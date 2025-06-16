@@ -22,6 +22,28 @@
         textarea, input[type="text"] {
             resize: vertical; /* Permite redimensionar verticalmente */
         }
+        /* Estilos para el modal de confirmación */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -35,10 +57,8 @@
 
     <!-- Script de la aplicación React (Babel transpilado) -->
     <script type="text/babel">
-        // Importa los hooks de React
         const { useState, useEffect, useCallback } = React;
 
-        // Componente React App completo
         const App = () => {
             // Estado para la tasa de cambio, cargada desde localStorage
             const [exchangeRate, setExchangeRate] = useState(() => {
@@ -75,6 +95,11 @@
             const [message, setMessage] = useState('');
             const [messageType, setMessageType] = useState(''); // 'success' o 'error'
             
+            // Nuevos estados para el modal de confirmación
+            const [showConfirmModal, setShowConfirmModal] = useState(false);
+            const [modalMessage, setModalMessage] = useState('');
+            const [onConfirmAction, setOnConfirmAction] = useState(null); // Función a ejecutar si se confirma
+
             // Muestra mensajes temporales al usuario
             const showMessage = (msg, type) => {
                 setMessage(msg);
@@ -83,6 +108,28 @@
                     setMessage('');
                     setMessageType('');
                 }, 5000); // El mensaje desaparece después de 5 segundos
+            };
+
+            // Función para abrir el modal de confirmación
+            const openConfirmModal = (message, callback) => {
+                setModalMessage(message);
+                setOnConfirmAction(() => callback); // Guarda la función de callback
+                setShowConfirmModal(true);
+            };
+
+            // Manejador para confirmar la acción en el modal
+            const handleConfirm = () => {
+                if (onConfirmAction) {
+                    onConfirmAction(); // Ejecuta la acción guardada
+                }
+                setShowConfirmModal(false); // Cierra el modal
+                setOnConfirmAction(null); // Limpia la acción guardada
+            };
+
+            // Manejador para cancelar la acción en el modal
+            const handleCancel = () => {
+                setShowConfirmModal(false); // Cierra el modal
+                setOnConfirmAction(null); // Limpia la acción guardada
             };
 
             // Guarda la tasa de cambio en localStorage cada vez que cambia
@@ -202,16 +249,40 @@
                 setExpenseCurrency('USD');
             };
 
-            // Manejador para eliminar una venta
+            // Manejador para eliminar una venta individual
             const handleDeleteSale = (id) => {
                 setSales(prevSales => prevSales.filter(sale => sale.id !== id));
                 showMessage('Venta eliminada.', 'success');
             };
 
-            // Manejador para eliminar un gasto
+            // Manejador para eliminar un gasto individual
             const handleDeleteExpense = (id) => {
                 setExpenses(prevExpenses => prevExpenses.filter(expense => expense.id !== id));
                 showMessage('Gasto eliminado.', 'success');
+            };
+
+            // NUEVA: Manejador para borrar TODO el historial de ventas
+            const handleClearSales = () => {
+                openConfirmModal(
+                    '¿Estás seguro de que quieres borrar TODO el historial de ventas? Esta acción no se puede deshacer.',
+                    () => {
+                        setSales([]); // Vacía el array de ventas
+                        localStorage.removeItem('sales'); // Elimina explícitamente del localStorage
+                        showMessage('Historial de ventas borrado.', 'success');
+                    }
+                );
+            };
+
+            // NUEVA: Manejador para borrar TODO el historial de gastos
+            const handleClearExpenses = () => {
+                openConfirmModal(
+                    '¿Estás seguro de que quieres borrar TODO el historial de gastos? Esta acción no se puede deshacer.',
+                    () => {
+                        setExpenses([]); // Vacía el array de gastos
+                        localStorage.removeItem('expenses'); // Elimina explícitamente del localStorage
+                        showMessage('Historial de gastos borrado.', 'success');
+                    }
+                );
             };
 
             // Función de ayuda para convertir a USD
@@ -246,6 +317,29 @@
                     {message && (
                         <div className={`fixed top-4 right-4 p-3 rounded-lg shadow-lg text-white z-50 ${messageType === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
                             {message}
+                        </div>
+                    )}
+
+                    {/* Modal de Confirmación */}
+                    {showConfirmModal && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <p className="text-lg font-semibold text-gray-800 mb-6">{modalMessage}</p>
+                                <div className="flex justify-center space-x-4">
+                                    <button
+                                        onClick={handleConfirm}
+                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out"
+                                    >
+                                        Sí, borrar
+                                    </button>
+                                    <button
+                                        onClick={handleCancel}
+                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out"
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -453,7 +547,17 @@
                         
                         {/* Sección de Historial de Ventas */}
                         <div className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Historial de Ventas</h2>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-semibold text-gray-800">Historial de Ventas</h2>
+                                {sales.length > 0 && (
+                                    <button
+                                        onClick={handleClearSales}
+                                        className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                                    >
+                                        Borrar todo
+                                    </button>
+                                )}
+                            </div>
                             {sales.length === 0 ? (
                                 <p className="text-gray-600">No hay ventas registradas aún.</p>
                             ) : (
@@ -505,7 +609,17 @@
                         
                         {/* Sección de Historial de Gastos */}
                         <div>
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Historial de Gastos</h2>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-semibold text-gray-800">Historial de Gastos</h2>
+                                {expenses.length > 0 && (
+                                    <button
+                                        onClick={handleClearExpenses}
+                                        className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                                    >
+                                        Borrar todo
+                                    </button>
+                                )}
+                            </div>
                             {expenses.length === 0 ? (
                                 <p className="text-gray-600">No hay gastos registrados aún.</p>
                             ) : (
@@ -555,7 +669,6 @@
             );
         };
 
-        // Renderiza el componente React en el div con id="root"
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
