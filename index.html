@@ -6,22 +6,55 @@
     <title>Gestor de Ventas y Presupuesto</title>
     <!-- Tailwind CSS CDN para estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Estilos para el efecto de sombra y transformación en botones */
+        /* Estilos generales para un fondo más profesional */
+        .min-h-screen {
+            background-color: #f0f4f8; /* Un gris azulado muy suave */
+        }
+        /* Contenedor principal más elegante */
+        .main-container {
+            background-color: #ffffff;
+            border-radius: 1rem; /* Más redondeado */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra más suave y extendida */
+            padding: 2.5rem; /* Más espacio interno */
+        }
+
+        /* Botones con estilo profesional */
         button {
-            transition: all 0.3s ease;
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.5rem; /* Menos redondeado para un look más serio */
+            font-weight: 600; /* Semi-bold */
         }
         button:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px); /* Efecto sutil al pasar el cursor */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Sombra al hover */
         }
-        /* Asegura que el textarea y input de texto se ajusten bien */
-        textarea, input[type="text"] {
-            resize: vertical; /* Permite redimensionar verticalmente */
+
+        /* Campos de entrada y selects más limpios */
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            border-radius: 0.5rem; /* Bordes suaves */
+            border: 1px solid #cbd5e1; /* Color de borde más sutil */
+            padding: 0.65rem 1rem; /* Relleno uniforme */
+            font-size: 0.95rem; /* Tamaño de fuente ligeramente más grande */
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
+        input:focus, select:focus, textarea:focus {
+            border-color: #6366f1; /* Un tono de azul/púrpura para el foco */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Anillo de foco sutil */
+            outline: none;
+        }
+        textarea {
+            resize: vertical;
+        }
+
         /* Estilos para el modal de confirmación */
         .modal-overlay {
             position: fixed;
@@ -29,20 +62,118 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         .modal-content {
-            background-color: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
+            background-color: #ffffff;
+            padding: 3rem; /* Más padding */
+            border-radius: 1rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px; /* Más ancho */
             width: 90%;
             text-align: center;
+        }
+        .modal-content p {
+            font-size: 1.15rem; /* Texto más grande en el modal */
+            line-height: 1.6;
+        }
+
+        /* Estilos específicos para los mensajes de notificación */
+        .message-box {
+            position: fixed;
+            top: 1.5rem; /* Un poco más abajo del borde */
+            right: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem; /* Más redondeado */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            font-weight: 500; /* Medium weight */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 999; /* Debajo del modal */
+        }
+        .message-box-close {
+            background: none;
+            border: none;
+            font-size: 1.8rem; /* Tamaño de la 'x' */
+            line-height: 1;
+            padding: 0;
+            margin-left: 1rem;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        .message-box-close:hover {
+            opacity: 1;
+        }
+
+        /* Estilos para los títulos y texto */
+        .main-heading {
+            font-size: 3rem; /* Título principal más grande */
+            font-weight: 800; /* Extra-bold */
+            color: #2d3748; /* Un gris oscuro profundo */
+            letter-spacing: -0.04em; /* Espaciado más sutil */
+            line-height: 1.2;
+        }
+        .section-heading {
+            font-size: 2.2rem; /* Títulos de sección grandes */
+            font-weight: 700; /* Bold */
+            color: #374151; /* Gris oscuro para subtítulos */
+            margin-bottom: 2rem; /* Más espacio inferior */
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0; /* Línea sutil debajo del título de sección */
+        }
+        .sub-heading {
+            font-size: 1.4rem; /* Subtítulos de cards */
+            font-weight: 600; /* Semi-bold */
+            color: #4a5568;
+        }
+        .card-value {
+            font-size: 2.8rem; /* Valores grandes en las cards */
+            font-weight: 700;
+        }
+        .card-currency {
+            font-size: 1.8rem; /* Tamaño de la moneda en las cards */
+            font-weight: 600;
+        }
+        .card-secondary-value {
+            font-size: 1.25rem; /* Valores secundarios en las cards */
+            font-weight: 500;
+        }
+        
+        /* Ajustes para tablas */
+        table {
+            width: 100%;
+            border-collapse: separate; /* Permite border-spacing */
+            border-spacing: 0;
+        }
+        th, td {
+            padding: 0.9rem 1rem; /* Más padding para celdas */
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0; /* Borde inferior sutil */
+        }
+        thead th {
+            background-color: #f8fafc; /* Fondo más claro para encabezados de tabla */
+            font-size: 0.8rem; /* Tamaño de fuente más pequeño para encabezados */
+            font-weight: 700;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        tbody tr:last-child td {
+            border-bottom: none; /* Eliminar el borde inferior de la última fila */
+        }
+        tbody tr:hover {
+            background-color: #f3f4f6; /* Hover más claro para filas */
+        }
+        .overflow-x-auto {
+            border-radius: 0.75rem; /* Redondeado para la tabla */
+            border: 1px solid #e2e8f0; /* Borde para la tabla completa */
         }
     </style>
 </head>
@@ -57,8 +188,10 @@
 
     <!-- Script de la aplicación React (Babel transpilado) -->
     <script type="text/babel">
+        // Importa los hooks de React
         const { useState, useEffect, useCallback } = React;
 
+        // Componente React App completo
         const App = () => {
             // Estado para la tasa de cambio, cargada desde localStorage
             const [exchangeRate, setExchangeRate] = useState(() => {
@@ -84,52 +217,79 @@
             const [saleQuantity, setSaleQuantity] = useState(''); 
             const [saleAmount, setSaleAmount] = useState('');   
             const [saleCurrency, setSaleCurrency] = useState('USD');
+            const [salePaymentMethod, setSalePaymentMethod] = useState(''); 
+            const [saleOperationNumber, setSaleOperationNumber] = useState(''); 
 
             // Estados del formulario de gastos
             const [expenseDate, setExpenseDate] = useState('');
             const [expenseCategory, setExpenseCategory] = useState('');
             const [expenseAmount, setExpenseAmount] = useState(''); 
             const [expenseCurrency, setExpenseCurrency] = useState('USD');
+            const [expensePaymentMethod, setExpensePaymentMethod] = useState(''); 
+            const [expenseOperationNumber, setExpenseOperationNumber] = useState(''); 
+
+            // NUEVOS ESTADOS para la Calculadora de Precios de Venta por Unidad
+            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice'); // 'calculateSellingPrice' o 'calculateProfitPercentage'
+            const [totalCostPrice, setTotalCostPrice] = useState(''); // Costo TOTAL del lote
+            const [purchaseQuantity, setPurchaseQuantity] = useState(''); // Cantidad de unidades compradas
+            const [profitPercentage, setProfitPercentage] = useState(''); // Porcentaje de ganancia deseado (cuando se calcula precio)
+            
+            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState(''); // Precio de venta deseado (cuando se calcula % de ganancia)
+            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD'); // Moneda del precio de venta deseado
+            
+            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null); 
+            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null); 
+            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null); // Resultado del % de ganancia calculado
 
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
-            const [messageType, setMessageType] = useState(''); // 'success' o 'error'
-            
+            const [messageType, setMessageType] = useState(''); 
+            const [showMessageBox, setShowMessageBox] = useState(false); 
+
             // Nuevos estados para el modal de confirmación
             const [showConfirmModal, setShowConfirmModal] = useState(false);
             const [modalMessage, setModalMessage] = useState('');
-            const [onConfirmAction, setOnConfirmAction] = useState(null); // Función a ejecutar si se confirma
+            const [onConfirmAction, setOnConfirmAction] = useState(null); 
 
             // Muestra mensajes temporales al usuario
             const showMessage = (msg, type) => {
                 setMessage(msg);
                 setMessageType(type);
+                setShowMessageBox(true); 
                 setTimeout(() => {
-                    setMessage('');
+                    setShowMessageBox(false); 
+                    setMessage(''); 
                     setMessageType('');
-                }, 5000); // El mensaje desaparece después de 5 segundos
+                }, 5000); 
+            };
+
+            // Función para cerrar el mensaje manualmente
+            const closeMessage = () => {
+                setShowMessageBox(false);
+                setMessage('');
+                setMessageType('');
             };
 
             // Función para abrir el modal de confirmación
             const openConfirmModal = (message, callback) => {
                 setModalMessage(message);
-                setOnConfirmAction(() => callback); // Guarda la función de callback
+                setOnConfirmAction(() => callback); 
                 setShowConfirmModal(true);
             };
 
             // Manejador para confirmar la acción en el modal
             const handleConfirm = () => {
                 if (onConfirmAction) {
-                    onConfirmAction(); // Ejecuta la acción guardada
+                    onConfirmAction(); 
                 }
-                setShowConfirmModal(false); // Cierra el modal
-                setOnConfirmAction(null); // Limpia la acción guardada
+                setShowConfirmModal(false); 
+                setOnConfirmAction(null); 
             };
 
             // Manejador para cancelar la acción en el modal
             const handleCancel = () => {
-                setShowConfirmModal(false); // Cierra el modal
-                setOnConfirmAction(null); // Limpia la acción guardada
+                setShowConfirmModal(false); 
+                setOnConfirmAction(null); 
             };
 
             // Guarda la tasa de cambio en localStorage cada vez que cambia
@@ -149,12 +309,11 @@
 
             // Manejador para añadir una nueva venta
             const handleAddSale = (e) => {
-                e.preventDefault(); // Evita que la página se recargue
+                e.preventDefault(); 
 
                 const quantityVal = saleQuantity.trim();
                 const amountVal = saleAmount.trim();
 
-                // Validaciones para asegurar que todos los campos estén llenos y sean válidos
                 if (!saleDate) {
                     showMessage('La fecha de venta no puede estar vacía.', 'error');
                     return;
@@ -181,36 +340,44 @@
                     showMessage('El monto unitario debe ser un número válido mayor que cero.', 'error');
                     return;
                 }
+                if (!salePaymentMethod) {
+                    showMessage('Por favor, selecciona un método de pago para la venta.', 'error');
+                    return;
+                }
+                if (salePaymentMethod === 'Pago Móvil' && !saleOperationNumber.trim()) {
+                    showMessage('El número de operación es obligatorio para Pago Móvil.', 'error');
+                    return;
+                }
 
-                // Crea el nuevo objeto de venta
                 const newSale = {
-                    id: Date.now(), // Un ID único basado en el tiempo
+                    id: Date.now(), 
                     date: saleDate,
                     product: saleProduct.trim(),
                     quantity: parsedQuantity,
                     amount: parsedAmount,
                     currency: saleCurrency,
+                    paymentMethod: salePaymentMethod, 
+                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '', 
                 };
                 
-                // Actualiza el estado de ventas y lo ordena
                 setSales(prevSales => [...prevSales, newSale].sort((a, b) => new Date(b.date) - new Date(a.date)));
                 showMessage('Venta agregada exitosamente.', 'success');
 
-                // Limpia los campos del formulario
                 setSaleDate('');
                 setSaleProduct('');
                 setSaleQuantity('');
                 setSaleAmount('');
                 setSaleCurrency('USD');
+                setSalePaymentMethod(''); 
+                setSaleOperationNumber(''); 
             };
 
             // Manejador para añadir un nuevo gasto
             const handleAddExpense = (e) => {
-                e.preventDefault(); // Evita que la página se recargue
+                e.preventDefault(); 
 
                 const expenseAmountVal = expenseAmount.trim();
 
-                // Validaciones para asegurar que todos los campos estén llenos y sean válidos
                 if (!expenseDate) {
                     showMessage('La fecha de gasto no puede estar vacía.', 'error');
                     return;
@@ -228,25 +395,34 @@
                     showMessage('El monto de gasto debe ser un número válido mayor que cero.', 'error');
                     return;
                 }
+                if (!expensePaymentMethod) {
+                    showMessage('Por favor, selecciona un método de pago para el gasto.', 'error');
+                    return;
+                }
+                if (expensePaymentMethod === 'Pago Móvil' && !expenseOperationNumber.trim()) {
+                    showMessage('El número de operación es obligatorio para Pago Móvil.', 'error');
+                    return;
+                }
 
-                // Crea el nuevo objeto de gasto
                 const newExpense = {
-                    id: Date.now(), // Un ID único basado en el tiempo
+                    id: Date.now(), 
                     date: expenseDate,
                     category: expenseCategory.trim(),
                     amount: parsedExpenseAmount,
                     currency: expenseCurrency,
+                    paymentMethod: expensePaymentMethod, 
+                    operationNumber: expensePaymentMethod === 'Pago Móvil' ? expenseOperationNumber.trim() : '', 
                 };
                 
-                // Actualiza el estado de gastos y lo ordena
                 setExpenses(prevExpenses => [...prevExpenses, newExpense].sort((a, b) => new Date(b.date) - new Date(a.date)));
                 showMessage('Gasto agregado exitosamente.', 'success');
 
-                // Limpia los campos del formulario
                 setExpenseDate('');
                 setExpenseCategory('');
                 setExpenseAmount('');
                 setExpenseCurrency('USD');
+                setExpensePaymentMethod(''); 
+                setExpenseOperationNumber(''); 
             };
 
             // Manejador para eliminar una venta individual
@@ -261,28 +437,134 @@
                 showMessage('Gasto eliminado.', 'success');
             };
 
-            // NUEVA: Manejador para borrar TODO el historial de ventas
+            // Manejador para borrar TODO el historial de ventas
             const handleClearSales = () => {
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de ventas? Esta acción no se puede deshacer.',
                     () => {
-                        setSales([]); // Vacía el array de ventas
-                        localStorage.removeItem('sales'); // Elimina explícitamente del localStorage
+                        setSales([]); 
+                        localStorage.removeItem('sales'); 
                         showMessage('Historial de ventas borrado.', 'success');
                     }
                 );
             };
 
-            // NUEVA: Manejador para borrar TODO el historial de gastos
+            // Manejador para borrar TODO el historial de gastos
             const handleClearExpenses = () => {
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de gastos? Esta acción no se puede deshacer.',
                     () => {
-                        setExpenses([]); // Vacía el array de gastos
-                        localStorage.removeItem('expenses'); // Elimina explícitamente del localStorage
+                        setExpenses([]); 
+                        localStorage.removeItem('expenses'); 
                         showMessage('Historial de gastos borrado.', 'success');
                     }
                 );
+            };
+
+            // Manejador para calcular el precio de venta por unidad
+            const handleCalculateSellingPrice = (e) => {
+                e.preventDefault();
+                const parsedTotalCostPrice = parseFloat(totalCostPrice);
+                const parsedPurchaseQuantity = parseFloat(purchaseQuantity);
+                const parsedProfitPercentage = parseFloat(profitPercentage);
+
+                if (isNaN(parsedTotalCostPrice) || parsedTotalCostPrice <= 0) {
+                    showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null); 
+                    return;
+                }
+                if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
+                    showMessage('Por favor, ingresa una cantidad de compra válida (número entero mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null); 
+                    return;
+                }
+                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) { 
+                    showMessage('Por favor, ingresa un porcentaje de ganancia válido (número mayor o igual a cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null); 
+                    return;
+                }
+
+                const costPerUnit = parsedTotalCostPrice / parsedPurchaseQuantity;
+                const sellingPricePerUnit = costPerUnit * (1 + parsedProfitPercentage / 100);
+                
+                setCalculatedCostPerUnit(costPerUnit);
+                setCalculatedSellingPricePerUnit(sellingPricePerUnit);
+                setCalculatedProfitPercentageResult(null); 
+                showMessage('Precio de venta por unidad calculado.', 'success');
+            };
+
+            // Manejador para calcular el porcentaje de ganancia
+            const handleCalculateProfitPercentage = (e) => {
+                e.preventDefault();
+                const parsedTotalCostPrice = parseFloat(totalCostPrice);
+                const parsedPurchaseQuantity = parseFloat(purchaseQuantity);
+                const desiredSellingPriceInputVal = desiredSellingPriceInput.trim();
+
+                if (isNaN(parsedTotalCostPrice) || parsedTotalCostPrice <= 0) {
+                    showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+                if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
+                    showMessage('Por favor, ingresa una cantidad de compra válida (número entero mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+                if (!desiredSellingPriceInputVal) {
+                    showMessage('Por favor, ingresa el precio de venta deseado por unidad.', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+                const parsedDesiredSellingPrice = parseFloat(desiredSellingPriceInputVal);
+                if (isNaN(parsedDesiredSellingPrice) || parsedDesiredSellingPrice <= 0) {
+                    showMessage('El precio de venta deseado debe ser un número válido mayor que cero.', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+
+                const costPerUnit = parsedTotalCostPrice / parsedPurchaseQuantity;
+                let sellingPriceForCalculation = parsedDesiredSellingPrice;
+
+                // Convertir el precio de venta deseado a USD si se ingresó en VES
+                if (desiredSellingPriceCurrency === 'VES') {
+                    if (exchangeRate <= 0) {
+                        showMessage('La tasa de cambio debe ser mayor que cero para convertir de VES a USD.', 'error');
+                        setCalculatedCostPerUnit(null);
+                        setCalculatedSellingPricePerUnit(null);
+                        setCalculatedProfitPercentageResult(null);
+                        return;
+                    }
+                    sellingPriceForCalculation = parsedDesiredSellingPrice / exchangeRate;
+                }
+
+                if (costPerUnit === 0) {
+                    showMessage('El costo por unidad no puede ser cero para calcular el porcentaje de ganancia.', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+
+                const profitPercentageCalculated = ((sellingPriceForCalculation - costPerUnit) / costPerUnit) * 100;
+                
+                setCalculatedCostPerUnit(costPerUnit);
+                setCalculatedSellingPricePerUnit(parsedDesiredSellingPrice); // Mostrar el precio deseado en su moneda original
+                setCalculatedProfitPercentageResult(profitPercentageCalculated);
+                showMessage('Porcentaje de ganancia calculado.', 'success');
             };
 
             // Función de ayuda para convertir a USD
@@ -312,11 +594,14 @@
             const netProfitVES = totalSalesVES - totalExpensesVES;
 
             return (
-                <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 sm:p-6 lg:p-8 font-inter">
-                    {/* Mensajes de notificación */}
-                    {message && (
-                        <div className={`fixed top-4 right-4 p-3 rounded-lg shadow-lg text-white z-50 ${messageType === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
-                            {message}
+                <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center p-4 sm:p-6 lg:p-8 font-inter">
+                    {/* Mensajes de notificación con botón de cierre */}
+                    {showMessageBox && message && (
+                        <div className={`fixed top-4 right-4 p-3 rounded-lg shadow-xl text-white z-50 message-box ${messageType === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                            <span>{message}</span>
+                            <button onClick={closeMessage} className="message-box-close">
+                                &times; {/* Símbolo de "x" */}
+                            </button>
                         </div>
                     )}
 
@@ -324,17 +609,17 @@
                     {showConfirmModal && (
                         <div className="modal-overlay">
                             <div className="modal-content">
-                                <p className="text-lg font-semibold text-gray-800 mb-6">{modalMessage}</p>
+                                <p className="text-xl font-semibold text-gray-800 mb-6">{modalMessage}</p>
                                 <div className="flex justify-center space-x-4">
                                     <button
                                         onClick={handleConfirm}
-                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out"
+                                        className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out"
                                     >
                                         Sí, borrar
                                     </button>
                                     <button
                                         onClick={handleCancel}
-                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out"
+                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out"
                                     >
                                         Cancelar
                                     </button>
@@ -343,14 +628,14 @@
                         </div>
                     )}
 
-                    <div className="w-full max-w-6xl bg-white rounded-xl shadow-lg p-6 sm:p-8 lg:p-10 mb-8">
-                        <h1 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">
-                            Gestor de Ventas y Presupuesto
+                    <div className="w-full max-w-6xl bg-white main-container p-6 sm:p-8 lg:p-10 mb-8">
+                        <h1 className="text-center mb-10 main-heading">
+                            📊 Gestor de Ventas y Presupuesto
                         </h1>
 
                         {/* Sección de Tasa de Cambio */}
-                        <div className="bg-yellow-50 p-4 rounded-lg shadow-sm mb-8">
-                            <label htmlFor="exchangeRate" className="block text-lg font-semibold text-yellow-700 mb-2">
+                        <div className="bg-amber-50 p-6 rounded-xl shadow-lg mb-10 border border-amber-200">
+                            <label htmlFor="exchangeRate" className="block text-xl font-bold text-amber-800 mb-3">
                                 Tasa de Cambio (VES/USD):
                             </label>
                             <input
@@ -361,79 +646,79 @@
                                 placeholder="Ej: 36.5"
                                 min="0"
                                 step="0.01"
-                                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                                className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 text-lg font-medium"
                             />
-                            <p className="text-sm text-gray-600 mt-2">
+                            <p className="text-sm text-gray-700 mt-3">
                                 Actualiza este valor diariamente con la tasa de cambio actual (ej. BCV).
                             </p>
-                            <p className="text-sm text-yellow-800 mt-2 font-semibold">
-                                * Tus datos (ventas, gastos y tasa) se guardan automáticamente en tu navegador.
+                            <p className="text-base text-amber-900 mt-3 font-semibold">
+                                ✨ Tus datos (ventas, gastos y tasa) se guardan automáticamente en tu navegador.
                             </p>
                         </div>
 
                         {/* Sección de Resumen General */}
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Resumen General</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div className="bg-green-100 p-4 rounded-lg shadow-md flex flex-col justify-between">
-                                    <h3 className="text-lg font-medium text-green-800">Total Ventas</h3>
-                                    <p className="text-2xl font-bold text-green-700 mt-2">
-                                        ${totalSalesUSD.toFixed(2)} USD
+                        <div className="mb-10">
+                            <h2 className="section-heading mb-6">📈 Resumen General</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="bg-emerald-100 p-6 rounded-xl shadow-md flex flex-col justify-between border border-emerald-200">
+                                    <h3 className="sub-heading text-emerald-800">Total Ventas</h3>
+                                    <p className="card-value text-emerald-700 mt-3">
+                                        ${totalSalesUSD.toFixed(2)} <span className="card-currency">USD</span>
                                     </p>
-                                    <p className="text-lg text-green-600">
-                                        Bs. {totalSalesVES.toFixed(2)} VES
-                                    </p>
-                                </div>
-                                <div className="bg-red-100 p-4 rounded-lg shadow-md flex flex-col justify-between">
-                                    <h3 className="text-lg font-medium text-red-800">Total Gastos</h3>
-                                    <p className="text-2xl font-bold text-red-700 mt-2">
-                                        ${totalExpensesUSD.toFixed(2)} USD
-                                    </p>
-                                    <p className="text-lg text-red-600">
-                                        Bs. {totalExpensesVES.toFixed(2)} VES
+                                    <p className="card-secondary-value text-emerald-600 mt-1">
+                                        Bs. {totalSalesVES.toFixed(2)} <span className="text-lg">VES</span>
                                     </p>
                                 </div>
-                                <div className={`p-4 rounded-lg shadow-md flex flex-col justify-between ${netProfitUSD >= 0 ? 'bg-blue-100' : 'bg-purple-100'}`}>
-                                    <h3 className="text-lg font-medium text-blue-800">Ganancia/Pérdida Neta</h3>
-                                    <p className={`text-2xl font-bold mt-2 ${netProfitUSD >= 0 ? 'text-blue-700' : 'text-purple-700'}`}>
-                                        ${netProfitUSD.toFixed(2)} USD
+                                <div className="bg-rose-100 p-6 rounded-xl shadow-md flex flex-col justify-between border border-rose-200">
+                                    <h3 className="sub-heading text-rose-800">Total Gastos</h3>
+                                    <p className="card-value text-rose-700 mt-3">
+                                        ${totalExpensesUSD.toFixed(2)} <span className="card-currency">USD</span>
                                     </p>
-                                    <p className={`text-lg ${netProfitVES >= 0 ? 'text-blue-600' : 'text-purple-600'}`}>
-                                        Bs. {netProfitVES.toFixed(2)} VES
+                                    <p className="card-secondary-value text-rose-600 mt-1">
+                                        Bs. {totalExpensesVES.toFixed(2)} <span className="text-lg">VES</span>
+                                    </p>
+                                </div>
+                                <div className={`p-6 rounded-xl shadow-md flex flex-col justify-between border ${netProfitUSD >= 0 ? 'bg-indigo-100 border-indigo-200' : 'bg-red-200 border-red-300'}`}>
+                                    <h3 className="sub-heading text-indigo-800">Ganancia/Pérdida Neta</h3>
+                                    <p className={`card-value mt-3 ${netProfitUSD >= 0 ? 'text-indigo-700' : 'text-rose-800'}`}>
+                                        ${netProfitUSD.toFixed(2)} <span className="card-currency">USD</span>
+                                    </p>
+                                    <p className={`card-secondary-value mt-1 ${netProfitVES >= 0 ? 'text-indigo-600' : 'text-rose-700'}`}>
+                                        Bs. {netProfitVES.toFixed(2)} <span className="text-lg">VES</span>
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <hr className="my-8 border-gray-300" />
+                        <hr className="my-10 border-gray-300" />
 
                         {/* Sección de Registrar Venta */}
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Registrar Venta</h2>
-                            <form onSubmit={handleAddSale} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="mb-10">
+                            <h2 className="section-heading mb-6">🛍️ Registrar Venta</h2>
+                            <form onSubmit={handleAddSale} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
-                                    <label htmlFor="saleDate" className="block text-sm font-medium text-gray-700">Fecha:</label>
+                                    <label htmlFor="saleDate" className="block text-sm font-medium text-gray-700 mb-1">Fecha:</label>
                                     <input
                                         type="date"
                                         id="saleDate"
                                         value={saleDate}
                                         onChange={(e) => setSaleDate(e.target.value)}
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="saleProduct" className="block text-sm font-medium text-gray-700">Producto/Servicio:</label>
+                                    <label htmlFor="saleProduct" className="block text-sm font-medium text-gray-700 mb-1">Producto/Servicio:</label>
                                     <input
                                         type="text"
                                         id="saleProduct"
                                         value={saleProduct}
                                         onChange={(e) => setSaleProduct(e.target.value)}
                                         placeholder="Nombre del producto"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="saleQuantity" className="block text-sm font-medium text-gray-700">Cantidad:</label>
+                                    <label htmlFor="saleQuantity" className="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
                                     <input
                                         type="number"
                                         id="saleQuantity"
@@ -441,11 +726,11 @@
                                         onChange={(e) => setSaleQuantity(e.target.value)}
                                         placeholder="1"
                                         min="0"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="saleAmount" className="block text-sm font-medium text-gray-700">Monto Unitario:</label>
+                                    <label htmlFor="saleAmount" className="block text-sm font-medium text-gray-700 mb-1">Monto Unitario:</label>
                                     <input
                                         type="number"
                                         id="saleAmount"
@@ -454,25 +739,59 @@
                                         placeholder="Ej: 25.00"
                                         min="0"
                                         step="0.01"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="saleCurrency" className="block text-sm font-medium text-gray-700">Moneda:</label>
+                                    <label htmlFor="saleCurrency" className="block text-sm font-medium text-gray-700 mb-1">Moneda del Producto:</label>
                                     <select
                                         id="saleCurrency"
                                         value={saleCurrency}
                                         onChange={(e) => setSaleCurrency(e.target.value)}
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     >
                                         <option value="USD">USD</option>
                                         <option value="VES">VES</option>
                                     </select>
                                 </div>
+                                {/* Campo para Método de Pago de Venta */}
+                                <div>
+                                    <label htmlFor="salePaymentMethod" className="block text-sm font-medium text-gray-700 mb-1">Método de Pago:</label>
+                                    <select
+                                        id="salePaymentMethod"
+                                        value={salePaymentMethod}
+                                        onChange={(e) => {
+                                            setSalePaymentMethod(e.target.value);
+                                            if (e.target.value !== 'Pago Móvil') {
+                                                setSaleOperationNumber(''); 
+                                            }
+                                        }}
+                                        className="w-full"
+                                    >
+                                        <option value="">Selecciona...</option>
+                                        <option value="Efectivo">Efectivo</option>
+                                        <option value="Transferencia">Transferencia</option>
+                                        <option value="Pago Móvil">Pago Móvil</option>
+                                    </select>
+                                </div>
+                                {/* Campo condicional para Número de Operación */}
+                                {salePaymentMethod === 'Pago Móvil' && (
+                                    <div className="md:col-span-2 lg:col-span-1">
+                                        <label htmlFor="saleOperationNumber" className="block text-sm font-medium text-gray-700 mb-1">Número de Operación (Pago Móvil):</label>
+                                        <input
+                                            type="text"
+                                            id="saleOperationNumber"
+                                            value={saleOperationNumber}
+                                            onChange={(e) => setSaleOperationNumber(e.target.value)}
+                                            placeholder="Ej: 0123456789"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                )}
                                 <div className="md:col-span-2 lg:col-span-1 flex items-end">
                                     <button
                                         type="submit"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 shadow-lg"
                                     >
                                         Añadir Venta
                                     </button>
@@ -480,35 +799,35 @@
                             </form>
                         </div>
 
-                        <hr className="my-8 border-gray-300" />
+                        <hr className="my-10 border-gray-300" />
 
                         {/* Sección de Registrar Gasto */}
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Registrar Gasto</h2>
-                            <form onSubmit={handleAddExpense} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="mb-10">
+                            <h2 className="section-heading mb-6">💸 Registrar Gasto</h2>
+                            <form onSubmit={handleAddExpense} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
-                                    <label htmlFor="expenseDate" className="block text-sm font-medium text-gray-700">Fecha:</label>
+                                    <label htmlFor="expenseDate" className="block text-sm font-medium text-gray-700 mb-1">Fecha:</label>
                                     <input
                                         type="date"
                                         id="expenseDate"
                                         value={expenseDate}
                                         onChange={(e) => setExpenseDate(e.target.value)}
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="expenseCategory" className="block text-sm font-medium text-gray-700">Categoría:</label>
+                                    <label htmlFor="expenseCategory" className="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
                                     <input
                                         type="text"
                                         id="expenseCategory"
                                         value={expenseCategory}
                                         onChange={(e) => setExpenseCategory(e.target.value)}
                                         placeholder="Ej: Materia prima, Transporte"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="expenseAmount" className="block text-sm font-medium text-gray-700">Monto:</label>
+                                    <label htmlFor="expenseAmount" className="block text-sm font-medium text-gray-700 mb-1">Monto:</label>
                                     <input
                                         type="number"
                                         id="expenseAmount"
@@ -517,25 +836,59 @@
                                         placeholder="Ej: 15.00"
                                         min="0"
                                         step="0.01"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="expenseCurrency" className="block text-sm font-medium text-gray-700">Moneda:</label>
+                                    <label htmlFor="expenseCurrency" className="block text-sm font-medium text-gray-700 mb-1">Moneda del Gasto:</label>
                                     <select
                                         id="expenseCurrency"
                                         value={expenseCurrency}
                                         onChange={(e) => setExpenseCurrency(e.target.value)}
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full"
                                     >
                                         <option value="USD">USD</option>
                                         <option value="VES">VES</option>
                                     </select>
                                 </div>
+                                {/* Campo para Método de Pago de Gasto */}
+                                <div>
+                                    <label htmlFor="expensePaymentMethod" className="block text-sm font-medium text-gray-700 mb-1">Método de Pago:</label>
+                                    <select
+                                        id="expensePaymentMethod"
+                                        value={expensePaymentMethod}
+                                        onChange={(e) => {
+                                            setExpensePaymentMethod(e.target.value);
+                                            if (e.target.value !== 'Pago Móvil') {
+                                                setExpenseOperationNumber(''); 
+                                            }
+                                        }}
+                                        className="w-full"
+                                    >
+                                        <option value="">Selecciona...</option>
+                                        <option value="Efectivo">Efectivo</option>
+                                        <option value="Transferencia">Transferencia</option>
+                                        <option value="Pago Móvil">Pago Móvil</option>
+                                    </select>
+                                </div>
+                                {/* Campo condicional para Número de Operación de Gasto */}
+                                {expensePaymentMethod === 'Pago Móvil' && (
+                                    <div className="md:col-span-2 lg:col-span-1">
+                                        <label htmlFor="expenseOperationNumber" className="block text-sm font-medium text-gray-700 mb-1">Número de Operación (Pago Móvil):</label>
+                                        <input
+                                            type="text"
+                                            id="expenseOperationNumber"
+                                            value={expenseOperationNumber}
+                                            onChange={(e) => setExpenseOperationNumber(e.target.value)}
+                                            placeholder="Ej: 0123456789"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                )}
                                 <div className="md:col-span-2 lg:col-span-1 flex items-end">
                                     <button
                                         type="submit"
-                                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 shadow-lg"
                                     >
                                         Añadir Gasto
                                     </button>
@@ -543,46 +896,225 @@
                             </form>
                         </div>
 
-                        <hr className="my-8 border-gray-300" />
+                        <hr className="my-10 border-gray-300" />
+
+                        {/* Sección: Calculadora de Precios de Venta por Unidad */}
+                        <div className="mb-10">
+                            <h2 className="section-heading mb-6">➕ Calculadora de Precios de Venta</h2>
+                            
+                            {/* Selector de Modo de Calculadora */}
+                            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+                                <button
+                                    onClick={() => {
+                                        setCalculatorMode('calculateSellingPrice');
+                                        setCalculatedCostPerUnit(null);
+                                        setCalculatedSellingPricePerUnit(null);
+                                        setCalculatedProfitPercentageResult(null);
+                                    }}
+                                    className={`py-3 px-6 rounded-xl font-bold transition duration-200 ease-in-out text-lg ${
+                                        calculatorMode === 'calculateSellingPrice' ? 'bg-indigo-600 text-white shadow-xl' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    Calcular Precio de Venta
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setCalculatorMode('calculateProfitPercentage');
+                                        setCalculatedCostPerUnit(null);
+                                        setCalculatedSellingPricePerUnit(null);
+                                        setCalculatedProfitPercentageResult(null);
+                                    }}
+                                    className={`py-3 px-6 rounded-xl font-bold transition duration-200 ease-in-out text-lg ${
+                                        calculatorMode === 'calculateProfitPercentage' ? 'bg-emerald-600 text-white shadow-xl' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    Calcular % de Ganancia
+                                </button>
+                            </div>
+
+                            {calculatorMode === 'calculateSellingPrice' ? (
+                                <form onSubmit={handleCalculateSellingPrice} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="totalCostPrice" className="block text-sm font-medium text-gray-700 mb-1">Costo Total de Compra (USD):</label>
+                                        <input
+                                            type="number"
+                                            id="totalCostPrice"
+                                            value={totalCostPrice}
+                                            onChange={(e) => setTotalCostPrice(e.target.value)}
+                                            placeholder="Ej: 10.00 (para 28 helados)"
+                                            min="0"
+                                            step="0.01"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="purchaseQuantity" className="block text-sm font-medium text-gray-700 mb-1">Cantidad de Unidades Compradas:</label>
+                                        <input
+                                            type="number"
+                                            id="purchaseQuantity"
+                                            value={purchaseQuantity}
+                                            onChange={(e) => setPurchaseQuantity(e.target.value)}
+                                            placeholder="Ej: 28 (helados)"
+                                            min="1"
+                                            step="1"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label htmlFor="profitPercentage" className="block text-sm font-medium text-gray-700 mb-1">Porcentaje de Ganancia Deseado (%):</label>
+                                        <input
+                                            type="number"
+                                            id="profitPercentage"
+                                            value={profitPercentage}
+                                            onChange={(e) => setProfitPercentage(e.target.value)}
+                                            placeholder="Ej: 30"
+                                            min="0"
+                                            step="0.1"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2 flex items-end">
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 shadow-lg"
+                                        >
+                                            Calcular Precio de Venta
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : ( /* Modo: Calcular % de Ganancia */
+                                <form onSubmit={handleCalculateProfitPercentage} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="totalCostPrice" className="block text-sm font-medium text-gray-700 mb-1">Costo Total de Compra (USD):</label>
+                                        <input
+                                            type="number"
+                                            id="totalCostPrice"
+                                            value={totalCostPrice}
+                                            onChange={(e) => setTotalCostPrice(e.target.value)}
+                                            placeholder="Ej: 10.00"
+                                            min="0"
+                                            step="0.01"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="purchaseQuantity" className="block text-sm font-medium text-gray-700 mb-1">Cantidad de Unidades Compradas:</label>
+                                        <input
+                                            type="number"
+                                            id="purchaseQuantity"
+                                            value={purchaseQuantity}
+                                            onChange={(e) => setPurchaseQuantity(e.target.value)}
+                                            placeholder="Ej: 28"
+                                            min="1"
+                                            step="1"
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label htmlFor="desiredSellingPriceInput" className="block text-sm font-medium text-gray-700 mb-1">Precio de Venta Deseado por Unidad:</label>
+                                        <div className="flex mt-1">
+                                            <input
+                                                type="number"
+                                                id="desiredSellingPriceInput"
+                                                value={desiredSellingPriceInput}
+                                                onChange={(e) => setDesiredSellingPriceInput(e.target.value)}
+                                                placeholder="Ej: 50.00"
+                                                min="0"
+                                                step="0.01"
+                                                className="block w-full p-2 border border-gray-300 rounded-l-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                            />
+                                            <select
+                                                id="desiredSellingPriceCurrency"
+                                                value={desiredSellingPriceCurrency}
+                                                onChange={(e) => setDesiredSellingPriceCurrency(e.target.value)}
+                                                className="p-2 border border-gray-300 rounded-r-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500 bg-gray-50 text-gray-800"
+                                            >
+                                                <option value="USD">USD</option>
+                                                <option value="VES">VES</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2 flex items-end">
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 shadow-lg"
+                                        >
+                                            Calcular % de Ganancia
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {/* Resultados de la Calculadora */}
+                            {calculatorMode === 'calculateSellingPrice' && calculatedSellingPricePerUnit !== null && (
+                                <div className="mt-6 p-5 bg-indigo-50 rounded-lg shadow-md text-center border border-indigo-200">
+                                    <p className="text-lg font-semibold text-indigo-700 mb-1">Costo por Unidad:</p>
+                                    <p className="text-2xl font-bold text-indigo-900 mb-3">${calculatedCostPerUnit.toFixed(2)} USD</p>
+                                    <p className="text-lg font-semibold text-indigo-700 mb-1">Precio de Venta Sugerido por Unidad:</p>
+                                    <p className="text-3xl font-bold text-indigo-900">${calculatedSellingPricePerUnit.toFixed(2)} USD</p>
+                                    <p className="text-xl text-indigo-800 mt-1">Bs. {(calculatedSellingPricePerUnit * exchangeRate).toFixed(2)} VES</p>
+                                </div>
+                            )}
+
+                            {calculatorMode === 'calculateProfitPercentage' && calculatedProfitPercentageResult !== null && (
+                                <div className="mt-6 p-5 bg-emerald-50 rounded-lg shadow-md text-center border border-emerald-200">
+                                    <p className="text-lg font-semibold text-emerald-700 mb-1">Costo por Unidad:</p>
+                                    <p className="text-2xl font-bold text-emerald-900 mb-2">${calculatedCostPerUnit.toFixed(2)} USD</p>
+                                    <p className="text-lg font-semibold text-emerald-700 mb-1">Precio de Venta Deseado por Unidad:</p>
+                                    <p className="text-3xl font-bold text-emerald-900">
+                                        {desiredSellingPriceCurrency === 'USD' ? '$' : 'Bs. '}
+                                        {calculatedSellingPricePerUnit.toFixed(2)} {desiredSellingPriceCurrency}
+                                    </p>
+                                    <p className="text-lg font-semibold text-emerald-700 mt-3">Porcentaje de Ganancia Obtenido:</p>
+                                    <p className="text-3xl font-bold text-emerald-900">{calculatedProfitPercentageResult.toFixed(2)}%</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <hr className="my-10 border-gray-300" />
                         
                         {/* Sección de Historial de Ventas */}
-                        <div className="mb-8">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-semibold text-gray-800">Historial de Ventas</h2>
+                        <div className="mb-10">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="section-heading">🧾 Historial de Ventas</h2>
                                 {sales.length > 0 && (
                                     <button
                                         onClick={handleClearSales}
-                                        className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                                        className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm"
                                     >
                                         Borrar todo
                                     </button>
                                 )}
                             </div>
                             {sales.length === 0 ? (
-                                <p className="text-gray-600">No hay ventas registradas aún.</p>
+                                <p className="text-gray-600 text-lg py-4 text-center">No hay ventas registradas aún.</p>
                             ) : (
-                                <div className="overflow-x-auto rounded-lg shadow-md">
-                                    <table className="min-w-full bg-white border-collapse">
-                                        <thead className="bg-gray-200">
+                                <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+                                    <table className="min-w-full bg-white">
+                                        <thead>
                                             <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Fecha</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Producto</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Cantidad</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Monto Original</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Total USD</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Total VES</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Acciones</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Producto</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Cant.</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto Original</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Método Pago</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">N° Operación</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total USD</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total VES</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
+                                        <tbody>
                                             {sales.map((sale) => (
-                                                <tr key={sale.id} className="hover:bg-gray-50">
+                                                <tr key={sale.id} className="hover:bg-gray-50 transition duration-150 ease-in-out">
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{sale.date}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{sale.product}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{sale.quantity}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                                         {sale.amount.toFixed(2)} {sale.currency}
                                                     </td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{sale.paymentMethod || 'N/A'}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{sale.operationNumber || 'N/A'}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                                         ${(convertToUSD(sale.amount, sale.currency) * sale.quantity).toFixed(2)}
                                                     </td>
@@ -592,7 +1124,7 @@
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                                                         <button
                                                             onClick={() => handleDeleteSale(sale.id)}
-                                                            className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
+                                                            className="text-rose-600 hover:text-rose-900 transition duration-150 ease-in-out"
                                                         >
                                                             Eliminar
                                                         </button>
@@ -605,44 +1137,48 @@
                             )}
                         </div>
 
-                        <hr className="my-8 border-gray-300" />
+                        <hr className="my-10 border-gray-300" />
                         
                         {/* Sección de Historial de Gastos */}
                         <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-semibold text-gray-800">Historial de Gastos</h2>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="section-heading">📒 Historial de Gastos</h2>
                                 {expenses.length > 0 && (
                                     <button
                                         onClick={handleClearExpenses}
-                                        className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-3 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+                                        className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-sm"
                                     >
                                         Borrar todo
                                     </button>
                                 )}
                             </div>
                             {expenses.length === 0 ? (
-                                <p className="text-gray-600">No hay gastos registrados aún.</p>
+                                <p className="text-gray-600 text-lg py-4 text-center">No hay gastos registrados aún.</p>
                             ) : (
-                                <div className="overflow-x-auto rounded-lg shadow-md">
-                                    <table className="min-w-full bg-white border-collapse">
-                                        <thead className="bg-gray-200">
+                                <div className="overflow-x-auto rounded-lg shadow-lg border border-gray-200">
+                                    <table className="min-w-full bg-white">
+                                        <thead>
                                             <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Fecha</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Categoría</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Monto Original</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Monto USD</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Monto VES</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Acciones</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Categoría</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto Original</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Método Pago</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">N° Operación</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto USD</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto VES</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
+                                        <tbody>
                                             {expenses.map((expense) => (
-                                                <tr key={expense.id} className="hover:bg-gray-50">
+                                                <tr key={expense.id} className="hover:bg-gray-50 transition duration-150 ease-in-out">
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{expense.date}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{expense.category}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                                         {expense.amount.toFixed(2)} {expense.currency}
                                                     </td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{expense.paymentMethod || 'N/A'}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{expense.operationNumber || 'N/A'}</td>
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                                         ${convertToUSD(expense.amount, expense.currency).toFixed(2)}
                                                     </td>
@@ -652,7 +1188,7 @@
                                                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                                                         <button
                                                             onClick={() => handleDeleteExpense(expense.id)}
-                                                            className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
+                                                            className="text-rose-600 hover:text-rose-900 transition duration-150 ease-in-out"
                                                         >
                                                             Eliminar
                                                         </button>
