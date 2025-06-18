@@ -26,8 +26,8 @@
 
         /* Botones con estilo profesional, tonos pasteles y mejor sombra */
         button {
-            transition: all 0.3s ease-in-out;
-            border-radius: 1rem; /* Bordes más redondeados */
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.5rem; /* Menos redondeado para un look más serio */
             font-weight: 600; /* Semi-bold */
             letter-spacing: 0.03em; /* Ligero espaciado para mejor legibilidad */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra inicial sutil */
@@ -60,42 +60,69 @@
 
         /* Estilos para el modal de confirmación, más suave y elevado */
         .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.65); /* Fondo un poco más oscuro para mejor enfoque */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
         .modal-content {
-            padding: 4rem; /* Más padding */
-            border-radius: 2rem; /* Bordes más suaves */
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); /* Sombra mucho más grande y suave */
-            max-width: 600px; /* Un poco más ancho */
-            border: 1px solid #e0e7ee;
+            background-color: #ffffff;
+            padding: 3rem; /* Más padding */
+            border-radius: 1rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px; /* Más ancho */
+            width: 90%;
+            text-align: center;
         }
         .modal-content p {
-            font-size: 1.3rem; /* Texto más grande en el modal */
-            line-height: 1.8;
+            font-size: 1.15rem; /* Texto más grande en el modal */
+            line-height: 1.6;
             color: #374151; /* Color de texto más definido */
         }
 
         /* Estilos específicos para los mensajes de notificación con pasteles más vibrantes */
         .message-box {
-            top: 2.5rem; /* Más abajo del borde */
-            right: 2.5rem;
-            padding: 1.1rem 2rem;
-            border-radius: 1.25rem; /* Más redondeado */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: fixed;
+            top: 1.5rem; /* Un poco más abajo del borde */
+            right: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem; /* Más redondeado */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
             font-weight: 500; /* Medium weight */
-            border: 1px solid rgba(255,255,255,0.3); /* Borde sutil para pop */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 999; /* Debajo del modal */
         }
         .message-box-close {
-            font-size: 2.2rem; /* Tamaño de la 'x' más grande */
-            margin-left: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.8rem; /* Tamaño de la 'x' */
+            line-height: 1;
+            padding: 0;
+            margin-left: 1rem;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        .message-box-close:hover {
+            opacity: 1;
         }
 
-        /* Estilos para los títulos y texto con una tipografía más elegante y prominente */
+        /* Estilos para los títulos y texto */
         .main-heading {
-            font-size: 3.8rem; /* Título principal aún más grande y llamativo */
+            font-size: 3rem; /* Título principal más grande */
             font-weight: 800; /* Extra-bold */
-            color: #1a202c; /* Un gris muy oscuro para contraste fuerte */
-            line-height: 1.1;
+            color: #2d3748; /* Un gris oscuro profundo */
+            letter-spacing: -0.04em; /* Espaciado más sutil */
+            line-height: 1.2;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.08); /* Sombra más pronunciada para profundidad */
             display: flex; /* Para alinear icono */
             align-items: center; /* Para alinear icono */
@@ -107,12 +134,12 @@
             color: #4a5568; /* Color para el icono del título principal */
         }
         .section-heading {
-            font-size: 2.8rem; /* Títulos de sección grandes */
+            font-size: 2.2rem; /* Títulos de sección grandes */
             font-weight: 700; /* Bold */
-            color: #4a5568; /* Un gris azulado oscuro para los encabezados de sección */
-            margin-bottom: 3rem; /* Más espacio inferior */
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #e0e7ee; /* Línea más definida */
+            color: #374151; /* Un gris azulado oscuro para los encabezados de sección */
+            margin-bottom: 2rem; /* Más espacio inferior */
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0; /* Línea más definida */
             display: flex; /* Para alinear icono */
             align-items: center; /* Para alinear icono */
         }
@@ -149,10 +176,13 @@
         
         /* Ajustes para tablas con un look más suave y flotante */
         table {
+            width: 100%;
+            border-collapse: separate; /* Permite border-spacing */
             border-spacing: 0 0.75rem; /* Más espaciado entre filas para un look más ligero */
         }
         th, td {
             padding: 1.2rem 1.5rem; /* Más padding para celdas */
+            text-align: left;
             border-bottom: none; /* Eliminar borde inferior de celdas para un look flotante */
         }
         thead th {
@@ -183,6 +213,28 @@
             border-radius: 1.5rem; /* Redondeado para la tabla completa */
             border: none; /* Eliminar el borde principal de la tabla */
             padding: 0.5rem; /* Espaciado interno para la tabla */
+        }
+
+        /* Estilos específicos para los botones de modo de calculadora */
+        .calculator-mode-button {
+            border-radius: 0.75rem; /* Más redondeado para las pestañas */
+            padding: 0.8rem 1.8rem; /* Relleno cómodo */
+            font-weight: 700; /* Más audaz */
+            font-size: 1.15rem; /* Tamaño de fuente más grande */
+            letter-spacing: 0.02em; /* Espaciado sutil */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); /* Sombra para las pestañas */
+            transition: all 0.25s ease-in-out;
+        }
+        .calculator-mode-button svg {
+            stroke-width: 2.5;
+            margin-right: 0.8rem;
+        }
+        .calculator-mode-button.active {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* Sombra más fuerte para la activa */
+            transform: translateY(-2px); /* Ligeramente levantada */
         }
     </style>
 </head>
@@ -296,22 +348,22 @@
             const [expenseCategory, setExpenseCategory] = useState('');
             const [expenseAmount, setExpenseAmount] = useState(''); 
             const [expenseCurrency, setExpenseCurrency] = useState('USD'); 
-            // const [expensePaymentMethod, setExpensePaymentMethod] = useState(''); // Eliminado según solicitud
-            // const [expenseOperationNumber, setExpenseOperationNumber = useState(''); // Eliminado según solicitud
+            const [expensePaymentMethod, setExpensePaymentMethod] = useState(''); 
+            const [expenseOperationNumber, setExpenseOperationNumber] = useState(''); 
 
-            // ESTADOS para la Calculadora de Precios de Venta por Unidad (RESTAURADOS)
-            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice'); // 'calculateSellingPrice' o 'calculateProfitPercentage'
-            const [totalCostPrice, setTotalCostPrice] = useState(''); // Costo TOTAL del lote
-            const [purchaseQuantity, setPurchaseQuantity] = useState(''); // Cantidad de unidades compradas
-            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades'); // Unidad de medida de la compra
-            const [profitPercentage, setProfitPercentage] = useState(''); // Porcentaje de ganancia deseado (cuando se calcula precio)
+            // ESTADOS para la Calculadora de Precios de Venta por Unidad
+            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice'); 
+            const [totalCostPrice, setTotalCostPrice] = useState(''); 
+            const [purchaseQuantity, setPurchaseQuantity] = useState(''); 
+            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades'); 
+            const [profitPercentage, setProfitPercentage] = useState(''); 
             
-            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState(''); // Precio de venta deseado (cuando se calcula % de ganancia)
-            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD'); // Moneda del precio de venta deseado
+            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState(''); 
+            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD'); 
             
             const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null); 
             const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null); 
-            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null); // Resultado del % de ganancia calculado
+            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null); 
 
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
@@ -467,16 +519,15 @@
                     showMessage('El monto de gasto debe ser un número válido mayor que cero.', 'error');
                     return;
                 }
-                // No se valida expensePaymentMethod ni expenseOperationNumber ya que fueron eliminados del formulario.
-
+                
                 const newExpense = {
                     id: Date.now(), 
                     date: expenseDate,
                     category: expenseCategory.trim(),
                     amount: parsedExpenseAmount,
                     currency: expenseCurrency,
-                    paymentMethod: '', // Se establece vacío ya que no se selecciona un método de pago
-                    operationNumber: '', // Se establece vacío ya que no se selecciona un número de operación
+                    paymentMethod: '', 
+                    operationNumber: '', 
                 };
                 
                 setExpenses(prevExpenses => [...prevExpenses, newExpense].sort((a, b) => new Date(b.date) - new Date(a.date)));
@@ -485,9 +536,7 @@
                 setExpenseDate('');
                 setExpenseCategory('');
                 setExpenseAmount('');
-                setExpenseCurrency('USD'); // Reiniciar a USD, ya que es la única opción
-                // setExpensePaymentMethod(''); // Eliminado
-                // setExpenseOperationNumber(''); // Eliminado
+                setExpenseCurrency('USD'); 
             };
 
             // Manejador para eliminar una venta individual
@@ -526,15 +575,121 @@
                 );
             };
 
-            // Función de utilidad para convertir a USD
+            // Manejador para calcular el precio de venta por unidad
+            const handleCalculateSellingPrice = (e) => {
+                e.preventDefault();
+                const parsedTotalCostPrice = parseFloat(totalCostPrice);
+                const parsedPurchaseQuantity = parseFloat(purchaseQuantity);
+                const parsedProfitPercentage = parseFloat(profitPercentage);
+
+                if (isNaN(parsedTotalCostPrice) || parsedTotalCostPrice <= 0) {
+                    showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null); 
+                    return;
+                }
+                if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
+                    showMessage('Por favor, ingresa una cantidad de compra válida (número entero mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null); 
+                    return;
+                }
+                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) { 
+                    showMessage('Por favor, ingresa un porcentaje de ganancia válido (número mayor o igual a cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null); 
+                    return;
+                }
+
+                const costPerUnit = parsedTotalCostPrice / parsedPurchaseQuantity;
+                const sellingPricePerUnit = costPerUnit * (1 + parsedProfitPercentage / 100);
+                
+                setCalculatedCostPerUnit(costPerUnit);
+                setCalculatedSellingPricePerUnit(sellingPricePerUnit);
+                setCalculatedProfitPercentageResult(null); 
+                showMessage('Precio de venta por unidad calculado.', 'success');
+            };
+
+            // Manejador para calcular el porcentaje de ganancia
+            const handleCalculateProfitPercentage = (e) => {
+                e.preventDefault();
+                const parsedTotalCostPrice = parseFloat(totalCostPrice);
+                const parsedPurchaseQuantity = parseFloat(purchaseQuantity);
+                const desiredSellingPriceInputVal = desiredSellingPriceInput.trim();
+
+                if (isNaN(parsedTotalCostPrice) || parsedTotalCostPrice <= 0) {
+                    showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+                if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
+                    showMessage('Por favor, ingresa una cantidad de compra válida (número entero mayor que cero).', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+                if (!desiredSellingPriceInputVal) {
+                    showMessage('Por favor, ingresa el precio de venta deseado por unidad.', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+                const parsedDesiredSellingPrice = parseFloat(desiredSellingPriceInputVal);
+                if (isNaN(parsedDesiredSellingPrice) || parsedDesiredSellingPrice <= 0) {
+                    showMessage('El precio de venta deseado debe ser un número válido mayor que cero.', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+
+                const costPerUnit = parsedTotalCostPrice / parsedPurchaseQuantity;
+                let sellingPriceForCalculation = parsedDesiredSellingPrice;
+
+                // Convertir el precio de venta deseado a USD si se ingresó en VES
+                if (desiredSellingPriceCurrency === 'VES') {
+                    if (exchangeRate <= 0) {
+                        showMessage('La tasa de cambio debe ser mayor que cero para convertir de VES a USD.', 'error');
+                        setCalculatedCostPerUnit(null);
+                        setCalculatedSellingPricePerUnit(null);
+                        setCalculatedProfitPercentageResult(null);
+                        return;
+                    }
+                    sellingPriceForCalculation = parsedDesiredSellingPrice / exchangeRate;
+                }
+
+                if (costPerUnit === 0) {
+                    showMessage('El costo por unidad no puede ser cero para calcular el porcentaje de ganancia.', 'error');
+                    setCalculatedCostPerUnit(null);
+                    setCalculatedSellingPricePerUnit(null);
+                    setCalculatedProfitPercentageResult(null);
+                    return;
+                }
+
+                const profitPercentageCalculated = ((sellingPriceForCalculation - costPerUnit) / costPerUnit) * 100;
+                
+                setCalculatedCostPerUnit(costPerUnit);
+                setCalculatedSellingPricePerUnit(parsedDesiredSellingPrice); // Mostrar el precio deseado en su moneda original
+                setCalculatedProfitPercentageResult(profitPercentageCalculated);
+                showMessage('Porcentaje de ganancia calculado.', 'success');
+            };
+
+            // Función de ayuda para convertir a USD
             const convertToUSD = useCallback((amount, currency) => {
                 if (currency === 'VES') {
-                    return amount / exchangeRate;
+                    return exchangeRate > 0 ? amount / exchangeRate : 0;
                 }
                 return amount;
             }, [exchangeRate]);
 
-            // Función de utilidad para convertir a VES
+            // Función de ayuda para convertir a VES
             const convertToVES = useCallback((amount, currency) => {
                 if (currency === 'USD') {
                     return amount * exchangeRate;
@@ -542,108 +697,45 @@
                 return amount;
             }, [exchangeRate]);
 
-            // Calculo de totales de ventas y gastos
-            const totalSalesUSD = sales.reduce((sum, sale) => sum + convertToUSD(sale.amount * sale.quantity, sale.currency), 0);
-            const totalExpensesUSD = expenses.reduce((sum, expense) => sum + convertToUSD(expense.amount, expense.currency), 0);
+            // Cálculos de totales y ganancia/pérdida
+            const totalSalesUSD = sales.reduce((acc, sale) => acc + (convertToUSD(sale.amount, sale.currency) * sale.quantity), 0);
+            const totalSalesVES = sales.reduce((acc, sale) => acc + (convertToVES(sale.amount, sale.currency) * sale.quantity), 0);
+
+            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0); 
+            const totalExpensesVES = expenses.reduce((acc, expense) => acc + convertToVES(expense.amount, expense.currency), 0); 
+
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
-
-            // Manejador para calcular el precio de venta por unidad
-            const handleCalculateSellingPrice = (e) => {
-                e.preventDefault();
-                const cost = parseFloat(totalCostPrice);
-                const qty = parseFloat(purchaseQuantity);
-                const profit = parseFloat(profitPercentage);
-
-                if (isNaN(cost) || cost <= 0) {
-                    showMessage('El costo total debe ser un número válido mayor que cero.', 'error');
-                    setCalculatedCostPerUnit(null);
-                    setCalculatedSellingPricePerUnit(null);
-                    return;
-                }
-                if (isNaN(qty) || qty <= 0) {
-                    showMessage('La cantidad comprada debe ser un número válido mayor que cero.', 'error');
-                    setCalculatedCostPerUnit(null);
-                    setCalculatedSellingPricePerUnit(null);
-                    return;
-                }
-                if (isNaN(profit) || profit < 0) {
-                    showMessage('El porcentaje de ganancia debe ser un número válido (0 o mayor).', 'error');
-                    setCalculatedCostPerUnit(null);
-                    setCalculatedSellingPricePerUnit(null);
-                    return;
-                }
-
-                const costPerUnit = cost / qty;
-                const sellingPricePerUnit = costPerUnit * (1 + profit / 100);
-
-                setCalculatedCostPerUnit(costPerUnit);
-                setCalculatedSellingPricePerUnit(sellingPricePerUnit);
-                showMessage('Precio de venta calculado.', 'success');
-            };
-
-            // Manejador para calcular el porcentaje de ganancia
-            const handleCalculateProfitPercentage = (e) => {
-                e.preventDefault();
-                const cost = parseFloat(totalCostPrice);
-                const qty = parseFloat(purchaseQuantity);
-                const desiredSellingPrice = parseFloat(desiredSellingPriceInput);
-
-                if (isNaN(cost) || cost <= 0) {
-                    showMessage('El costo total debe ser un número válido mayor que cero.', 'error');
-                    setCalculatedProfitPercentageResult(null);
-                    return;
-                }
-                if (isNaN(qty) || qty <= 0) {
-                    showMessage('La cantidad comprada debe ser un número válido mayor que cero.', 'error');
-                    setCalculatedProfitPercentageResult(null);
-                    return;
-                }
-                if (isNaN(desiredSellingPrice) || desiredSellingPrice <= 0) {
-                    showMessage('El precio de venta deseado debe ser un número válido mayor que cero.', 'error');
-                    setCalculatedProfitPercentageResult(null);
-                    return;
-                }
-                
-                const costPerUnit = cost / qty;
-                if (desiredSellingPrice < costPerUnit) {
-                    showMessage('El precio de venta deseado es menor que el costo por unidad, resultaría en pérdida.', 'warning');
-                }
-                
-                const profitPercentageResult = ((desiredSellingPrice - costPerUnit) / costPerUnit) * 100;
-                setCalculatedProfitPercentageResult(profitPercentageResult);
-                showMessage('Porcentaje de ganancia calculado.', 'success');
-            };
-
+            const netProfitVES = totalSalesVES - totalExpensesVES;
 
             return (
-                <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-                    <div className="main-container w-full max-w-6xl">
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+                    {/* Mensajes de notificación con botón de cierre */}
+                    {showMessageBox && (
+                        <MessageBox message={message} type={messageType} onClose={closeMessage} />
+                    )}
+
+                    {/* Modal de Confirmación */}
+                    {showConfirmModal && (
+                        <ConfirmModal
+                            message={modalMessage}
+                            onConfirm={handleConfirm}
+                            onCancel={handleCancel}
+                        />
+                    )}
+
+                    <div className="w-full max-w-6xl bg-white main-container mb-8">
                         <h1 className="main-heading text-center mb-14">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dollar-sign">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dollar-sign">
                                 <line x1="12" y1="1" x2="12" y2="23"></line>
                                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                             </svg>
                             Gestor de Ventas y Presupuesto
                         </h1>
 
-                        {/* Caja de mensajes */}
-                        {showMessageBox && (
-                            <MessageBox message={message} type={messageType} onClose={closeMessage} />
-                        )}
-
-                        {/* Modal de Confirmación */}
-                        {showConfirmModal && (
-                            <ConfirmModal
-                                message={modalMessage}
-                                onConfirm={handleConfirm}
-                                onCancel={handleCancel}
-                            />
-                        )}
-
                         {/* Sección de Tasa de Cambio */}
                         <div className="mb-16 p-9 bg-blue-50 border border-blue-100 rounded-3xl shadow-lg">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrows-right-left text-blue-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrows-right-left text-blue-800">
                                     <path d="M8 3H18L22 7L18 11H8"></path>
                                     <path d="M16 21H6L2 17L6 13H16"></path>
                                 </svg>
@@ -663,12 +755,18 @@
                                 />
                                 <span className="text-xl text-gray-700 font-medium">VES</span>
                             </div>
+                            <p className="text-sm text-gray-700 mt-6 text-center">
+                                Actualiza este valor diariamente con la tasa de cambio actual (ej. BCV).
+                            </p>
+                            <p className="text-base text-blue-800 mt-3 text-center font-semibold">
+                                ✨ Tus datos (ventas, gastos y tasa) se guardan automáticamente en tu navegador.
+                            </p>
                         </div>
 
                         {/* Resumen General */}
                         <div className="mb-16">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pie-chart text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pie-chart text-gray-600">
                                     <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                                     <path d="M22 12A10 10 0 0 0 12 2v10Z"></path>
                                 </svg>
@@ -678,7 +776,7 @@
                                 {/* Total Ventas */}
                                 <div className="bg-gradient-to-br from-emerald-300 to-emerald-500 text-white p-9 rounded-3xl shadow-2xl flex flex-col items-center justify-center transform hover:scale-105 transition duration-300">
                                     <h3 className="sub-heading mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trending-up">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trending-up">
                                             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
                                             <polyline points="16 7 22 7 22 13"></polyline>
                                         </svg>
@@ -688,13 +786,13 @@
                                         <span className="card-currency">$</span>{totalSalesUSD.toFixed(2)}
                                     </p>
                                     <p className="card-secondary-value mt-4">
-                                        ≈ {(totalSalesUSD * exchangeRate).toFixed(2)} VES
+                                        ≈ Bs. {(totalSalesUSD * exchangeRate).toFixed(2)} VES
                                     </p>
                                 </div>
                                 {/* Total Gastos */}
                                 <div className="bg-gradient-to-br from-rose-300 to-rose-500 text-white p-9 rounded-3xl shadow-2xl flex flex-col items-center justify-center transform hover:scale-105 transition duration-300">
                                     <h3 className="sub-heading mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trending-down">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trending-down">
                                             <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
                                             <polyline points="16 17 22 17 22 11"></polyline>
                                         </svg>
@@ -704,13 +802,13 @@
                                         <span className="card-currency">$</span>{totalExpensesUSD.toFixed(2)}
                                     </p>
                                     <p className="card-secondary-value mt-4">
-                                        ≈ {(totalExpensesUSD * exchangeRate).toFixed(2)} VES
+                                        ≈ Bs. {(totalExpensesUSD * exchangeRate).toFixed(2)} VES
                                     </p>
                                 </div>
                                 {/* Ganancia Neta */}
                                 <div className="bg-gradient-to-br from-violet-400 to-indigo-600 text-white p-9 rounded-3xl shadow-2xl flex flex-col items-center justify-center transform hover:scale-105 transition duration-300">
                                     <h3 className="sub-heading mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sack">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sack">
                                             <path d="M12 10h.01"></path>
                                             <path d="M17 10h.01"></path>
                                             <path d="M7 10h.01"></path>
@@ -727,7 +825,7 @@
                                         <span className="card-currency">$</span>{netProfitUSD.toFixed(2)}
                                     </p>
                                     <p className="card-secondary-value mt-4">
-                                        ≈ {(netProfitUSD * exchangeRate).toFixed(2)} VES
+                                        ≈ Bs. {(netProfitUSD * exchangeRate).toFixed(2)} VES
                                     </p>
                                 </div>
                             </div>
@@ -736,7 +834,7 @@
                         {/* Formulario de Nueva Venta */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-circle text-blue-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-circle text-blue-600">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="8" x2="12" y2="16"></line>
                                     <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -814,7 +912,12 @@
                                     <select
                                         id="salePaymentMethod"
                                         value={salePaymentMethod}
-                                        onChange={(e) => setSalePaymentMethod(e.target.value)}
+                                        onChange={(e) => {
+                                            setSalePaymentMethod(e.target.value);
+                                            if (e.target.value !== 'Pago Móvil') {
+                                                setSaleOperationNumber(''); 
+                                            }
+                                        }}
                                         className="w-full"
                                         required
                                     >
@@ -857,7 +960,7 @@
                         {/* Historial de Ventas */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-receipt text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-receipt text-gray-600">
                                     <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2h-2h-2h-2h-2h-2h-2H4Z"></path>
                                     <path d="M18 6H8"></path>
                                     <path d="M18 10H8"></path>
@@ -883,7 +986,7 @@
                                                     <th className="px-6 py-4 text-left">Acciones</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
+                                            <tbody>
                                                 {sales.map((sale) => (
                                                     <tr key={sale.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
@@ -895,7 +998,7 @@
                                                                 {sale.currency === 'USD' ? ` (≈ ${(sale.amount * sale.quantity * exchangeRate).toFixed(2)} VES)` : ` (≈ ${(sale.amount * sale.quantity / exchangeRate).toFixed(2)} USD)`}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.paymentMethod}</td>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.paymentMethod || 'N/A'}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.operationNumber || '-'}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-right text-base font-medium">
                                                             <button
@@ -932,7 +1035,7 @@
                         {/* Formulario de Nuevo Gasto */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-minus-circle text-rose-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-minus-circle text-rose-600">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="8" y1="12" x2="16" y2="12"></line>
                                 </svg>
@@ -969,7 +1072,7 @@
                                             type="number"
                                             id="expenseAmount"
                                             value={expenseAmount}
-                                            onChange={(e) => setExpenseAmount(e.target.value)}
+                                            onChange={(e) => setExpenseAmount(e.target.value)} 
                                             className="w-full"
                                             placeholder="Monto del gasto"
                                             min="0.01"
@@ -1007,7 +1110,7 @@
                         {/* Historial de Gastos */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-archive text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-archive text-gray-600">
                                     <rect width="20" height="5" x="2" y="3" rx="1"></rect>
                                     <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
                                     <path d="M10 12h4"></path>
@@ -1028,7 +1131,7 @@
                                                     <th className="px-6 py-4 text-left">Acciones</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
+                                            <tbody>
                                                 {expenses.map((expense) => (
                                                     <tr key={expense.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.date}</td>
@@ -1074,7 +1177,7 @@
                         {/* Calculadora de Precios de Venta por Unidad */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator text-gray-600">
                                     <rect x="8" y="2" width="8" height="4" rx="1"></rect>
                                     <path d="M17 17v-2H7v2"></path>
                                     <path d="M17 10h-2V7H7v3"></path>
@@ -1084,27 +1187,38 @@
                                 Calculadora de Precios de Venta por Unidad
                             </h2>
 
-                            <div className="flex flex-col sm:flex-row mb-9 space-y-5 sm:space-y-0 sm:space-x-7">
+                            {/* Selector de Modo de Calculadora (mejorado) */}
+                            <div className="flex flex-col sm:flex-row justify-center space-y-5 sm:space-y-0 sm:space-x-7 mb-8">
                                 <button
-                                    onClick={() => setCalculatorMode('calculateSellingPrice')}
-                                    className={`flex-1 py-4.5 px-8 rounded-xl text-xl flex items-center justify-center ${calculatorMode === 'calculateSellingPrice' ? 'bg-indigo-400 text-white shadow-md' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                                    onClick={() => {
+                                        setCalculatorMode('calculateSellingPrice');
+                                        setCalculatedCostPerUnit(null);
+                                        setCalculatedSellingPricePerUnit(null);
+                                        setCalculatedProfitPercentageResult(null);
+                                    }}
+                                    className={`calculator-mode-button flex-1 ${calculatorMode === 'calculateSellingPrice' ? 'bg-indigo-400 text-white active' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevrons-right mr-3">
-                                        <polyline points="7 7 12 12 7 17"></polyline>
-                                        <polyline points="13 7 18 12 13 17"></polyline>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dollar-sign">
+                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                                     </svg>
                                     Calcular Precio de Venta
                                 </button>
                                 <button
-                                    onClick={() => setCalculatorMode('calculateProfitPercentage')}
-                                    className={`flex-1 py-4.5 px-8 rounded-xl text-xl flex items-center justify-center ${calculatorMode === 'calculateProfitPercentage' ? 'bg-indigo-400 text-white shadow-md' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                                    onClick={() => {
+                                        setCalculatorMode('calculateProfitPercentage');
+                                        setCalculatedCostPerUnit(null);
+                                        setCalculatedSellingPricePerUnit(null);
+                                        setCalculatedProfitPercentageResult(null);
+                                    }}
+                                    className={`calculator-mode-button flex-1 ${calculatorMode === 'calculateProfitPercentage' ? 'bg-emerald-400 text-white active' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-percent mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-percent">
                                         <line x1="19" y1="5" x2="5" y2="19"></line>
                                         <circle cx="6.5" cy="6.5" r="2.5"></circle>
                                         <circle cx="17.5" cy="17.5" r="2.5"></circle>
                                     </svg>
-                                    Calcular Porcentaje de Ganancia
+                                    Calcular % de Ganancia
                                 </button>
                             </div>
 
@@ -1117,15 +1231,15 @@
                                             id="totalCostPrice"
                                             value={totalCostPrice}
                                             onChange={(e) => setTotalCostPrice(e.target.value)}
-                                            className="w-full"
-                                            placeholder="Ej: 100"
+                                            placeholder="Ej: 100.00"
                                             min="0.01"
                                             step="0.01"
+                                            className="w-full"
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad de Unidades Compradas</label>
+                                        <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad Comprada</label>
                                         <div className="flex space-x-4">
                                             <input
                                                 type="number"
@@ -1150,14 +1264,14 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <label htmlFor="profitPercentage" className="block text-gray-700 text-base font-bold mb-2">Porcentaje de Ganancia Deseado (%)</label>
+                                        <label htmlFor="profitPercentage" className="block text-gray-700 text-base font-bold mb-2">Porcentaje de Ganancia Deseado (%):</label>
                                         <input
                                             type="number"
                                             id="profitPercentage"
                                             value={profitPercentage}
                                             onChange={(e) => setProfitPercentage(e.target.value)}
                                             className="w-full"
-                                            placeholder="Ej: 30 (para 30%)"
+                                            placeholder="Ej: 30"
                                             min="0"
                                             step="0.01"
                                             required
@@ -1166,30 +1280,33 @@
                                     <div className="md:col-span-2 mt-5">
                                         <button
                                             type="submit"
-                                            className="w-full bg-indigo-400 text-white py-4.5 px-8 rounded-xl hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                            className="w-full bg-blue-400 text-white py-4.5 px-8 rounded-xl hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dollar-sign mr-3">
-                                                <line x1="12" y1="1" x2="12" y2="23"></line>
-                                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
+                                                <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                                <path d="M17 17v-2H7v2"></path>
+                                                <path d="M17 10h-2V7H7v3"></path>
+                                                <path d="M14 17h-4V14h4v3Z"></path>
+                                                <rect x="3" y="6" width="18" height="16" rx="2"></rect>
                                             </svg>
                                             Calcular Precio de Venta
                                         </button>
                                     </div>
                                     {(calculatedCostPerUnit !== null && calculatedSellingPricePerUnit !== null) && (
-                                        <div className="md:col-span-2 mt-9 p-7 bg-indigo-50 border border-indigo-200 rounded-2xl shadow-inner">
+                                        <div className="md:col-span-2 mt-9 p-7 bg-indigo-50 border border-indigo-200 rounded-2xl shadow-inner text-center">
                                             <h3 className="text-xl font-semibold text-indigo-800 mb-5">Resultados:</h3>
                                             <p className="text-gray-700 text-lg">
-                                                Costo por {purchaseMeasurementUnit}: <span className="font-bold text-indigo-700">${calculatedCostPerUnit.toFixed(2)} USD</span>
+                                                Costo por <span className="font-bold text-indigo-700">{purchaseMeasurementUnit}</span>: <span className="font-bold text-indigo-700">${calculatedCostPerUnit.toFixed(2)} USD</span>
                                                 <span className="text-base text-gray-500 ml-4"> (≈ {(calculatedCostPerUnit * exchangeRate).toFixed(2)} VES)</span>
                                             </p>
                                             <p className="text-gray-700 text-lg mt-3">
-                                                Precio de Venta Sugerido por {purchaseMeasurementUnit} (con {profitPercentage}% de ganancia): <span className="font-bold text-xl text-indigo-900">${calculatedSellingPricePerUnit.toFixed(2)} USD</span>
+                                                Precio de Venta Sugerido por <span className="font-bold text-indigo-700">{purchaseMeasurementUnit}</span> (con {profitPercentage}% de ganancia): <span className="font-bold text-xl text-indigo-900">${calculatedSellingPricePerUnit.toFixed(2)} USD</span>
                                                 <span className="text-base text-gray-500 ml-4"> (≈ {(calculatedSellingPricePerUnit * exchangeRate).toFixed(2)} VES)</span>
                                             </p>
                                         </div>
                                     )}
                                 </form>
-                            ) : (
+                            ) : ( /* Modo: Calcular % de Ganancia */
                                 <form onSubmit={handleCalculateProfitPercentage} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div>
                                         <label htmlFor="totalCostPrice" className="block text-gray-700 text-base font-bold mb-2">Costo Total del Lote (USD)</label>
@@ -1198,10 +1315,10 @@
                                             id="totalCostPrice"
                                             value={totalCostPrice}
                                             onChange={(e) => setTotalCostPrice(e.target.value)}
-                                            className="w-full"
-                                            placeholder="Ej: 100"
+                                            placeholder="Ej: 100.00"
                                             min="0.01"
                                             step="0.01"
+                                            className="w-full"
                                             required
                                         />
                                     </div>
@@ -1230,7 +1347,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="flex items-end space-x-4">
+                                    <div className="flex items-end space-x-4 md:col-span-2">
                                         <div className="flex-grow">
                                             <label htmlFor="desiredSellingPriceInput" className="block text-gray-700 text-base font-bold mb-2">Precio de Venta Deseado por Unidad</label>
                                             <input
@@ -1239,7 +1356,7 @@
                                                 value={desiredSellingPriceInput}
                                                 onChange={(e) => setDesiredSellingPriceInput(e.target.value)}
                                                 className="w-full"
-                                                placeholder="Ej: 15"
+                                                placeholder="Ej: 15.00"
                                                 min="0.01"
                                                 step="0.01"
                                                 required
@@ -1261,25 +1378,23 @@
                                     <div className="md:col-span-2 mt-5">
                                         <button
                                             type="submit"
-                                            className="w-full bg-indigo-400 text-white py-4.5 px-8 rounded-xl hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                            className="w-full bg-emerald-400 text-white py-4.5 px-8 rounded-xl hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-percent mr-3">
-                                                <line x1="19" y1="5" x2="5" y2="19"></line>
-                                                <circle cx="6.5" cy="6.5" r="2.5"></circle>
-                                                <circle cx="17.5" cy="17.5" r="2.5"></circle>
-                                            </svg>
-                                            Calcular Porcentaje de Ganancia
+                                            Calcular % de Ganancia
                                         </button>
                                     </div>
                                     {calculatedProfitPercentageResult !== null && (
-                                        <div className="md:col-span-2 mt-9 p-7 bg-indigo-50 border border-indigo-200 rounded-2xl shadow-inner">
-                                            <h3 className="text-xl font-semibold text-indigo-800 mb-5">Resultados:</h3>
+                                        <div className="md:col-span-2 mt-9 p-7 bg-emerald-50 border border-emerald-200 rounded-2xl shadow-inner text-center">
+                                            <h3 className="text-xl font-semibold text-emerald-800 mb-5">Resultados:</h3>
                                             <p className="text-gray-700 text-lg">
-                                                Costo por {purchaseMeasurementUnit}: <span className="font-bold text-indigo-700">${(parseFloat(totalCostPrice) / parseFloat(purchaseQuantity)).toFixed(2)} USD</span>
+                                                Costo por <span className="font-bold text-emerald-700">{purchaseMeasurementUnit}</span>: <span className="font-bold text-emerald-700">${(parseFloat(totalCostPrice) / parseFloat(purchaseQuantity)).toFixed(2)} USD</span>
                                                 <span className="text-base text-gray-500 ml-4"> (≈ {((parseFloat(totalCostPrice) / parseFloat(purchaseQuantity)) * exchangeRate).toFixed(2)} VES)</span>
                                             </p>
                                             <p className="text-gray-700 text-lg mt-3">
-                                                Con un precio de venta de {desiredSellingPriceCurrency === 'USD' ? '$' : ''}{parseFloat(desiredSellingPriceInput).toFixed(2)} {desiredSellingPriceCurrency} por {purchaseMeasurementUnit}, el porcentaje de ganancia es: <span className="font-bold text-xl text-indigo-900">{calculatedProfitPercentageResult.toFixed(2)}%</span>
+                                                Con un precio de venta de <span className="font-bold text-emerald-900">
+                                                {desiredSellingPriceCurrency === 'USD' ? '$' : 'Bs. '}
+                                                {parseFloat(desiredSellingPriceInput).toFixed(2)} {desiredSellingPriceCurrency}
+                                                </span> por <span className="font-bold text-emerald-700">{purchaseMeasurementUnit}</span>, el porcentaje de ganancia es: <span className="font-bold text-xl text-emerald-900">{calculatedProfitPercentageResult.toFixed(2)}%</span>
                                             </p>
                                         </div>
                                     )}
@@ -1291,7 +1406,6 @@
             );
         };
 
-        // Renderiza el componente principal de la aplicación React
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
