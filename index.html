@@ -15,16 +15,15 @@
         .min-h-screen {
             background: linear-gradient(135deg, #f0f4f8, #e8f0f7); /* Degradado suave de gris azulado */
         }
-        /* Contenedor principal más elegante y bordes suaves con sombra pronunciada */
+        /* Contenedor principal más elegante */
         .main-container {
             background-color: #ffffff;
-            border-radius: 2rem; /* Aún más redondeado para suavidad */
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08); /* Sombra más grande, suave y difusa */
-            padding: 3.5rem; /* Más espacio interno para una sensación de amplitud */
-            border: 1px solid #e0e7ee; /* Borde muy sutil para definición */
+            border-radius: 1rem; /* Más redondeado */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra más suave y extendida */
+            padding: 2.5rem; /* Más espacio interno */
         }
 
-        /* Botones con estilo profesional, tonos pasteles y mejor sombra */
+        /* Botones con estilo profesional */
         button {
             transition: all 0.2s ease-in-out;
             border-radius: 0.5rem; /* Menos redondeado para un look más serio */
@@ -37,7 +36,7 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Sombra al hover más pronunciada pero suave */
         }
 
-        /* Campos de entrada y selects más limpios y suaves con mejor foco */
+        /* Campos de entrada y selects más limpios */
         input[type="text"],
         input[type="number"],
         input[type="date"],
@@ -65,7 +64,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal */
+            background-color: rgba(0, 0, 0, 0.65); /* Fondo un poco más oscuro para mejor enfoque */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -139,7 +138,7 @@
             color: #374151; /* Un gris azulado oscuro para los encabezados de sección */
             margin-bottom: 2rem; /* Más espacio inferior */
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e2e8f0; /* Línea más definida */
+            border-bottom: 2px solid #e0e7ee; /* Línea más definida */
             display: flex; /* Para alinear icono */
             align-items: center; /* Para alinear icono */
         }
@@ -193,6 +192,11 @@
             text-transform: uppercase;
             letter-spacing: 0.1em; /* Más espaciado entre letras */
             border-bottom: 2px solid #c3daee; /* Borde inferior para el thead */
+            cursor: pointer; /* Indica que la columna es clicable */
+            user-select: none; /* Evita selección de texto al hacer clic rápido */
+        }
+        thead th:hover {
+            background-color: #dbe8f5; /* Fondo más oscuro al pasar el cursor */
         }
         tbody tr {
             background-color: #ffffff; /* Fondo blanco para las filas */
@@ -250,7 +254,7 @@
     <!-- Script de la aplicación React (Babel transpilado) -->
     <script type="text/babel">
         // Importa los hooks de React
-        const { useState, useEffect, useCallback } = React;
+        const { useState, useEffect, useCallback, useMemo } = React;
 
         // Componente para el modal de confirmación
         const ConfirmModal = ({ message, onConfirm, onCancel }) => {
@@ -375,6 +379,14 @@
             const [modalMessage, setModalMessage] = useState('');
             const [onConfirmAction, setOnConfirmAction] = useState(null); 
 
+            // Estados de ordenación para ventas
+            const [salesSortColumn, setSalesSortColumn] = useState('date');
+            const [salesSortDirection, setSalesSortDirection] = useState('desc'); // 'asc' o 'desc'
+
+            // Estados de ordenación para gastos
+            const [expensesSortColumn, setExpensesSortColumn] = useState('date');
+            const [expensesSortDirection, setExpensesSortDirection] = useState('desc'); // 'asc' o 'desc'
+
             // Muestra mensajes temporales al usuario
             const showMessage = (msg, type) => {
                 setMessage(msg);
@@ -484,7 +496,7 @@
                     operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '', 
                 };
                 
-                setSales(prevSales => [...prevSales, newSale].sort((a, b) => new Date(b.date) - new Date(a.date)));
+                setSales(prevSales => [...prevSales, newSale]); // No ordenar aquí, la ordenación se hará en sortedSales
                 showMessage('Venta agregada exitosamente.', 'success');
 
                 setSaleDate('');
@@ -530,7 +542,7 @@
                     operationNumber: '', 
                 };
                 
-                setExpenses(prevExpenses => [...prevExpenses, newExpense].sort((a, b) => new Date(b.date) - new Date(a.date)));
+                setExpenses(prevExpenses => [...prevExpenses, newExpense]); // No ordenar aquí, la ordenación se hará en sortedExpenses
                 showMessage('Gasto agregado exitosamente.', 'success');
 
                 setExpenseDate('');
@@ -706,6 +718,91 @@
 
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
             const netProfitVES = totalSalesVES - totalExpensesVES;
+
+            // Lógica de ordenación para ventas
+            const handleSalesSort = (column) => {
+                if (salesSortColumn === column) {
+                    setSalesSortDirection(salesSortDirection === 'asc' ? 'desc' : 'asc');
+                } else {
+                    setSalesSortColumn(column);
+                    setSalesSortDirection('asc');
+                }
+            };
+
+            // Lógica de ordenación para gastos
+            const handleExpensesSort = (column) => {
+                if (expensesSortColumn === column) {
+                    setExpensesSortDirection(expensesSortDirection === 'asc' ? 'desc' : 'asc');
+                } else {
+                    setExpensesSortColumn(column);
+                    setExpensesSortDirection('asc');
+                }
+            };
+
+            // Memoized sorted sales data
+            const sortedSales = useMemo(() => {
+                if (!sales || sales.length === 0) return [];
+                const sortableSales = [...sales]; // Crear una copia para ordenar
+
+                sortableSales.sort((a, b) => {
+                    let aValue, bValue;
+
+                    switch (salesSortColumn) {
+                        case 'date':
+                            aValue = new Date(a.date);
+                            bValue = new Date(b.date);
+                            break;
+                        case 'product':
+                            aValue = a.product.toLowerCase();
+                            bValue = b.product.toLowerCase();
+                            break;
+                        case 'totalAmount':
+                            aValue = parseFloat(convertToUSD(a.amount * a.quantity, a.currency));
+                            bValue = parseFloat(convertToUSD(b.amount * b.quantity, b.currency));
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (aValue < bValue) return salesSortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return salesSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                return sortableSales;
+            }, [sales, salesSortColumn, salesSortDirection, convertToUSD]); // Dependencias
+
+            // Memoized sorted expenses data
+            const sortedExpenses = useMemo(() => {
+                if (!expenses || expenses.length === 0) return [];
+                const sortableExpenses = [...expenses]; // Crear una copia para ordenar
+
+                sortableExpenses.sort((a, b) => {
+                    let aValue, bValue;
+
+                    switch (expensesSortColumn) {
+                        case 'date':
+                            aValue = new Date(a.date);
+                            bValue = new Date(b.date);
+                            break;
+                        case 'category':
+                            aValue = a.category.toLowerCase();
+                            bValue = b.category.toLowerCase();
+                            break;
+                        case 'amount':
+                            aValue = parseFloat(convertToUSD(a.amount, a.currency));
+                            bValue = parseFloat(convertToUSD(b.amount, b.currency));
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (aValue < bValue) return expensesSortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return expensesSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                return sortableExpenses;
+            }, [expenses, expensesSortColumn, expensesSortDirection, convertToUSD]); // Dependencias
+
 
             return (
                 <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -969,7 +1066,7 @@
                                 </svg>
                                 Historial de Ventas
                             </h2>
-                            {sales.length === 0 ? (
+                            {sortedSales.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay ventas registradas aún.</p>
                             ) : (
                                 <>
@@ -977,17 +1074,23 @@
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr>
-                                                    <th className="px-6 py-4 text-left">Fecha</th>
-                                                    <th className="px-6 py-4 text-left">Producto</th>
+                                                    <th onClick={() => handleSalesSort('date')} className="px-6 py-4 text-left">
+                                                        Fecha {salesSortColumn === 'date' && (salesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleSalesSort('product')} className="px-6 py-4 text-left">
+                                                        Producto {salesSortColumn === 'product' && (salesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
                                                     <th className="px-6 py-4 text-left">Cantidad</th>
-                                                    <th className="px-6 py-4 text-left">Monto Total</th>
+                                                    <th onClick={() => handleSalesSort('totalAmount')} className="px-6 py-4 text-left">
+                                                        Monto Total {salesSortColumn === 'totalAmount' && (salesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
                                                     <th className="px-6 py-4 text-left">Método de Pago</th>
                                                     <th className="px-6 py-4 text-left">Operación</th>
                                                     <th className="px-6 py-4 text-left">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {sales.map((sale) => (
+                                                {sortedSales.map((sale) => (
                                                     <tr key={sale.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.product}</td>
@@ -1117,7 +1220,7 @@
                                 </svg>
                                 Historial de Gastos
                             </h2>
-                            {expenses.length === 0 ? (
+                            {sortedExpenses.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay gastos registrados aún.</p>
                             ) : (
                                 <>
@@ -1125,14 +1228,20 @@
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr>
-                                                    <th className="px-6 py-4 text-left">Fecha</th>
-                                                    <th className="px-6 py-4 text-left">Categoría</th>
-                                                    <th className="px-6 py-4 text-left">Monto</th>
+                                                    <th onClick={() => handleExpensesSort('date')} className="px-6 py-4 text-left">
+                                                        Fecha {expensesSortColumn === 'date' && (expensesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleExpensesSort('category')} className="px-6 py-4 text-left">
+                                                        Categoría {expensesSortColumn === 'category' && (expensesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleExpensesSort('amount')} className="px-6 py-4 text-left">
+                                                        Monto {expensesSortColumn === 'amount' && (expensesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
                                                     <th className="px-6 py-4 text-left">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {expenses.map((expense) => (
+                                                {sortedExpenses.map((expense) => (
                                                     <tr key={expense.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.date}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.category}</td>
