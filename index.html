@@ -49,7 +49,7 @@
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #6366f1; /* Un tono de azul pastel brillante para el foco */
+            border-color: #93c5fd; /* Un tono de azul pastel brillante para el foco */
             box-shadow: 0 0 0 5px rgba(147, 197, 253, 0.35); /* Anillo de foco suave y más amplio */
             outline: none;
         }
@@ -372,6 +372,12 @@
                 const savedExpenses = localStorage.getItem('expenses');
                 return savedExpenses ? JSON.parse(savedExpenses) : [];
             });
+            
+            // Estado para ventas de queso al fiado, cargados desde localStorage
+            const [cheeseCreditSales, setCheeseCreditSales] = useState(() => {
+                const savedCreditSales = localStorage.getItem('cheeseCreditSales');
+                return savedCreditSales ? JSON.parse(savedCreditSales) : [];
+            });
 
             // Estados del formulario de ventas
             const [saleDate, setSaleDate] = useState('');
@@ -406,9 +412,13 @@
 
             // Estado para la calculadora de Queso
             const [cheeseWeightGrams, setCheeseWeightGrams] = useState('');
-            const [cheesePricePerKiloUSD, setCheesePricePerKiloUSD] = useState('');
+            const [cheesePricePerKiloUSD, setCheesePricePerKiloUSD] = useState(''); // Precio por kilo para la calculadora de queso
             const [calculatedCheesePriceUSD, setCalculatedCheesePriceUSD] = useState(null);
             const [calculatedCheesePriceVES, setCalculatedCheesePriceVES] = useState(null);
+            
+            // Nuevos estados para el formulario de venta de queso al fiado
+            const [creditCustomerName, setCreditCustomerName] = useState('');
+            const [creditCheeseWeightGrams, setCreditCheeseWeightGrams] = useState('');
 
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
@@ -431,6 +441,12 @@
             const [expensesSortDirection, setExpensesSortDirection] = useState('desc'); // 'asc' o 'desc'
             // Estados de paginación para gastos
             const [currentExpensesPage, setCurrentExpensesPage] = useState(1);
+
+            // Estados de ordenación para ventas de queso al fiado
+            const [cheeseCreditSortColumn, setCheeseCreditSortColumn] = useState('date');
+            const [cheeseCreditSortDirection, setCheeseCreditSortDirection] = useState('desc');
+            // Estados de paginación para ventas de queso al fiado
+            const [currentCheeseCreditPage, setCurrentCheeseCreditPage] = useState(1);
 
 
             // Muestra mensajes temporales al usuario
@@ -488,6 +504,12 @@
             useEffect(() => {
                 localStorage.setItem('expenses', JSON.stringify(expenses));
             }, [expenses]);
+
+            // Guarda las ventas de queso al fiado en localStorage cada vez que cambian
+            useEffect(() => {
+                localStorage.setItem('cheeseCreditSales', JSON.stringify(cheeseCreditSales));
+            }, [cheeseCreditSales]);
+
 
             // Manejador para añadir una nueva venta
             const handleAddSale = (e) => {
@@ -598,6 +620,51 @@
                 setExpenseAmount('');
                 setExpenseCurrency('USD'); 
             };
+            
+            // Manejador para añadir una nueva venta de queso al fiado
+            const handleAddCheeseCreditSale = (e) => {
+                e.preventDefault();
+                const parsedCreditCheeseWeightGrams = parseFloat(creditCheeseWeightGrams);
+                const parsedCheesePricePerKiloUSD = parseFloat(cheesePricePerKiloUSD); // Usar el precio del kilo de queso de la calculadora
+
+                if (!creditCustomerName.trim()) {
+                    showMessage('El nombre del cliente no puede estar vacío.', 'error');
+                    return;
+                }
+                if (isNaN(parsedCreditCheeseWeightGrams) || parsedCreditCheeseWeightGrams <= 0) {
+                    showMessage('Por favor, ingresa un peso válido en gramos (número mayor que cero).', 'error');
+                    return;
+                }
+                if (isNaN(parsedCheesePricePerKiloUSD) || parsedCheesePricePerKiloUSD <= 0) {
+                    showMessage('Por favor, configura un precio válido por kilo en la "Calculadora de Venta de Queso por Peso" antes de registrar fiado.', 'error');
+                    return;
+                }
+                if (exchangeRate <= 0) {
+                    showMessage('La tasa de cambio debe ser mayor que cero para calcular en VES.', 'error');
+                    return;
+                }
+
+                const totalUSD = (parsedCreditCheeseWeightGrams / 1000) * parsedCheesePricePerKiloUSD;
+                const totalVES = totalUSD * exchangeRate;
+
+                const newCreditSale = {
+                    id: Date.now(),
+                    date: new Date().toISOString().slice(0, 10), // Fecha actual
+                    customerName: creditCustomerName.trim(),
+                    weightGrams: parsedCreditCheeseWeightGrams,
+                    pricePerKiloUSD: parsedCheesePricePerKiloUSD, // Guardar el precio por kilo usado en ese momento
+                    totalUSD: totalUSD,
+                    totalVES: totalVES,
+                };
+
+                setCheeseCreditSales(prevSales => [...prevSales, newCreditSale]);
+                showMessage('Venta de queso a crédito registrada.', 'success');
+                setCurrentCheeseCreditPage(1); // Reset to first page after adding
+
+                setCreditCustomerName('');
+                setCreditCheeseWeightGrams('');
+            };
+
 
             // Manejador para eliminar una venta individual
             const handleDeleteSale = (id) => {
@@ -618,6 +685,16 @@
                     setCurrentExpensesPage(prev => prev - 1);
                 }
             };
+            
+            // Manejador para eliminar una venta de queso al fiado individual
+            const handleDeleteCheeseCreditSale = (id) => {
+                setCheeseCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
+                showMessage('Venta a crédito de queso eliminada.', 'success');
+                if (currentCheeseCreditPage > 1 && paginatedCheeseCreditSales.length === 1 && cheeseCreditSales.length === ITEMS_PER_PAGE + 1) {
+                    setCurrentCheeseCreditPage(prev => prev - 1);
+                }
+            };
+
 
             // Manejador para borrar TODO el historial de ventas
             const handleClearSales = () => {
@@ -644,8 +721,22 @@
                     }
                 );
             };
+            
+            // Manejador para borrar TODO el historial de ventas de queso al fiado
+            const handleClearCheeseCreditSales = () => {
+                openConfirmModal(
+                    '¿Estás seguro de que quieres borrar TODO el historial de ventas de queso a crédito? Esta acción no se puede deshacer.',
+                    () => {
+                        setCheeseCreditSales([]);
+                        localStorage.removeItem('cheeseCreditSales');
+                        showMessage('Historial de ventas a crédito de queso borrado.', 'success');
+                        setCurrentCheeseCreditPage(1); // Reset page after clearing
+                    }
+                );
+            };
 
-            // Manejador para calcular el precio de venta por unidad
+
+            // Manejador para calcular el precio de venta por unidad (general)
             const handleCalculateSellingPrice = (e) => {
                 e.preventDefault();
                 const parsedTotalCostPrice = parseFloat(totalCostPrice);
@@ -683,7 +774,7 @@
                 showMessage('Precio de venta por unidad calculado.', 'success');
             };
 
-            // Manejador para calcular el porcentaje de ganancia
+            // Manejador para calcular el porcentaje de ganancia (general)
             const handleCalculateProfitPercentage = (e) => {
                 e.preventDefault();
                 const parsedTotalCostPrice = parseFloat(totalCostPrice);
@@ -751,7 +842,7 @@
                 showMessage('Porcentaje de ganancia calculado.', 'success');
             };
 
-            // Manejador para la calculadora de queso
+            // Manejador para la calculadora de queso (manteniendo la que estaba)
             const handleCalculateCheesePrice = (e) => {
                 e.preventDefault();
                 const parsedCheeseWeightGrams = parseFloat(cheeseWeightGrams);
@@ -799,6 +890,10 @@
 
             const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0); 
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
+            
+            const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
+            const totalCheeseCreditSalesVES = totalCheeseCreditSalesUSD * exchangeRate; // Calcular VES a partir de USD total del fiado
+
 
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
             const netProfitVES = netProfitUSD * exchangeRate;
@@ -823,6 +918,17 @@
                     setExpensesSortDirection('asc');
                 }
                 setCurrentExpensesPage(1); // Reset to first page on sort change
+            };
+            
+            // Lógica de ordenación para ventas de queso al fiado
+            const handleCheeseCreditSort = (column) => {
+                if (cheeseCreditSortColumn === column) {
+                    setCheeseCreditSortDirection(cheeseCreditSortDirection === 'asc' ? 'desc' : 'asc');
+                } else {
+                    setCheeseCreditSortColumn(column);
+                    setCheeseCreditSortDirection('asc');
+                }
+                setCurrentCheeseCreditPage(1); // Reset to first page on sort change
             };
 
             // Memoized sorted sales data (before pagination)
@@ -906,6 +1012,46 @@
                 const endIndex = startIndex + ITEMS_PER_PAGE;
                 return sortedExpenses.slice(startIndex, endIndex);
             }, [sortedExpenses, currentExpensesPage]);
+            
+            // Memoized sorted cheese credit sales data
+            const sortedCheeseCreditSales = useMemo(() => {
+                if (!cheeseCreditSales || cheeseCreditSales.length === 0) return [];
+                const sortableCreditSales = [...cheeseCreditSales];
+
+                sortableCreditSales.sort((a, b) => {
+                    let aValue, bValue;
+
+                    switch (cheeseCreditSortColumn) {
+                        case 'date':
+                            aValue = new Date(a.date);
+                            bValue = new Date(b.date);
+                            break;
+                        case 'customerName':
+                            aValue = a.customerName.toLowerCase();
+                            bValue = b.customerName.toLowerCase();
+                            break;
+                        case 'totalUSD':
+                            aValue = a.totalUSD;
+                            bValue = b.totalUSD;
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (aValue < bValue) return cheeseCreditSortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return cheeseCreditSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                return sortableCreditSales;
+            }, [cheeseCreditSales, cheeseCreditSortColumn, cheeseCreditSortDirection]);
+
+            // Paginación de ventas de queso al fiado
+            const totalCheeseCreditPages = Math.ceil(sortedCheeseCreditSales.length / ITEMS_PER_PAGE);
+            const paginatedCheeseCreditSales = useMemo(() => {
+                const startIndex = (currentCheeseCreditPage - 1) * ITEMS_PER_PAGE;
+                const endIndex = startIndex + ITEMS_PER_PAGE;
+                return sortedCheeseCreditSales.slice(startIndex, endIndex);
+            }, [sortedCheeseCreditSales, currentCheeseCreditPage]);
 
 
             return (
@@ -1220,7 +1366,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    {sales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                    {sortedSales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
                                         <div className="pagination-container">
                                             <button
                                                 onClick={() => setCurrentSalesPage(prev => Math.max(prev - 1, 1))}
@@ -1380,7 +1526,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    {expenses.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                    {sortedExpenses.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
                                         <div className="pagination-container">
                                             <button
                                                 onClick={() => setCurrentExpensesPage(prev => Math.max(prev - 1, 1))}
@@ -1481,233 +1627,147 @@
                                 </div>
                             )}
                         </div>
-
-
-                        {/* Calculadora de Precios de Venta por Unidad (General) */}
+                        
+                        {/* Sección: Venta de Queso a Crédito */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator text-gray-600">
-                                    <rect x="8" y="2" width="8" height="4" rx="1"></rect>
-                                    <path d="M17 17v-2H7v2"></path>
-                                    <path d="M17 10h-2V7H7v3"></path>
-                                    <path d="M14 17h-4V14h4v3Z"></path>
-                                    <rect x="3" y="6" width="18" height="16" rx="2"></rect>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wallet text-gray-600">
+                                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12a2 2 0 0 0 2-2v-3"></path>
+                                    <path d="M2 20v-3h.01"></path>
                                 </svg>
-                                Calculadora de Precios de Venta por Unidad (General)
+                                Venta de Queso a Crédito 🧀
                             </h2>
-
-                            {/* Selector de Modo de Calculadora (mejorado) */}
-                            <div className="flex flex-col sm:flex-row justify-center space-y-5 sm:space-y-0 sm:space-x-7 mb-8">
-                                <button
-                                    onClick={() => {
-                                        setCalculatorMode('calculateSellingPrice');
-                                        setCalculatedCostPerUnit(null);
-                                        setCalculatedSellingPricePerUnit(null);
-                                        setCalculatedProfitPercentageResult(null);
-                                    }}
-                                    className={`calculator-mode-button flex-1 ${calculatorMode === 'calculateSellingPrice' ? 'bg-indigo-400 text-white active' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dollar-sign">
-                                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                    </svg>
-                                    Calcular Precio de Venta
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setCalculatorMode('calculateProfitPercentage');
-                                        setCalculatedCostPerUnit(null);
-                                        setCalculatedSellingPricePerUnit(null);
-                                        setCalculatedProfitPercentageResult(null);
-                                    }}
-                                    className={`calculator-mode-button flex-1 ${calculatorMode === 'calculateProfitPercentage' ? 'bg-emerald-400 text-white active' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-percent">
-                                        <line x1="19" y1="5" x2="5" y2="19"></line>
-                                        <circle cx="6.5" cy="6.5" r="2.5"></circle>
-                                        <circle cx="17.5" cy="17.5" r="2.5"></circle>
-                                    </svg>
-                                    Calcular % de Ganancia
-                                </button>
-                            </div>
-
-                            {calculatorMode === 'calculateSellingPrice' ? (
-                                <form onSubmit={handleCalculateSellingPrice} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                        <label htmlFor="totalCostPrice" className="block text-gray-700 text-base font-bold mb-2">Costo Total del Lote (USD)</label>
-                                        <input
-                                            type="number"
-                                            id="totalCostPrice"
-                                            value={totalCostPrice}
-                                            onChange={(e) => setTotalCostPrice(e.target.value)}
-                                            placeholder="Ej: 100.00"
-                                            min="0.01"
-                                            step="0.01"
-                                            className="w-full"
-                                            required
-                                        />
+                            <p className="text-gray-700 text-base mb-6">
+                                * Se utilizará el "Precio por Kilo (USD)" de la calculadora de queso para el cálculo.
+                            </p>
+                            <form onSubmit={handleAddCheeseCreditSale} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label htmlFor="creditCustomerName" className="block text-gray-700 text-base font-bold mb-2">Nombre del Cliente:</label>
+                                    <input
+                                        type="text"
+                                        id="creditCustomerName"
+                                        value={creditCustomerName}
+                                        onChange={(e) => setCreditCustomerName(e.target.value)}
+                                        placeholder="Ej: Juan Pérez"
+                                        className="w-full"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="creditCheeseWeightGrams" className="block text-gray-700 text-base font-bold mb-2">Peso (Gramos):</label>
+                                    <input
+                                        type="number"
+                                        id="creditCheeseWeightGrams"
+                                        value={creditCheeseWeightGrams}
+                                        onChange={(e) => setCreditCheeseWeightGrams(e.target.value)}
+                                        placeholder="Ej: 655"
+                                        min="0.01"
+                                        step="0.01"
+                                        className="w-full"
+                                        required
+                                    />
+                                </div>
+                                <div className="md:col-span-2 mt-5">
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-blue-400 text-white py-4.5 px-8 rounded-xl hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus mr-3">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        Registrar Crédito
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        {/* Historial de Venta de Queso a Crédito */}
+                        <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
+                            <h2 className="section-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clipboard-list text-gray-600">
+                                    <rect x="9" y="7" width="10" height="4" rx="1"></rect>
+                                    <path d="M15 3h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"></path>
+                                    <path d="M8 7H5"></path>
+                                    <path d="M8 12H5"></path>
+                                    <path d="M12 17H5"></path>
+                                </svg>
+                                Historial de Venta de Queso a Crédito
+                            </h2>
+                            {paginatedCheeseCreditSales.length === 0 ? (
+                                <p className="text-gray-600 text-center py-7 text-lg">No hay registros de crédito de queso aún.</p>
+                            ) : (
+                                <>
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th onClick={() => handleCheeseCreditSort('date')} className="px-6 py-4 text-left">
+                                                        Fecha {cheeseCreditSortColumn === 'date' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleCheeseCreditSort('customerName')} className="px-6 py-4 text-left">
+                                                        Cliente {cheeseCreditSortColumn === 'customerName' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left">Peso (g)</th>
+                                                    <th onClick={() => handleCheeseCreditSort('totalUSD')} className="px-6 py-4 text-left">
+                                                        Monto Adeudado {cheeseCreditSortColumn === 'totalUSD' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedCheeseCreditSales.map((sale) => (
+                                                    <tr key={sale.id}>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.customerName}</td>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.weightGrams} g</td>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
+                                                            ${sale.totalUSD.toFixed(2)} USD
+                                                            <span className="text-sm text-gray-500 block">
+                                                                ≈ Bs. {sale.totalVES.toFixed(2)} VES
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-right text-base font-medium">
+                                                            <button
+                                                                onClick={() => openConfirmModal('¿Estás seguro de que quieres eliminar este registro de fiado?', () => handleDeleteCheeseCreditSale(sale.id))}
+                                                                className="text-rose-600 hover:text-rose-800 ml-4 p-2"
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div>
-                                        <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad Comprada:</label>
-                                        <div className="flex space-x-4">
-                                            <input
-                                                type="number"
-                                                id="purchaseQuantity"
-                                                value={purchaseQuantity}
-                                                onChange={(e) => setPurchaseQuantity(e.target.value)}
-                                                className="flex-grow"
-                                                placeholder="Ej: 10"
-                                                min="0.01"
-                                                step="0.01"
-                                                required
-                                            />
-                                            <select
-                                                value={purchaseMeasurementUnit}
-                                                onChange={(e) => setPurchaseMeasurementUnit(e.target.value)}
-                                                className="w-auto py-3.5"
+                                    {sortedCheeseCreditSales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                        <div className="pagination-container">
+                                            <button
+                                                onClick={() => setCurrentCheeseCreditPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentCheeseCreditPage === 1}
+                                                className="pagination-button"
                                             >
-                                                <option value="unidades">Unidades</option>
-                                                <option value="kg">Kg</option>
-                                                <option value="litros">Litros</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label htmlFor="profitPercentage" className="block text-gray-700 text-base font-bold mb-2">Porcentaje de Ganancia Deseado (%):</label>
-                                        <input
-                                            type="number"
-                                            id="profitPercentage"
-                                            value={profitPercentage}
-                                            onChange={(e) => setProfitPercentage(e.target.value)}
-                                            className="w-full"
-                                            placeholder="Ej: 30"
-                                            min="0"
-                                            step="0.01"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2 mt-5">
-                                        <button
-                                            type="submit"
-                                            className="w-full bg-blue-400 text-white py-4.5 px-8 rounded-xl hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
-                                                <rect x="8" y="2" width="8" height="4" rx="1"></rect>
-                                                <path d="M17 17v-2H7v2"></path>
-                                                <path d="M17 10h-2V7H7v3"></path>
-                                                <path d="M14 17h-4V14h4v3Z"></path>
-                                                <rect x="3" y="6" width="18" height="16" rx="2"></rect>
-                                            </svg>
-                                            Calcular Precio de Venta
-                                        </button>
-                                    </div>
-                                    {(calculatedCostPerUnit !== null && calculatedSellingPricePerUnit !== null) && (
-                                        <div className="md:col-span-2 mt-9 p-7 bg-indigo-50 border border-indigo-200 rounded-2xl shadow-inner text-center">
-                                            <h3 className="text-xl font-semibold text-indigo-800 mb-5">Resultados:</h3>
-                                            <p className="text-gray-700 text-lg">
-                                                Costo por <span className="font-bold text-indigo-700">{purchaseMeasurementUnit}</span>: <span className="font-bold text-indigo-700">${calculatedCostPerUnit.toFixed(2)} USD</span>
-                                                <span className="text-base text-gray-500 ml-4"> (≈ {(calculatedCostPerUnit * exchangeRate).toFixed(2)} VES)</span>
-                                            </p>
-                                            <p className="text-gray-700 text-lg mt-3">
-                                                Precio de Venta Sugerido por <span className="font-bold text-indigo-700">{purchaseMeasurementUnit}</span> (con {profitPercentage}% de ganancia): <span className="font-bold text-xl text-indigo-900">${calculatedSellingPricePerUnit.toFixed(2)} USD</span>
-                                                <span className="text-base text-gray-500 ml-4"> (≈ {(calculatedSellingPricePerUnit * exchangeRate).toFixed(2)} VES)</span>
-                                            </p>
+                                                Anterior
+                                            </button>
+                                            {Array.from({ length: totalCheeseCreditPages }, (_, i) => i + 1).map(page => (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setCurrentCheeseCreditPage(page)}
+                                                    className={`pagination-button ${currentCheeseCreditPage === page ? 'active' : ''}`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setCurrentCheeseCreditPage(prev => Math.min(prev + 1, totalCheeseCreditPages))}
+                                                disabled={currentCheeseCreditPage === totalCheeseCreditPages}
+                                                className="pagination-button"
+                                            >
+                                                Siguiente
+                                            </button>
                                         </div>
                                     )}
-                                </form>
-                            ) : ( /* Modo: Calcular % de Ganancia */
-                                <form onSubmit={handleCalculateProfitPercentage} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                        <label htmlFor="totalCostPrice" className="block text-gray-700 text-base font-bold mb-2">Costo Total del Lote (USD)</label>
-                                        <input
-                                            type="number"
-                                            id="totalCostPrice"
-                                            value={totalCostPrice}
-                                            onChange={(e) => setTotalCostPrice(e.target.value)}
-                                            placeholder="Ej: 100.00"
-                                            min="0.01"
-                                            step="0.01"
-                                            className="w-full"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad de Unidades Compradas</label>
-                                        <div className="flex space-x-4">
-                                            <input
-                                                type="number"
-                                                id="purchaseQuantity"
-                                                value={purchaseQuantity}
-                                                onChange={(e) => setPurchaseQuantity(e.target.value)}
-                                                className="flex-grow"
-                                                placeholder="Ej: 10"
-                                                min="0.01"
-                                                step="0.01"
-                                                required
-                                            />
-                                            <select
-                                                value={purchaseMeasurementUnit}
-                                                onChange={(e) => setPurchaseMeasurementUnit(e.target.value)}
-                                                className="w-auto py-3.5"
-                                            >
-                                                <option value="unidades">Unidades</option>
-                                                <option value="kg">Kg</option>
-                                                <option value="litros">Litros</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-end space-x-4 md:col-span-2">
-                                        <div className="flex-grow">
-                                            <label htmlFor="desiredSellingPriceInput" className="block text-gray-700 text-base font-bold mb-2">Precio de Venta Deseado por Unidad</label>
-                                            <input
-                                                type="number"
-                                                id="desiredSellingPriceInput"
-                                                value={desiredSellingPriceInput}
-                                                onChange={(e) => setDesiredSellingPriceInput(e.target.value)}
-                                                className="w-full"
-                                                placeholder="Ej: 15.00"
-                                                min="0.01"
-                                                step="0.01"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="flex-shrink-0">
-                                            <label htmlFor="desiredSellingPriceCurrency" className="sr-only">Moneda de Venta</label>
-                                            <select
-                                                id="desiredSellingPriceCurrency"
-                                                value={desiredSellingPriceCurrency}
-                                                onChange={(e) => setDesiredSellingPriceCurrency(e.target.value)}
-                                                className="w-full py-3.5"
-                                            >
-                                                <option value="USD">USD</option>
-                                                <option value="VES">VES</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="md:col-span-2 mt-5">
-                                        <button
-                                            type="submit"
-                                            className="w-full bg-emerald-400 text-white py-4.5 px-8 rounded-xl hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
-                                        >
-                                            Calcular % de Ganancia
-                                        </button>
-                                    </div>
-                                    {calculatedProfitPercentageResult !== null && (
-                                        <div className="md:col-span-2 mt-9 p-7 bg-emerald-50 border border-emerald-200 rounded-2xl shadow-inner text-center">
-                                            <h3 className="text-xl font-semibold text-emerald-800 mb-5">Resultados:</h3>
-                                            <p className="text-gray-700 text-lg">
-                                                Costo por <span className="font-bold text-emerald-700">{purchaseMeasurementUnit}</span>: <span className="font-bold text-emerald-700">${(parseFloat(totalCostPrice) / parseFloat(purchaseQuantity)).toFixed(2)} USD</span>
-                                                <span className="text-base text-gray-500 ml-4"> (≈ {((parseFloat(totalCostPrice) / parseFloat(purchaseQuantity)) * exchangeRate).toFixed(2)} VES)</span>
-                                            </p>
-                                            <p className="text-gray-700 text-lg mt-3">
-                                                Con un precio de venta de <span className="font-bold text-emerald-900">
-                                                {desiredSellingPriceCurrency === 'USD' ? '$' : 'Bs. '}
-                                                {parseFloat(desiredSellingPriceInput).toFixed(2)} {desiredSellingPriceCurrency}
-                                                </span> por <span className="font-bold text-emerald-700">{purchaseMeasurementUnit}</span>, el porcentaje de ganancia es: <span className="font-bold text-xl text-emerald-900">{calculatedProfitPercentageResult.toFixed(2)}%</span>
-                                            </p>
-                                        </div>
-                                    )}
-                                </form>
+                                </>
                             )}
                         </div>
                     </div>
