@@ -49,7 +49,7 @@
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #93c5fd; /* Un tono de azul pastel brillante para el foco */
+            border-color: #6366f1; /* Un tono de azul pastel brillante para el foco */
             box-shadow: 0 0 0 5px rgba(147, 197, 253, 0.35); /* Anillo de foco suave y más amplio */
             outline: none;
         }
@@ -64,7 +64,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.65); /* Fondo un poco más oscuro para mejor enfoque */
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo más oscuro para el modal */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -240,6 +240,38 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* Sombra más fuerte para la activa */
             transform: translateY(-2px); /* Ligeramente levantada */
         }
+        /* Estilos para la paginación */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 0.75rem;
+        }
+        .pagination-button {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .pagination-button:hover:not(:disabled) {
+            background-color: #cbd5e1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination-button.active {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -318,6 +350,9 @@
         };
 
 
+        // Constante para definir cuántos elementos por página
+        const ITEMS_PER_PAGE = 10;
+
         // Componente React App completo
         const App = () => {
             // Estado para la tasa de cambio, cargada desde localStorage
@@ -369,6 +404,12 @@
             const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null); 
             const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null); 
 
+            // Estado para la calculadora de Queso
+            const [cheeseWeightGrams, setCheeseWeightGrams] = useState('');
+            const [cheesePricePerKiloUSD, setCheesePricePerKiloUSD] = useState('');
+            const [calculatedCheesePriceUSD, setCalculatedCheesePriceUSD] = useState(null);
+            const [calculatedCheesePriceVES, setCalculatedCheesePriceVES] = useState(null);
+
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
             const [messageType, setMessageType] = useState(''); 
@@ -382,10 +423,15 @@
             // Estados de ordenación para ventas
             const [salesSortColumn, setSalesSortColumn] = useState('date');
             const [salesSortDirection, setSalesSortDirection] = useState('desc'); // 'asc' o 'desc'
+            // Estados de paginación para ventas
+            const [currentSalesPage, setCurrentSalesPage] = useState(1);
 
             // Estados de ordenación para gastos
             const [expensesSortColumn, setExpensesSortColumn] = useState('date');
             const [expensesSortDirection, setExpensesSortDirection] = useState('desc'); // 'asc' o 'desc'
+            // Estados de paginación para gastos
+            const [currentExpensesPage, setCurrentExpensesPage] = useState(1);
+
 
             // Muestra mensajes temporales al usuario
             const showMessage = (msg, type) => {
@@ -496,8 +542,9 @@
                     operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '', 
                 };
                 
-                setSales(prevSales => [...prevSales, newSale]); // No ordenar aquí, la ordenación se hará en sortedSales
+                setSales(prevSales => [...prevSales, newSale]); 
                 showMessage('Venta agregada exitosamente.', 'success');
+                setCurrentSalesPage(1); // Reset to first page after adding new sale
 
                 setSaleDate('');
                 setSaleProduct('');
@@ -542,8 +589,9 @@
                     operationNumber: '', 
                 };
                 
-                setExpenses(prevExpenses => [...prevExpenses, newExpense]); // No ordenar aquí, la ordenación se hará en sortedExpenses
+                setExpenses(prevExpenses => [...prevExpenses, newExpense]); 
                 showMessage('Gasto agregado exitosamente.', 'success');
+                setCurrentExpensesPage(1); // Reset to first page after adding new expense
 
                 setExpenseDate('');
                 setExpenseCategory('');
@@ -555,12 +603,20 @@
             const handleDeleteSale = (id) => {
                 setSales(prevSales => prevSales.filter(sale => sale.id !== id));
                 showMessage('Venta eliminada.', 'success');
+                // Ajustar página si la última fila de la página actual fue eliminada
+                if (currentSalesPage > 1 && paginatedSales.length === 1 && sales.length === ITEMS_PER_PAGE + 1) {
+                    setCurrentSalesPage(prev => prev - 1);
+                }
             };
 
             // Manejador para eliminar un gasto individual
             const handleDeleteExpense = (id) => {
                 setExpenses(prevExpenses => prevExpenses.filter(expense => expense.id !== id));
                 showMessage('Gasto eliminado.', 'success');
+                // Ajustar página si la última fila de la página actual fue eliminada
+                if (currentExpensesPage > 1 && paginatedExpenses.length === 1 && expenses.length === ITEMS_PER_PAGE + 1) {
+                    setCurrentExpensesPage(prev => prev - 1);
+                }
             };
 
             // Manejador para borrar TODO el historial de ventas
@@ -571,6 +627,7 @@
                         setSales([]); 
                         localStorage.removeItem('sales'); 
                         showMessage('Historial de ventas borrado.', 'success');
+                        setCurrentSalesPage(1); // Reset page after clearing
                     }
                 );
             };
@@ -583,6 +640,7 @@
                         setExpenses([]); 
                         localStorage.removeItem('expenses'); 
                         showMessage('Historial de gastos borrado.', 'success');
+                        setCurrentExpensesPage(1); // Reset page after clearing
                     }
                 );
             };
@@ -602,7 +660,7 @@
                     return;
                 }
                 if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
-                    showMessage('Por favor, ingresa una cantidad de compra válida (número entero mayor que cero).', 'error');
+                    showMessage(`Por favor, ingresa una cantidad válida de ${purchaseMeasurementUnit} (número mayor que cero).`, 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
                     setCalculatedProfitPercentageResult(null); 
@@ -640,7 +698,7 @@
                     return;
                 }
                 if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
-                    showMessage('Por favor, ingresa una cantidad de compra válida (número entero mayor que cero).', 'error');
+                    showMessage(`Por favor, ingresa una cantidad válida de ${purchaseMeasurementUnit} (número mayor que cero).`, 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
                     setCalculatedProfitPercentageResult(null);
@@ -693,6 +751,40 @@
                 showMessage('Porcentaje de ganancia calculado.', 'success');
             };
 
+            // Manejador para la calculadora de queso
+            const handleCalculateCheesePrice = (e) => {
+                e.preventDefault();
+                const parsedCheeseWeightGrams = parseFloat(cheeseWeightGrams);
+                const parsedCheesePricePerKiloUSD = parseFloat(cheesePricePerKiloUSD);
+
+                if (isNaN(parsedCheeseWeightGrams) || parsedCheeseWeightGrams <= 0) {
+                    showMessage('Por favor, ingresa un peso válido en gramos (número mayor que cero).', 'error');
+                    setCalculatedCheesePriceUSD(null);
+                    setCalculatedCheesePriceVES(null);
+                    return;
+                }
+                if (isNaN(parsedCheesePricePerKiloUSD) || parsedCheesePricePerKiloUSD <= 0) {
+                    showMessage('Por favor, ingresa un precio válido por kilo en USD (número mayor que cero).', 'error');
+                    setCalculatedCheesePriceUSD(null);
+                    setCalculatedCheesePriceVES(null);
+                    return;
+                }
+                if (exchangeRate <= 0) {
+                    showMessage('La tasa de cambio debe ser mayor que cero para calcular en VES.', 'error');
+                    setCalculatedCheesePriceUSD(null);
+                    setCalculatedCheesePriceVES(null);
+                    return;
+                }
+
+                const totalUSD = (parsedCheeseWeightGrams / 1000) * parsedCheesePricePerKiloUSD;
+                const totalVES = totalUSD * exchangeRate;
+
+                setCalculatedCheesePriceUSD(totalUSD);
+                setCalculatedCheesePriceVES(totalVES);
+                showMessage('Precio del queso calculado.', 'success');
+            };
+
+
             // Función de ayuda para convertir a USD
             const convertToUSD = useCallback((amount, currency) => {
                 if (currency === 'VES') {
@@ -701,23 +793,15 @@
                 return amount;
             }, [exchangeRate]);
 
-            // Función de ayuda para convertir a VES
-            const convertToVES = useCallback((amount, currency) => {
-                if (currency === 'USD') {
-                    return amount * exchangeRate;
-                }
-                return amount;
-            }, [exchangeRate]);
-
             // Cálculos de totales y ganancia/pérdida
             const totalSalesUSD = sales.reduce((acc, sale) => acc + (convertToUSD(sale.amount, sale.currency) * sale.quantity), 0);
-            const totalSalesVES = sales.reduce((acc, sale) => acc + (convertToVES(sale.amount, sale.currency) * sale.quantity), 0);
+            const totalSalesVES = totalSalesUSD * exchangeRate; // Calcular VES a partir de USD total
 
             const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0); 
-            const totalExpensesVES = expenses.reduce((acc, expense) => acc + convertToVES(expense.amount, expense.currency), 0); 
+            const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
 
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
-            const netProfitVES = totalSalesVES - totalExpensesVES;
+            const netProfitVES = netProfitUSD * exchangeRate;
 
             // Lógica de ordenación para ventas
             const handleSalesSort = (column) => {
@@ -727,6 +811,7 @@
                     setSalesSortColumn(column);
                     setSalesSortDirection('asc');
                 }
+                setCurrentSalesPage(1); // Reset to first page on sort change
             };
 
             // Lógica de ordenación para gastos
@@ -737,9 +822,10 @@
                     setExpensesSortColumn(column);
                     setExpensesSortDirection('asc');
                 }
+                setCurrentExpensesPage(1); // Reset to first page on sort change
             };
 
-            // Memoized sorted sales data
+            // Memoized sorted sales data (before pagination)
             const sortedSales = useMemo(() => {
                 if (!sales || sales.length === 0) return [];
                 const sortableSales = [...sales]; // Crear una copia para ordenar
@@ -757,6 +843,7 @@
                             bValue = b.product.toLowerCase();
                             break;
                         case 'totalAmount':
+                            // Convertir ambos a USD para comparar si hay mezcla de monedas originales
                             aValue = parseFloat(convertToUSD(a.amount * a.quantity, a.currency));
                             bValue = parseFloat(convertToUSD(b.amount * b.quantity, b.currency));
                             break;
@@ -771,7 +858,16 @@
                 return sortableSales;
             }, [sales, salesSortColumn, salesSortDirection, convertToUSD]); // Dependencias
 
-            // Memoized sorted expenses data
+            // Paginación de ventas
+            const totalSalesPages = Math.ceil(sortedSales.length / ITEMS_PER_PAGE);
+            const paginatedSales = useMemo(() => {
+                const startIndex = (currentSalesPage - 1) * ITEMS_PER_PAGE;
+                const endIndex = startIndex + ITEMS_PER_PAGE;
+                return sortedSales.slice(startIndex, endIndex);
+            }, [sortedSales, currentSalesPage]);
+
+
+            // Memoized sorted expenses data (before pagination)
             const sortedExpenses = useMemo(() => {
                 if (!expenses || expenses.length === 0) return [];
                 const sortableExpenses = [...expenses]; // Crear una copia para ordenar
@@ -802,6 +898,14 @@
                 });
                 return sortableExpenses;
             }, [expenses, expensesSortColumn, expensesSortDirection, convertToUSD]); // Dependencias
+
+            // Paginación de gastos
+            const totalExpensesPages = Math.ceil(sortedExpenses.length / ITEMS_PER_PAGE);
+            const paginatedExpenses = useMemo(() => {
+                const startIndex = (currentExpensesPage - 1) * ITEMS_PER_PAGE;
+                const endIndex = startIndex + ITEMS_PER_PAGE;
+                return sortedExpenses.slice(startIndex, endIndex);
+            }, [sortedExpenses, currentExpensesPage]);
 
 
             return (
@@ -1066,7 +1170,7 @@
                                 </svg>
                                 Historial de Ventas
                             </h2>
-                            {sortedSales.length === 0 ? (
+                            {paginatedSales.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay ventas registradas aún.</p>
                             ) : (
                                 <>
@@ -1084,13 +1188,13 @@
                                                     <th onClick={() => handleSalesSort('totalAmount')} className="px-6 py-4 text-left">
                                                         Monto Total {salesSortColumn === 'totalAmount' && (salesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th className="px-6 py-4 text-left">Método de Pago</th>
-                                                    <th className="px-6 py-4 text-left">Operación</th>
+                                                    <th className="px-6 py-4 text-left">Método Pago</th>
+                                                    <th className="px-6 py-4 text-left">N° Operación</th>
                                                     <th className="px-6 py-4 text-left">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {sortedSales.map((sale) => (
+                                                {paginatedSales.map((sale) => (
                                                     <tr key={sale.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.product}</td>
@@ -1116,21 +1220,33 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div className="flex justify-end mt-9">
-                                        <button
-                                            onClick={handleClearSales}
-                                            className="px-8 py-4.5 bg-rose-400 text-white rounded-xl hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2 mr-3">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                                            </svg>
-                                            Borrar Historial de Ventas
-                                        </button>
-                                    </div>
+                                    {sales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                        <div className="pagination-container">
+                                            <button
+                                                onClick={() => setCurrentSalesPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentSalesPage === 1}
+                                                className="pagination-button"
+                                            >
+                                                Anterior
+                                            </button>
+                                            {Array.from({ length: totalSalesPages }, (_, i) => i + 1).map(page => (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setCurrentSalesPage(page)}
+                                                    className={`pagination-button ${currentSalesPage === page ? 'active' : ''}`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setCurrentSalesPage(prev => Math.min(prev + 1, totalSalesPages))}
+                                                disabled={currentSalesPage === totalSalesPages}
+                                                className="pagination-button"
+                                            >
+                                                Siguiente
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -1220,7 +1336,7 @@
                                 </svg>
                                 Historial de Gastos
                             </h2>
-                            {sortedExpenses.length === 0 ? (
+                            {paginatedExpenses.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay gastos registrados aún.</p>
                             ) : (
                                 <>
@@ -1241,7 +1357,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {sortedExpenses.map((expense) => (
+                                                {paginatedExpenses.map((expense) => (
                                                     <tr key={expense.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.date}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.category}</td>
@@ -1264,26 +1380,110 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div className="flex justify-end mt-9">
-                                        <button
-                                            onClick={handleClearExpenses}
-                                            className="px-8 py-4.5 bg-rose-400 text-white rounded-xl hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2 mr-3">
-                                                <path d="M3 6h18"></path>
-                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                                                <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                <line x1="14" y1="11" x2="14" y2="17"></line>
-                                            </svg>
-                                            Borrar Historial de Gastos
-                                        </button>
-                                    </div>
+                                    {expenses.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                        <div className="pagination-container">
+                                            <button
+                                                onClick={() => setCurrentExpensesPage(prev => Math.max(prev - 1, 1))}
+                                                disabled={currentExpensesPage === 1}
+                                                className="pagination-button"
+                                            >
+                                                Anterior
+                                            </button>
+                                            {Array.from({ length: totalExpensesPages }, (_, i) => i + 1).map(page => (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setCurrentExpensesPage(page)}
+                                                    className={`pagination-button ${currentExpensesPage === page ? 'active' : ''}`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setCurrentExpensesPage(prev => Math.min(prev + 1, totalExpensesPages))}
+                                                disabled={currentExpensesPage === totalExpensesPages}
+                                                className="pagination-button"
+                                            >
+                                                Siguiente
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
 
-                        {/* Calculadora de Precios de Venta por Unidad */}
+                        {/* Calculadora de Venta de Queso */}
+                        <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
+                            <h2 className="section-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cheese text-gray-600">
+                                    <path d="M12 21s-3-2-6-2-6 2-6 2V3s3 2 6 2 6-2 6-2v18Z"></path>
+                                    <path d="M12 21s3-2 6-2 6 2 6 2V3s-3 2-6 2-6-2-6-2"></path>
+                                    <path d="M15 13V8h-3v5"></path>
+                                    <path d="M12 8v5h3"></path>
+                                    <path d="M9 13V8h3v5"></path>
+                                    <path d="M9 8v5h3"></path>
+                                </svg>
+                                Calculadora de Venta de Queso por Peso
+                            </h2>
+                            <form onSubmit={handleCalculateCheesePrice} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label htmlFor="cheeseWeightGrams" className="block text-gray-700 text-base font-bold mb-2">Peso del Queso (Gramos):</label>
+                                    <input
+                                        type="number"
+                                        id="cheeseWeightGrams"
+                                        value={cheeseWeightGrams}
+                                        onChange={(e) => setCheeseWeightGrams(e.target.value)}
+                                        placeholder="Ej: 860"
+                                        min="0.01"
+                                        step="0.01"
+                                        className="w-full"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="cheesePricePerKiloUSD" className="block text-gray-700 text-base font-bold mb-2">Precio por Kilo (USD):</label>
+                                    <input
+                                        type="number"
+                                        id="cheesePricePerKiloUSD"
+                                        value={cheesePricePerKiloUSD}
+                                        onChange={(e) => setCheesePricePerKiloUSD(e.target.value)}
+                                        placeholder="Ej: 4.00"
+                                        min="0.01"
+                                        step="0.01"
+                                        className="w-full"
+                                        required
+                                    />
+                                </div>
+                                <div className="md:col-span-2 mt-5">
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-green-400 text-white py-4.5 px-8 rounded-xl hover:bg-green-500 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
+                                            <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                            <path d="M17 17v-2H7v2"></path>
+                                            <path d="M17 10h-2V7H7v3"></path>
+                                            <path d="M14 17h-4V14h4v3Z"></path>
+                                            <rect x="3" y="6" width="18" height="16" rx="2"></rect>
+                                        </svg>
+                                        Calcular Precio del Queso
+                                    </button>
+                                </div>
+                            </form>
+                            {(calculatedCheesePriceUSD !== null && calculatedCheesePriceVES !== null) && (
+                                <div className="mt-9 p-7 bg-green-50 border border-green-200 rounded-2xl shadow-inner text-center">
+                                    <h3 className="text-xl font-semibold text-green-800 mb-5">Resultados:</h3>
+                                    <p className="text-gray-700 text-lg">
+                                        Total a Pagar en Divisas: <span className="font-bold text-green-700">${calculatedCheesePriceUSD.toFixed(2)} USD</span>
+                                    </p>
+                                    <p className="text-gray-700 text-lg mt-3">
+                                        Total a Pagar en Bolívares: <span className="font-bold text-xl text-green-900">Bs. {calculatedCheesePriceVES.toFixed(2)} VES</span>
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+
+                        {/* Calculadora de Precios de Venta por Unidad (General) */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator text-gray-600">
@@ -1293,7 +1493,7 @@
                                     <path d="M14 17h-4V14h4v3Z"></path>
                                     <rect x="3" y="6" width="18" height="16" rx="2"></rect>
                                 </svg>
-                                Calculadora de Precios de Venta por Unidad
+                                Calculadora de Precios de Venta por Unidad (General)
                             </h2>
 
                             {/* Selector de Modo de Calculadora (mejorado) */}
@@ -1348,7 +1548,7 @@
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad Comprada</label>
+                                        <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad Comprada:</label>
                                         <div className="flex space-x-4">
                                             <input
                                                 type="number"
