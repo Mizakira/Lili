@@ -416,7 +416,7 @@
             const [calculatedCheesePriceUSD, setCalculatedCheesePriceUSD] = useState(null);
             const [calculatedCheesePriceVES, setCalculatedCheesePriceVES] = useState(null);
             
-            // Nuevos estados para el formulario de venta de queso al fiado
+            // Nuevos estados para el formulario de venta de queso a crédito
             const [creditCustomerName, setCreditCustomerName] = useState('');
             const [creditCheeseWeightGrams, setCreditCheeseWeightGrams] = useState('');
 
@@ -442,10 +442,10 @@
             // Estados de paginación para gastos
             const [currentExpensesPage, setCurrentExpensesPage] = useState(1);
 
-            // Estados de ordenación para ventas de queso al fiado
+            // Estados de ordenación para ventas de queso a crédito
             const [cheeseCreditSortColumn, setCheeseCreditSortColumn] = useState('date');
             const [cheeseCreditSortDirection, setCheeseCreditSortDirection] = useState('desc');
-            // Estados de paginación para ventas de queso al fiado
+            // Estados de paginación para ventas de queso a crédito
             const [currentCheeseCreditPage, setCurrentCheeseCreditPage] = useState(1);
 
 
@@ -505,7 +505,7 @@
                 localStorage.setItem('expenses', JSON.stringify(expenses));
             }, [expenses]);
 
-            // Guarda las ventas de queso al fiado en localStorage cada vez que cambian
+            // Guarda las ventas de queso a crédito en localStorage cada vez que cambian
             useEffect(() => {
                 localStorage.setItem('cheeseCreditSales', JSON.stringify(cheeseCreditSales));
             }, [cheeseCreditSales]);
@@ -621,7 +621,7 @@
                 setExpenseCurrency('USD'); 
             };
             
-            // Manejador para añadir una nueva venta de queso al fiado
+            // Manejador para añadir una nueva venta de queso a crédito
             const handleAddCheeseCreditSale = (e) => {
                 e.preventDefault();
                 const parsedCreditCheeseWeightGrams = parseFloat(creditCheeseWeightGrams);
@@ -636,7 +636,7 @@
                     return;
                 }
                 if (isNaN(parsedCheesePricePerKiloUSD) || parsedCheesePricePerKiloUSD <= 0) {
-                    showMessage('Por favor, configura un precio válido por kilo en la "Calculadora de Venta de Queso por Peso" antes de registrar fiado.', 'error');
+                    showMessage('Por favor, configura un precio válido por kilo en la "Calculadora de Venta de Queso por Peso" antes de registrar el crédito.', 'error');
                     return;
                 }
                 if (exchangeRate <= 0) {
@@ -645,7 +645,7 @@
                 }
 
                 const totalUSD = (parsedCreditCheeseWeightGrams / 1000) * parsedCheesePricePerKiloUSD;
-                const totalVES = totalUSD * exchangeRate;
+                // No se guarda totalVES, se calcula dinámicamente al mostrar
 
                 const newCreditSale = {
                     id: Date.now(),
@@ -654,7 +654,7 @@
                     weightGrams: parsedCreditCheeseWeightGrams,
                     pricePerKiloUSD: parsedCheesePricePerKiloUSD, // Guardar el precio por kilo usado en ese momento
                     totalUSD: totalUSD,
-                    totalVES: totalVES,
+                    // totalVES ya NO se guarda aquí
                 };
 
                 setCheeseCreditSales(prevSales => [...prevSales, newCreditSale]);
@@ -686,7 +686,7 @@
                 }
             };
             
-            // Manejador para eliminar una venta de queso al fiado individual
+            // Manejador para eliminar una venta de queso a crédito individual
             const handleDeleteCheeseCreditSale = (id) => {
                 setCheeseCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
                 showMessage('Venta a crédito de queso eliminada.', 'success');
@@ -722,7 +722,7 @@
                 );
             };
             
-            // Manejador para borrar TODO el historial de ventas de queso al fiado
+            // Manejador para borrar TODO el historial de ventas de queso a crédito
             const handleClearCheeseCreditSales = () => {
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de ventas de queso a crédito? Esta acción no se puede deshacer.',
@@ -892,7 +892,7 @@
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
             
             const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
-            const totalCheeseCreditSalesVES = totalCheeseCreditSalesUSD * exchangeRate; // Calcular VES a partir de USD total del fiado
+            // totalCheeseCreditSalesVES se calcula dinámicamente en el renderizado ahora
 
 
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
@@ -920,7 +920,7 @@
                 setCurrentExpensesPage(1); // Reset to first page on sort change
             };
             
-            // Lógica de ordenación para ventas de queso al fiado
+            // Lógica de ordenación para ventas de queso a crédito
             const handleCheeseCreditSort = (column) => {
                 if (cheeseCreditSortColumn === column) {
                     setCheeseCreditSortDirection(cheeseCreditSortDirection === 'asc' ? 'desc' : 'asc');
@@ -1045,7 +1045,7 @@
                 return sortableCreditSales;
             }, [cheeseCreditSales, cheeseCreditSortColumn, cheeseCreditSortDirection]);
 
-            // Paginación de ventas de queso al fiado
+            // Paginación de ventas de queso a crédito
             const totalCheeseCreditPages = Math.ceil(sortedCheeseCreditSales.length / ITEMS_PER_PAGE);
             const paginatedCheeseCreditSales = useMemo(() => {
                 const startIndex = (currentCheeseCreditPage - 1) * ITEMS_PER_PAGE;
@@ -1724,7 +1724,7 @@
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
                                                             ${sale.totalUSD.toFixed(2)} USD
                                                             <span className="text-sm text-gray-500 block">
-                                                                ≈ Bs. {sale.totalVES.toFixed(2)} VES
+                                                                ≈ Bs. {(sale.totalUSD * exchangeRate).toFixed(2)} VES
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-right text-base font-medium">
