@@ -373,7 +373,7 @@
                 return savedExpenses ? JSON.parse(savedExpenses) : [];
             });
             
-            // Estado para ventas de queso al fiado, cargados desde localStorage
+            // Estado para ventas de queso a crédito, cargados desde localStorage
             const [cheeseCreditSales, setCheeseCreditSales] = useState(() => {
                 const savedCreditSales = localStorage.getItem('cheeseCreditSales');
                 return savedCreditSales ? JSON.parse(savedCreditSales) : [];
@@ -382,11 +382,14 @@
             // Estados del formulario de ventas
             const [saleDate, setSaleDate] = useState('');
             const [saleProduct, setSaleProduct] = useState('');
-            const [saleQuantity, setSaleQuantity] = useState(''); 
+            // Ahora la cantidad puede ser unidades o gramos (dependiendo de saleTypeForSale)
+            const [saleQuantity, setSaleQuantity] = useState('');   
             const [saleAmount, setSaleAmount] = useState('');   
             const [saleCurrency, setSaleCurrency] = useState('USD');
             const [salePaymentMethod, setSalePaymentMethod] = useState(''); 
             const [saleOperationNumber, setSaleOperationNumber] = useState(''); 
+            // Nuevo estado para el tipo de venta (unidades o peso)
+            const [saleTypeForSale, setSaleTypeForSale] = useState('unidades'); 
 
             // Estados del formulario de gastos
             const [expenseDate, setExpenseDate] = useState('');
@@ -515,33 +518,13 @@
             const handleAddSale = (e) => {
                 e.preventDefault(); 
 
-                const quantityVal = saleQuantity.trim();
-                const amountVal = saleAmount.trim();
-
+                // Common validation
                 if (!saleDate) {
                     showMessage('La fecha de venta no puede estar vacía.', 'error');
                     return;
                 }
                 if (!saleProduct.trim()) {
                     showMessage('El nombre del producto no puede estar vacío.', 'error');
-                    return;
-                }
-                if (!quantityVal) {
-                    showMessage('La cantidad no puede estar vacía.', 'error');
-                    return;
-                }
-                const parsedQuantity = parseFloat(quantityVal);
-                if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-                    showMessage('La cantidad debe ser un número válido mayor que cero.', 'error');
-                    return;
-                }
-                if (!amountVal) {
-                    showMessage('El monto unitario no puede estar vacío.', 'error');
-                    return;
-                }
-                const parsedAmount = parseFloat(amountVal);
-                if (isNaN(parsedAmount) || parsedAmount <= 0) {
-                    showMessage('El monto unitario debe ser un número válido mayor que cero.', 'error');
                     return;
                 }
                 if (!salePaymentMethod) {
@@ -553,13 +536,67 @@
                     return;
                 }
 
+                let finalQuantity, finalAmount, storedProductLabel;
+                let finalUnitType; // 'unidades' o 'peso_g' (peso en gramos)
+
+                if (saleTypeForSale === 'unidades') {
+                    const quantityVal = saleQuantity.trim();
+                    const amountVal = saleAmount.trim();
+
+                    if (!quantityVal) {
+                        showMessage('La cantidad no puede estar vacía.', 'error');
+                        return;
+                    }
+                    finalQuantity = parseFloat(quantityVal);
+                    if (isNaN(finalQuantity) || finalQuantity <= 0) {
+                        showMessage('La cantidad debe ser un número válido mayor que cero.', 'error');
+                        return;
+                    }
+                    if (!amountVal) {
+                        showMessage('El monto unitario no puede estar vacío.', 'error');
+                        return;
+                    }
+                    finalAmount = parseFloat(amountVal); // Monto por unidad (USD o VES)
+                    if (isNaN(finalAmount) || finalAmount <= 0) {
+                        showMessage('El monto unitario debe ser un número válido mayor que cero.', 'error');
+                        return;
+                    }
+                    finalUnitType = 'unidades';
+                    storedProductLabel = saleProduct.trim();
+                } else { // saleTypeForSale === 'peso'
+                    const quantityVal = saleQuantity.trim(); // Ahora 'saleQuantity' se usa para el peso en gramos
+                    const amountVal = saleAmount.trim(); // Ahora 'saleAmount' se usa para el precio por kilo USD
+
+                    if (!quantityVal) {
+                        showMessage('El peso en gramos no puede estar vacío.', 'error');
+                        return;
+                    }
+                    finalQuantity = parseFloat(quantityVal); // Peso en gramos
+                    if (isNaN(finalQuantity) || finalQuantity <= 0) {
+                        showMessage('El peso debe ser un número válido mayor que cero.', 'error');
+                        return;
+                    }
+                    if (!amountVal) {
+                        showMessage('El precio por kilo (USD) no puede estar vacío.', 'error');
+                        return;
+                    }
+                    finalAmount = parseFloat(amountVal); // Precio por kilo USD
+                    if (isNaN(finalAmount) || finalAmount <= 0) {
+                        showMessage('El precio por kilo (USD) debe ser un número válido mayor que cero.', 'error');
+                        return;
+                    }
+                    finalUnitType = 'peso_g'; // Indicar que la cantidad es en gramos
+                    storedProductLabel = `${saleProduct.trim()} (Peso)`; // Adaptar el nombre del producto
+                }
+
                 const newSale = {
                     id: Date.now(), 
                     date: saleDate,
-                    product: saleProduct.trim(),
-                    quantity: parsedQuantity,
-                    amount: parsedAmount,
-                    currency: saleCurrency,
+                    product: storedProductLabel,
+                    quantity: finalQuantity, // Cantidad en unidades O en gramos
+                    amount: finalAmount, // Monto unitario O precio por kilo USD
+                    currency: saleTypeForSale === 'unidades' ? saleCurrency : 'USD', // La moneda del monto original
+                    unitType: finalUnitType, // 'unidades' o 'peso_g'
                     paymentMethod: salePaymentMethod, 
                     operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '', 
                 };
@@ -568,6 +605,7 @@
                 showMessage('Venta agregada exitosamente.', 'success');
                 setCurrentSalesPage(1); // Reset to first page after adding new sale
 
+                // Clear form fields
                 setSaleDate('');
                 setSaleProduct('');
                 setSaleQuantity('');
@@ -575,6 +613,7 @@
                 setSaleCurrency('USD');
                 setSalePaymentMethod(''); 
                 setSaleOperationNumber(''); 
+                setSaleTypeForSale('unidades'); // Reset to default
             };
 
             // Manejador para añadir un nuevo gasto
@@ -645,7 +684,7 @@
                 }
 
                 const totalUSD = (parsedCreditCheeseWeightGrams / 1000) * parsedCheesePricePerKiloUSD;
-                // No se guarda totalVES, se calcula dinámicamente al mostrar
+                // totalVES ya NO se guarda, se calcula dinámicamente
 
                 const newCreditSale = {
                     id: Date.now(),
@@ -654,7 +693,6 @@
                     weightGrams: parsedCreditCheeseWeightGrams,
                     pricePerKiloUSD: parsedCheesePricePerKiloUSD, // Guardar el precio por kilo usado en ese momento
                     totalUSD: totalUSD,
-                    // totalVES ya NO se guarda aquí
                 };
 
                 setCheeseCreditSales(prevSales => [...prevSales, newCreditSale]);
@@ -885,14 +923,14 @@
             }, [exchangeRate]);
 
             // Cálculos de totales y ganancia/pérdida
-            const totalSalesUSD = sales.reduce((acc, sale) => acc + (convertToUSD(sale.amount, sale.currency) * sale.quantity), 0);
+            const totalSalesUSD = sales.reduce((acc, sale) => acc + (convertToUSD(sale.amount * (sale.unitType === 'peso_g' ? sale.quantity / 1000 : sale.quantity), sale.currency)), 0);
             const totalSalesVES = totalSalesUSD * exchangeRate; // Calcular VES a partir de USD total
 
             const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0); 
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
             
             const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
-            // totalCheeseCreditSalesVES se calcula dinámicamente en el renderizado ahora
+            const totalCheeseCreditSalesVES = totalCheeseCreditSalesUSD * exchangeRate; // Calcular VES a partir de USD total del fiado
 
 
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
@@ -949,9 +987,12 @@
                             bValue = b.product.toLowerCase();
                             break;
                         case 'totalAmount':
-                            // Convertir ambos a USD para comparar si hay mezcla de monedas originales
-                            aValue = parseFloat(convertToUSD(a.amount * a.quantity, a.currency));
-                            bValue = parseFloat(convertToUSD(b.amount * b.quantity, b.currency));
+                            // Importante: Asegurarse de que el cálculo de totalAmount sea consistente
+                            // La venta puede ser por unidades o por peso
+                            const aTotalUSD = a.unitType === 'peso_g' ? (a.quantity / 1000) * a.amount : a.quantity * a.amount;
+                            const bTotalUSD = b.unitType === 'peso_g' ? (b.quantity / 1000) * b.amount : b.quantity * b.amount;
+                            aValue = parseFloat(convertToUSD(aTotalUSD, 'USD')); // Convertir a USD para comparar
+                            bValue = parseFloat(convertToUSD(bTotalUSD, 'USD')); // Convertir a USD para comparar
                             break;
                         default:
                             return 0;
@@ -1189,6 +1230,42 @@
                                 Registrar Nueva Venta
                             </h2>
                             <form onSubmit={handleAddSale} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="md:col-span-2">
+                                    <label className="block text-gray-700 text-base font-bold mb-2">Tipo de Venta:</label>
+                                    <div className="flex space-x-4">
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio text-blue-600"
+                                                name="saleType"
+                                                value="unidades"
+                                                checked={saleTypeForSale === 'unidades'}
+                                                onChange={() => {
+                                                    setSaleTypeForSale('unidades');
+                                                    setSaleQuantity(''); // Clear old value
+                                                    setSaleAmount(''); // Clear old value
+                                                }}
+                                            />
+                                            <span className="ml-2 text-gray-700 text-lg">Por Unidades</span>
+                                        </label>
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio text-blue-600"
+                                                name="saleType"
+                                                value="peso"
+                                                checked={saleTypeForSale === 'peso'}
+                                                onChange={() => {
+                                                    setSaleTypeForSale('peso');
+                                                    setSaleQuantity(''); // Clear old value
+                                                    setSaleAmount(''); // Clear old value
+                                                }}
+                                            />
+                                            <span className="ml-2 text-gray-700 text-lg">Por Peso (Gramos/Kilo)</span>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label htmlFor="saleDate" className="block text-gray-700 text-base font-bold mb-2">Fecha</label>
                                     <input
@@ -1212,48 +1289,85 @@
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label htmlFor="saleQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad</label>
-                                    <input
-                                        type="number"
-                                        id="saleQuantity"
-                                        value={saleQuantity}
-                                        onChange={(e) => setSaleQuantity(e.target.value)}
-                                        className="w-full"
-                                        placeholder="Cantidad"
-                                        min="0.01"
-                                        step="0.01"
-                                        required
-                                    />
-                                </div>
-                                <div className="flex items-end space-x-4">
-                                    <div className="flex-grow">
-                                        <label htmlFor="saleAmount" className="block text-gray-700 text-base font-bold mb-2">Monto Unitario</label>
-                                        <input
-                                            type="number"
-                                            id="saleAmount"
-                                            value={saleAmount}
-                                            onChange={(e) => setSaleAmount(e.target.value)}
-                                            className="w-full"
-                                            placeholder="Monto por unidad"
-                                            min="0.01"
-                                            step="0.01"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="flex-shrink-0">
-                                        <label htmlFor="saleCurrency" className="sr-only">Moneda</label>
-                                        <select
-                                            id="saleCurrency"
-                                            value={saleCurrency}
-                                            onChange={(e) => setSaleCurrency(e.target.value)}
-                                            className="w-full py-3.5"
-                                        >
-                                            <option value="USD">USD</option>
-                                            <option value="VES">VES</option>
-                                        </select>
-                                    </div>
-                                </div>
+
+                                {saleTypeForSale === 'unidades' ? (
+                                    <>
+                                        <div>
+                                            <label htmlFor="saleQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad</label>
+                                            <input
+                                                type="number"
+                                                id="saleQuantity"
+                                                value={saleQuantity}
+                                                onChange={(e) => setSaleQuantity(e.target.value)}
+                                                className="w-full"
+                                                placeholder="Cantidad de unidades"
+                                                min="0.01"
+                                                step="0.01"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex items-end space-x-4">
+                                            <div className="flex-grow">
+                                                <label htmlFor="saleAmount" className="block text-gray-700 text-base font-bold mb-2">Monto Unitario</label>
+                                                <input
+                                                    type="number"
+                                                    id="saleAmount"
+                                                    value={saleAmount}
+                                                    onChange={(e) => setSaleAmount(e.target.value)}
+                                                    className="w-full"
+                                                    placeholder="Monto por unidad"
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="flex-shrink-0">
+                                                <label htmlFor="saleCurrency" className="sr-only">Moneda</label>
+                                                <select
+                                                    id="saleCurrency"
+                                                    value={saleCurrency}
+                                                    onChange={(e) => setSaleCurrency(e.target.value)}
+                                                    className="w-full py-3.5"
+                                                >
+                                                    <option value="USD">USD</option>
+                                                    <option value="VES">VES</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : ( // saleTypeForSale === 'peso'
+                                    <>
+                                        <div>
+                                            <label htmlFor="saleQuantity" className="block text-gray-700 text-base font-bold mb-2">Peso (Gramos)</label>
+                                            <input
+                                                type="number"
+                                                id="saleQuantity" // Reutilizar saleQuantity para peso
+                                                value={saleQuantity}
+                                                onChange={(e) => setSaleQuantity(e.target.value)}
+                                                className="w-full"
+                                                placeholder="Peso en gramos (Ej: 860)"
+                                                min="0.01"
+                                                step="0.01"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="saleAmount" className="block text-gray-700 text-base font-bold mb-2">Precio por Kilo (USD)</label>
+                                            <input
+                                                type="number"
+                                                id="saleAmount" // Reutilizar saleAmount para precio por kilo
+                                                value={saleAmount}
+                                                onChange={(e) => setSaleAmount(e.target.value)}
+                                                className="w-full"
+                                                placeholder="Precio por Kilo (Ej: 4.00)"
+                                                min="0.01"
+                                                step="0.01"
+                                                required
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
                                 <div>
                                     <label htmlFor="salePaymentMethod" className="block text-gray-700 text-base font-bold mb-2">Método de Pago</label>
                                     <select
@@ -1344,11 +1458,16 @@
                                                     <tr key={sale.id}>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.product}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.quantity}</td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
-                                                            {sale.currency === 'USD' ? '$' : ''}{(sale.amount * sale.quantity).toFixed(2)} {sale.currency}
+                                                            {sale.quantity} {sale.unitType === 'peso_g' ? 'g' : ''}
+                                                        </td>
+                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
+                                                            {sale.unitType === 'peso_g' ? 
+                                                                `$${(sale.quantity / 1000 * sale.amount).toFixed(2)} USD` : 
+                                                                `${sale.amount.toFixed(2)} ${sale.currency}`
+                                                            }
                                                             <span className="text-sm text-gray-500 block">
-                                                                {sale.currency === 'USD' ? ` (≈ ${(sale.amount * sale.quantity * exchangeRate).toFixed(2)} VES)` : ` (≈ ${(sale.amount * sale.quantity / exchangeRate).toFixed(2)} USD)`}
+                                                                {sale.currency === 'USD' ? ` (≈ ${(sale.unitType === 'peso_g' ? (sale.quantity / 1000 * sale.amount * exchangeRate) : (sale.quantity * sale.amount * exchangeRate)).toFixed(2)} VES)` : ` (≈ ${(sale.unitType === 'peso_g' ? (sale.quantity / 1000 * sale.amount / exchangeRate) : (sale.quantity * sale.amount / exchangeRate)).toFixed(2)} USD)`}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.paymentMethod || 'N/A'}</td>
