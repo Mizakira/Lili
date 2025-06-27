@@ -141,8 +141,13 @@
             border-bottom: 2px solid #e0e7ee; /* Línea más definida */
             display: flex; /* Para alinear icono */
             align-items: center; /* Para alinear icono */
+            justify-content: space-between; /* To space out title and button */
         }
-        .section-heading svg {
+        .section-heading-title {
+            display: flex;
+            align-items: center;
+        }
+        .section-heading-title svg {
             margin-right: 1.2rem; /* Espacio entre icono y texto */
             stroke-width: 3; /* Grosor de línea para los iconos de sección */
         }
@@ -177,16 +182,16 @@
         table {
             width: 100%;
             border-collapse: separate; /* Permite border-spacing */
-            border-spacing: 0 0.75rem; /* Más espaciado entre filas para un look más ligero */
+            border-spacing: 0 0.5rem; /* REDUCIDO: Menos espaciado entre filas */
         }
         th, td {
-            padding: 1.2rem 1.5rem; /* Más padding para celdas */
+            padding: 0.9rem 1.2rem; /* REDUCIDO: Menos padding para celdas */
             text-align: left;
             border-bottom: none; /* Eliminar borde inferior de celdas para un look flotante */
         }
         thead th {
             background-color: #e6f0fa; /* Fondo muy claro azulado para encabezados */
-            font-size: 0.9rem; /* Tamaño de fuente ligeramente más grande */
+            font-size: 0.8rem; /* REDUCIDO: Tamaño de fuente más pequeño */
             font-weight: 700;
             color: #5a67d8; /* Un azul más vibrante para los encabezados */
             text-transform: uppercase;
@@ -202,8 +207,10 @@
             background-color: #ffffff; /* Fondo blanco para las filas */
             border-radius: 1rem; /* Bordes redondeados para las filas */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06); /* Sombra sutil para un efecto "flotante" */
-            margin-bottom: 0.75rem; /* Asegurar espacio entre filas */
             transition: all 0.25s ease-in-out;
+        }
+         tbody td {
+            font-size: 0.9rem; /* REDUCIDO: Tamaño de fuente en celdas del cuerpo */
         }
         tbody tr:hover {
             background-color: #f7f9fc; /* Hover más claro y sutil */
@@ -406,8 +413,8 @@
             // Estados del formulario de ventas para múltiples productos
             const [saleDate, setSaleDate] = useState('');
             const [saleItems, setSaleItems] = useState([{ product: '', quantity: '', amount: '', currency: 'USD', unitType: 'unidades' }]);
-            const [salePaymentMethod, setSalePaymentMethod] = useState('');    
-            const [saleOperationNumber, setSaleOperationNumber] = useState('');    
+            const [salePaymentMethod, setSalePaymentMethod] = useState('');     
+            const [saleOperationNumber, setSaleOperationNumber] = useState('');     
             // Nuevo estado para el tipo de venta (unidades o peso) - this now applies per item
             // Retaining saleTypeForSale to control the default type for new items
             const [saleTypeForSale, setSaleTypeForSale] = useState('unidades');
@@ -415,23 +422,23 @@
             // Estados del formulario de gastos
             const [expenseDate, setExpenseDate] = useState('');
             const [expenseCategory, setExpenseCategory] = useState('');
-            const [expenseAmount, setExpenseAmount] = useState('');    
-            const [expenseCurrency, setExpenseCurrency] = useState('USD');    
+            const [expenseAmount, setExpenseAmount] = useState('');     
+            const [expenseCurrency, setExpenseCurrency] = useState('USD');     
             // Removed expensePaymentMethod and expenseOperationNumber from state as they are not used in expense form
 
             // ESTADOS para la Calculadora de Precios de Venta por Unidad (General)
-            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice');    
-            const [totalCostPrice, setTotalCostPrice] = useState('');    
-            const [purchaseQuantity, setPurchaseQuantity] = useState('');    
-            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades');    
-            const [profitPercentage, setProfitPercentage] = useState('');    
+            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice');     
+            const [totalCostPrice, setTotalCostPrice] = useState('');     
+            const [purchaseQuantity, setPurchaseQuantity] = useState('');     
+            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades');     
+            const [profitPercentage, setProfitPercentage] = useState('');     
             
-            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState('');    
-            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD');    
+            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState('');     
+            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD');     
             
-            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null);    
-            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null);    
-            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null);    
+            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null);     
+            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null);     
+            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null);     
 
             // Estado para la calculadora de Queso
             const [cheeseWeightGrams, setCheeseWeightGrams] = useState('');
@@ -445,13 +452,13 @@
 
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
-            const [messageType, setMessageType] = useState('');    
-            const [showMessageBox, setShowMessageBox] = useState(false);    
+            const [messageType, setMessageType] = useState('');     
+            const [showMessageBox, setShowMessageBox] = useState(false);     
 
             // Nuevos estados para el modal de confirmación
             const [showConfirmModal, setShowConfirmModal] = useState(false);
             const [modalMessage, setModalMessage] = useState('');
-            const [onConfirmAction, setOnConfirmAction] = useState(null);    
+            const [onConfirmAction, setOnConfirmAction] = useState(null);     
 
             // Estados de ordenación para ventas
             const [salesSortColumn, setSalesSortColumn] = useState('date');
@@ -476,12 +483,12 @@
             const showMessage = (msg, type) => {
                 setMessage(msg);
                 setMessageType(type);
-                setShowMessageBox(true);    
+                setShowMessageBox(true);     
                 setTimeout(() => {
-                    setShowMessageBox(false);    
-                    setMessage('');    
+                    setShowMessageBox(false);     
+                    setMessage('');     
                     setMessageType('');
-                }, 5000);    
+                }, 5000);     
             };
 
             // Función para cerrar el mensaje manualmente
@@ -494,23 +501,23 @@
             // Función para abrir el modal de confirmación
             const openConfirmModal = (message, callback) => {
                 setModalMessage(message);
-                setOnConfirmAction(() => callback);    
+                setOnConfirmAction(() => callback);     
                 setShowConfirmModal(true);
             };
 
             // Manejador para confirmar la acción en el modal
             const handleConfirm = () => {
                 if (onConfirmAction) {
-                    onConfirmAction();    
+                    onConfirmAction();     
                 }
-                setShowConfirmModal(false);    
-                setOnConfirmAction(null);    
+                setShowConfirmModal(false);     
+                setOnConfirmAction(null);     
             };
 
             // Manejador para cancelar la acción en el modal
             const handleCancel = () => {
-                setShowConfirmModal(false);    
-                setOnConfirmAction(null);    
+                setShowConfirmModal(false);     
+                setOnConfirmAction(null);     
             };
 
             // Guarda la tasa de cambio en localStorage cada vez que cambia
@@ -561,7 +568,7 @@
 
             // Manejador para añadir una nueva venta
             const handleAddSale = (e) => {
-                e.preventDefault();    
+                e.preventDefault();     
 
                 // Validate overall sale properties first
                 if (!saleDate) {
@@ -628,28 +635,28 @@
                 }
 
                 const newSale = {
-                    id: Date.now(),    
+                    id: Date.now(),     
                     date: saleDate,
-                    paymentMethod: salePaymentMethod,    
-                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '',    
+                    paymentMethod: salePaymentMethod,     
+                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '',     
                     items: validatedItems, // Store the array of validated items
                 };
                 
-                setSales(prevSales => [...prevSales, newSale]);    
+                setSales(prevSales => [...prevSales, newSale]);     
                 showMessage('Venta agregada exitosamente.', 'success');
                 setCurrentSalesPage(1); // Reset to first page after adding new sale
 
                 // Clear form fields
                 setSaleDate('');
-                setSalePaymentMethod('');    
-                setSaleOperationNumber('');    
+                setSalePaymentMethod('');     
+                setSaleOperationNumber('');     
                 setSaleItems([{ product: '', quantity: '', amount: '', currency: 'USD', unitType: 'unidades' }]); // Reset to one empty item
                 setSaleTypeForSale('unidades'); // Reset sale type radio to default
             };
 
             // Manejador para añadir un nuevo gasto
             const handleAddExpense = (e) => {
-                e.preventDefault();    
+                e.preventDefault();     
 
                 const expenseAmountVal = expenseAmount.trim();
 
@@ -672,21 +679,21 @@
                 }
                 
                 const newExpense = {
-                    id: Date.now(),    
+                    id: Date.now(),     
                     date: expenseDate,
                     category: expenseCategory.trim(),
                     amount: parsedExpenseAmount,
                     currency: expenseCurrency, 
                 };
                 
-                setExpenses(prevExpenses => [...prevExpenses, newExpense]);    
+                setExpenses(prevExpenses => [...prevExpenses, newExpense]);     
                 showMessage('Gasto agregado exitosamente.', 'success');
                 setCurrentExpensesPage(1); // Reset to first page after adding new expense
 
                 setExpenseDate('');
                 setExpenseCategory('');
                 setExpenseAmount('');
-                setExpenseCurrency('USD');    
+                setExpenseCurrency('USD');     
             };
             
             // Manejador para añadir una nueva venta de queso a crédito
@@ -736,9 +743,9 @@
             const handleDeleteSale = (id) => {
                 setSales(prevSales => prevSales.filter(sale => sale.id !== id));
                 showMessage('Venta eliminada.', 'success');
-                // Ajustar página si la última fila de la página actual fue eliminada
-                if (currentSalesPage > 1 && paginatedSales.length === 1 && sales.length === ITEMS_PER_PAGE + 1) {
-                    setCurrentSalesPage(prev => prev - 1);
+                // Adjust current page if the last item on it was deleted
+                if (paginatedSales.length === 1 && currentSalesPage > 1) {
+                    setCurrentSalesPage(currentSalesPage - 1);
                 }
             };
 
@@ -746,9 +753,9 @@
             const handleDeleteExpense = (id) => {
                 setExpenses(prevExpenses => prevExpenses.filter(expense => expense.id !== id));
                 showMessage('Gasto eliminado.', 'success');
-                // Ajustar página si la última fila de la página actual fue eliminada
-                if (currentExpensesPage > 1 && paginatedExpenses.length === 1 && expenses.length === ITEMS_PER_PAGE + 1) {
-                    setCurrentExpensesPage(prev => prev - 1);
+                 // Adjust current page if the last item on it was deleted
+                if (paginatedExpenses.length === 1 && currentExpensesPage > 1) {
+                    setCurrentExpensesPage(currentExpensesPage - 1);
                 }
             };
             
@@ -756,8 +763,8 @@
             const handleDeleteCheeseCreditSale = (id) => {
                 setCheeseCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
                 showMessage('Venta a crédito de queso eliminada.', 'success');
-                if (currentCheeseCreditPage > 1 && paginatedCheeseCreditSales.length === 1 && cheeseCreditSales.length === ITEMS_PER_PAGE + 1) {
-                    setCurrentCheeseCreditPage(prev => prev - 1);
+                if (paginatedCheeseCreditSales.length === 1 && currentCheeseCreditPage > 1) {
+                    setCurrentCheeseCreditPage(currentCheeseCreditPage - 1);
                 }
             };
 
@@ -767,8 +774,8 @@
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de ventas? Esta acción no se puede deshacer.',
                     () => {
-                        setSales([]);    
-                        localStorage.removeItem('sales');    
+                        setSales([]);     
+                        localStorage.removeItem('sales');     
                         showMessage('Historial de ventas borrado.', 'success');
                         setCurrentSalesPage(1); // Reset page after clearing
                     }
@@ -780,8 +787,8 @@
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de gastos? Esta acción no se puede deshacer.',
                     () => {
-                        setExpenses([]);    
-                        localStorage.removeItem('expenses');    
+                        setExpenses([]);     
+                        localStorage.removeItem('expenses');     
                         showMessage('Historial de gastos borrado.', 'success');
                         setCurrentExpensesPage(1); // Reset page after clearing
                     }
@@ -813,21 +820,21 @@
                     showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null);    
+                    setCalculatedProfitPercentageResult(null);     
                     return;
                 }
                 if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
                     showMessage(`Por favor, ingresa una cantidad válida de ${purchaseMeasurementUnit} (número mayor que cero).`, 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null);    
+                    setCalculatedProfitPercentageResult(null);     
                     return;
                 }
-                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) {    
+                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) {     
                     showMessage('Por favor, ingresa un porcentaje de ganancia válido (número mayor o igual a cero).', 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null);    
+                    setCalculatedProfitPercentageResult(null);     
                     return;
                 }
 
@@ -836,7 +843,7 @@
                 
                 setCalculatedCostPerUnit(costPerUnit);
                 setCalculatedSellingPricePerUnit(sellingPricePerUnit);
-                setCalculatedProfitPercentageResult(null);    
+                setCalculatedProfitPercentageResult(null);     
                 showMessage('Precio de venta por unidad calculado.', 'success');
 
                 // Clear form fields after calculation
@@ -973,7 +980,7 @@
             }, 0);
             const totalSalesVES = totalSalesUSD * exchangeRate; // Calcular VES a partir de USD total
 
-            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0);    
+            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0);     
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
             
             const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
@@ -1036,18 +1043,17 @@
                             break;
                         case 'totalAmount':
                             // Calculate total amount for sale a
-                            let aTotal = 0;
-                            (a.items || []).forEach(item => { // Added defensive check
+                            let aTotal = (a.items || []).reduce((acc, item) => {
                                 const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
-                                aTotal += convertToUSD(effectiveAmount, item.currency);
-                            });
+                                return acc + convertToUSD(effectiveAmount, item.currency);
+                            }, 0);
 
                             // Calculate total amount for sale b
-                            let bTotal = 0;
-                            (b.items || []).forEach(item => { // Added defensive check
-                                const effectiveAmount = item.unitType === 'peso_g' ? (b.quantity / 1000) * item.amount : b.quantity * item.amount;
-                                bTotal += convertToUSD(effectiveAmount, item.currency);
-                            });
+                            let bTotal = (b.items || []).reduce((acc, item) => {
+                                // BUG FIX: Was using b.quantity, should be item.quantity
+                                const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
+                                return acc + convertToUSD(effectiveAmount, item.currency);
+                            }, 0);
 
                             aValue = aTotal;
                             bValue = bTotal;
@@ -1181,11 +1187,13 @@
                         {/* Sección de Tasa de Cambio */}
                         <div className="mb-16 p-9 bg-blue-50 border border-blue-100 rounded-3xl shadow-lg">
                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrows-right-left text-blue-800">
                                     <path d="M8 3H18L22 7L18 11H8"></path>
                                     <path d="M16 21H6L2 17L6 13H16"></path>
                                 </svg>
                                 Tasa de Cambio (USD a VES)
+                                </span>
                             </h2>
                             <div className="flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-6">
                                 <label htmlFor="exchangeRate" className="text-xl text-gray-700 font-medium">1 USD =</label>
@@ -1212,11 +1220,13 @@
                         {/* Resumen General */}
                         <div className="mb-16">
                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pie-chart text-gray-600">
                                     <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                                     <path d="M22 12A10 10 0 0 0 12 2v10Z"></path>
                                 </svg>
                                 Resumen General
+                                </span>
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-9">
                                 {/* Total Ventas */}
@@ -1280,12 +1290,14 @@
                         {/* Formulario de Nueva Venta */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus-circle text-blue-600">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="8" x2="12" y2="16"></line>
                                     <line x1="8" y1="12" x2="16" y2="12"></line>
                                 </svg>
                                 Registrar Nueva Venta
+                                </span>
                             </h2>
                             <form onSubmit={handleAddSale} className="grid grid-cols-1 gap-8">
                                 <div className="md:col-span-2">
@@ -1336,7 +1348,7 @@
                                         onChange={(e) => {
                                             setSalePaymentMethod(e.target.value);
                                             if (e.target.value !== 'Pago Móvil') {
-                                                setSaleOperationNumber('');    
+                                                setSaleOperationNumber('');     
                                             }
                                         }}
                                         className="w-full"
@@ -1482,15 +1494,22 @@
 
                         {/* Historial de Ventas */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
-                            <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-receipt text-gray-600">
-                                    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2h-2h-2h-2h-2h-2h-2H4Z"></path>
-                                    <path d="M18 6H8"></path>
-                                    <path d="M18 10H8"></path>
-                                    <path d="M18 14H8"></path>
-                                    <path d="M18 18H8"></path>
-                                </svg>
-                                Historial de Ventas
+                           <h2 className="section-heading">
+                                <span className="section-heading-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-receipt text-gray-600">
+                                        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2h-2h-2h-2h-2h-2h-2H4Z"></path>
+                                        <path d="M18 6H8"></path>
+                                        <path d="M18 10H8"></path>
+                                        <path d="M18 14H8"></path>
+                                        <path d="M18 18H8"></path>
+                                    </svg>
+                                    Historial de Ventas
+                                </span>
+                                {sales.length > 0 && (
+                                    <button onClick={handleClearSales} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                        Borrar Historial
+                                    </button>
+                                )}
                             </h2>
                             {paginatedSales.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay ventas registradas aún.</p>
@@ -1500,31 +1519,30 @@
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr>
-                                                    <th onClick={() => handleSalesSort('date')} className="px-6 py-4 text-left">
+                                                    <th onClick={() => handleSalesSort('date')}>
                                                         Fecha {salesSortColumn === 'date' && (salesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th className="px-6 py-4 text-left">Productos (Cant.)</th> {/* Combined Product and Quantity */}
-                                                    <th onClick={() => handleSalesSort('totalAmount')} className="px-6 py-4 text-left">
+                                                    <th>Productos (Cant.)</th>
+                                                    <th onClick={() => handleSalesSort('totalAmount')}>
                                                         Monto Total {salesSortColumn === 'totalAmount' && (salesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th className="px-6 py-4 text-left">Método Pago</th>
-                                                    <th className="px-6 py-4 text-left">N° Operación</th>
-                                                    <th className="px-6 py-4 text-left">Acciones</th>
+                                                    <th>Método Pago</th>
+                                                    <th>N° Operación</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {paginatedSales.map((sale) => (
                                                     <tr key={sale.id}>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
-                                                        <td className="px-6 py-5 text-base text-gray-800">
+                                                        <td>{sale.date}</td>
+                                                        <td>
                                                             {(sale.items || []).map((item, itemIndex) => (
                                                                 <div key={itemIndex} className="mb-1 last:mb-0">
                                                                     {item.product} ({item.quantity} {item.unitType === 'peso_g' ? 'g' : ''})
                                                                 </div>
                                                             ))}
                                                         </td>
-                                                        <td className="px-6 py-5 text-base text-gray-800">
-                                                            {/* Calculate total for this specific sale to display here */}
+                                                        <td>
                                                             {(() => {
                                                                 let currentSaleTotalUSD = 0;
                                                                 (sale.items || []).forEach(item => { 
@@ -1535,24 +1553,9 @@
 
                                                                 return (
                                                                     <>
-                                                                        {(sale.items || []).map((item, itemIndex) => {
-                                                                            const itemTotalValue = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
-                                                                            const displayAmount = item.currency === 'USD' ? `$${itemTotalValue.toFixed(2)} USD` : `${itemTotalValue.toFixed(2)} ${item.currency}`;
-                                                                            const convertedAmount = item.currency === 'USD' ? (itemTotalValue * exchangeRate) : (itemTotalValue / exchangeRate);
-                                                                            const convertedCurrencyLabel = item.currency === 'USD' ? 'VES' : 'USD';
-                                                                            return (
-                                                                                <div key={itemIndex} className="mb-1 last:mb-0">
-                                                                                    <span className="font-medium">{displayAmount}</span>
-                                                                                    <span className="text-sm text-gray-500 block">
-                                                                                        (≈ {convertedCurrencyLabel === 'USD' ? '$' : 'Bs. '}
-                                                                                        {convertedAmount.toFixed(2)} {convertedCurrencyLabel})
-                                                                                    </span>
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                        <div className="font-bold mt-2 pt-2 border-t border-gray-200">
-                                                                            Total Venta: ${currentSaleTotalUSD.toFixed(2)} USD
-                                                                            <span className="text-sm text-gray-500 block">
+                                                                        <div className="font-bold">
+                                                                            ${currentSaleTotalUSD.toFixed(2)} USD
+                                                                            <span className="text-xs text-gray-500 block font-normal">
                                                                                 (≈ Bs. {currentSaleTotalVES.toFixed(2)} VES)
                                                                             </span>
                                                                         </div>
@@ -1560,12 +1563,12 @@
                                                                 );
                                                             })()}
                                                         </td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.paymentMethod || 'N/A'}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.operationNumber || '-'}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-right text-base font-medium">
+                                                        <td>{sale.paymentMethod || 'N/A'}</td>
+                                                        <td>{sale.operationNumber || '-'}</td>
+                                                        <td className="text-right">
                                                             <button
                                                                 onClick={() => openConfirmModal('¿Estás seguro de que quieres eliminar esta venta?', () => handleDeleteSale(sale.id))}
-                                                                className="text-rose-600 hover:text-rose-800 ml-4 p-2"
+                                                                className="text-rose-600 hover:text-rose-800 p-2 text-xs"
                                                             >
                                                                 Eliminar
                                                             </button>
@@ -1575,7 +1578,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    {sortedSales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                    {sortedSales.length > ITEMS_PER_PAGE && (
                                         <div className="pagination-container">
                                             <button
                                                 onClick={() => setCurrentSalesPage(prev => Math.max(prev - 1, 1))}
@@ -1608,12 +1611,14 @@
 
                         {/* Formulario de Nuevo Gasto */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
-                            <h2 className="section-heading">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-minus-circle text-rose-600">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                                </svg>
-                                Registrar Nuevo Gasto
+                           <h2 className="section-heading">
+                                <span className="section-heading-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-minus-circle text-rose-600">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                                    </svg>
+                                    Registrar Nuevo Gasto
+                                </span>
                             </h2>
                             <form onSubmit={handleAddExpense} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
@@ -1646,7 +1651,7 @@
                                             type="number"
                                             id="expenseAmount"
                                             value={expenseAmount}
-                                            onChange={(e) => setExpenseAmount(e.target.value)}    
+                                            onChange={(e) => setExpenseAmount(e.target.value)}     
                                             className="w-full"
                                             placeholder="Monto del gasto"
                                             min="0.01"
@@ -1684,12 +1689,19 @@
                         {/* Historial de Gastos */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-archive text-gray-600">
                                     <rect width="20" height="5" x="2" y="3" rx="1"></rect>
                                     <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
                                     <path d="M10 12h4"></path>
                                 </svg>
                                 Historial de Gastos
+                                </span>
+                                {expenses.length > 0 && (
+                                     <button onClick={handleClearExpenses} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                        Borrar Historial
+                                    </button>
+                                )}
                             </h2>
                             {paginatedExpenses.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay gastos registrados aún.</p>
@@ -1699,33 +1711,33 @@
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr>
-                                                    <th onClick={() => handleExpensesSort('date')} className="px-6 py-4 text-left">
+                                                    <th onClick={() => handleExpensesSort('date')}>
                                                         Fecha {expensesSortColumn === 'date' && (expensesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th onClick={() => handleExpensesSort('category')} className="px-6 py-4 text-left">
+                                                    <th onClick={() => handleExpensesSort('category')}>
                                                         Categoría {expensesSortColumn === 'category' && (expensesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th onClick={() => handleExpensesSort('amount')} className="px-6 py-4 text-left">
+                                                    <th onClick={() => handleExpensesSort('amount')}>
                                                         Monto {expensesSortColumn === 'amount' && (expensesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th className="px-6 py-4 text-left">Acciones</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {paginatedExpenses.map((expense) => (
                                                     <tr key={expense.id}>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.date}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{expense.category}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
+                                                        <td>{expense.date}</td>
+                                                        <td>{expense.category}</td>
+                                                        <td>
                                                             {expense.currency === 'USD' ? '$' : 'Bs. '}{expense.amount.toFixed(2)} {expense.currency}
-                                                            <span className="text-sm text-gray-500 block">
+                                                            <span className="text-xs text-gray-500 block font-normal">
                                                                 {expense.currency === 'USD' ? ` (≈ ${(expense.amount * exchangeRate).toFixed(2)} VES)` : ` (≈ ${(expense.amount / exchangeRate).toFixed(2)} USD)`}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-right text-base font-medium">
+                                                        <td className="text-right">
                                                             <button
                                                                 onClick={() => openConfirmModal('¿Estás seguro de que quieres eliminar este gasto?', () => handleDeleteExpense(expense.id))}
-                                                                className="text-rose-600 hover:text-rose-800 ml-4 p-2"
+                                                                className="text-rose-600 hover:text-rose-800 p-2 text-xs"
                                                             >
                                                                 Eliminar
                                                             </button>
@@ -1769,6 +1781,7 @@
                         {/* Calculadora de Venta de Productos (General) */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator text-purple-600">
                                     <rect x="8" y="2" width="8" height="4" rx="1"></rect>
                                     <path d="M17 17v-2H7v2"></path>
@@ -1777,6 +1790,7 @@
                                     <rect x="3" y="6" width="18" height="16" rx="2"></rect>
                                 </svg>
                                 Calculadora de Precios de Productos
+                                </span>
                             </h2>
                             <div className="flex flex-col sm:flex-row gap-4 mb-8">
                                 <button
@@ -2008,7 +2022,8 @@
 
                         {/* Calculadora de Venta de Queso */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
-                            <h2 className="section-heading">
+                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cheese text-gray-600">
                                     <path d="M12 21s-3-2-6-2-6 2-6 2V3s3 2 6 2 6-2 6-2v18Z"></path>
                                     <path d="M12 21s3-2 6-2 6 2 6 2V3s-3 2-6 2-6-2-6-2"></path>
@@ -2018,6 +2033,7 @@
                                     <path d="M9 8v5h3"></path>
                                 </svg>
                                 Calculadora de Venta de Queso por Peso
+                                </span>
                             </h2>
                             <form onSubmit={handleCalculateCheesePrice} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
@@ -2080,11 +2096,13 @@
                         {/* Sección: Venta de Queso a Crédito */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wallet text-gray-600">
                                     <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12a2 2 0 0 0 2-2v-3"></path>
                                     <path d="M2 20v-3h.01"></path>
                                 </svg>
                                 Venta de Queso a Crédito 🧀
+                                </span>
                             </h2>
                             <p className="text-gray-700 text-base mb-6">
                                 * Se utilizará el "Precio por Kilo (USD)" de la calculadora de queso para el cálculo.
@@ -2133,7 +2151,8 @@
                         
                         {/* Historial de Venta de Queso a Crédito */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
-                            <h2 className="section-heading">
+                           <h2 className="section-heading">
+                                <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clipboard-list text-gray-600">
                                     <rect x="9" y="7" width="10" height="4" rx="1"></rect>
                                     <path d="M15 3h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"></path>
@@ -2142,6 +2161,12 @@
                                     <path d="M12 17H5"></path>
                                 </svg>
                                 Historial de Venta de Queso a Crédito
+                                </span>
+                                {cheeseCreditSales.length > 0 && (
+                                    <button onClick={handleClearCheeseCreditSales} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                        Borrar Historial
+                                    </button>
+                                )}
                             </h2>
                             {paginatedCheeseCreditSales.length === 0 ? (
                                 <p className="text-gray-600 text-center py-7 text-lg">No hay registros de crédito de queso aún.</p>
@@ -2151,35 +2176,35 @@
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr>
-                                                    <th onClick={() => handleCheeseCreditSort('date')} className="px-6 py-4 text-left">
+                                                    <th onClick={() => handleCheeseCreditSort('date')}>
                                                         Fecha {cheeseCreditSortColumn === 'date' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th onClick={() => handleCheeseCreditSort('customerName')} className="px-6 py-4 text-left">
+                                                    <th onClick={() => handleCheeseCreditSort('customerName')}>
                                                         Cliente {cheeseCreditSortColumn === 'customerName' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th className="px-6 py-4 text-left">Peso (g)</th>
-                                                    <th onClick={() => handleCheeseCreditSort('totalUSD')} className="px-6 py-4 text-left">
+                                                    <th>Peso (g)</th>
+                                                    <th onClick={() => handleCheeseCreditSort('totalUSD')}>
                                                         Monto Adeudado {cheeseCreditSortColumn === 'totalUSD' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th className="px-6 py-4 text-left">Acciones</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {paginatedCheeseCreditSales.map((sale) => (
                                                     <tr key={sale.id}>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.date}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.customerName}</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">{sale.weightGrams} g</td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
+                                                        <td>{sale.date}</td>
+                                                        <td>{sale.customerName}</td>
+                                                        <td>{sale.weightGrams} g</td>
+                                                        <td>
                                                             ${sale.totalUSD.toFixed(2)} USD
-                                                            <span className="text-sm text-gray-500 block">
+                                                            <span className="text-xs text-gray-500 block font-normal">
                                                                 ≈ Bs. {(sale.totalUSD * exchangeRate).toFixed(2)} VES
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-5 whitespace-nowrap text-right text-base font-medium">
+                                                        <td className="text-right">
                                                             <button
                                                                 onClick={() => openConfirmModal('¿Estás seguro de que quieres eliminar este registro de fiado?', () => handleDeleteCheeseCreditSale(sale.id))}
-                                                                className="text-rose-600 hover:text-rose-800 ml-4 p-2"
+                                                                className="text-rose-600 hover:text-rose-800 p-2 text-xs"
                                                             >
                                                                 Eliminar
                                                             </button>
