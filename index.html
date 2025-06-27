@@ -383,35 +383,35 @@
             const [saleDate, setSaleDate] = useState('');
             const [saleProduct, setSaleProduct] = useState('');
             // Ahora la cantidad puede ser unidades o gramos (dependiendo de saleTypeForSale)
-            const [saleQuantity, setSaleQuantity] = useState('');   
-            const [saleAmount, setSaleAmount] = useState('');   
+            const [saleQuantity, setSaleQuantity] = useState('');    
+            const [saleAmount, setSaleAmount] = useState('');    
             const [saleCurrency, setSaleCurrency] = useState('USD');
-            const [salePaymentMethod, setSalePaymentMethod] = useState(''); 
-            const [saleOperationNumber, setSaleOperationNumber] = useState(''); 
+            const [salePaymentMethod, setSalePaymentMethod] = useState('');    
+            const [saleOperationNumber, setSaleOperationNumber] = useState('');    
             // Nuevo estado para el tipo de venta (unidades o peso)
-            const [saleTypeForSale, setSaleTypeForSale] = useState('unidades'); 
+            const [saleTypeForSale, setSaleTypeForSale] = useState('unidades');    
 
             // Estados del formulario de gastos
             const [expenseDate, setExpenseDate] = useState('');
             const [expenseCategory, setExpenseCategory] = useState('');
-            const [expenseAmount, setExpenseAmount] = useState(''); 
-            const [expenseCurrency, setExpenseCurrency] = useState('USD'); 
-            const [expensePaymentMethod, setExpensePaymentMethod] = useState(''); 
-            const [expenseOperationNumber, setExpenseOperationNumber] = useState(''); 
+            const [expenseAmount, setExpenseAmount] = useState('');    
+            const [expenseCurrency, setExpenseCurrency] = useState('USD');    
+            const [expensePaymentMethod, setExpensePaymentMethod] = useState('');    
+            const [expenseOperationNumber, setExpenseOperationNumber] = useState('');    
 
-            // ESTADOS para la Calculadora de Precios de Venta por Unidad
-            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice'); 
-            const [totalCostPrice, setTotalCostPrice] = useState(''); 
-            const [purchaseQuantity, setPurchaseQuantity] = useState(''); 
-            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades'); 
-            const [profitPercentage, setProfitPercentage] = useState(''); 
+            // ESTADOS para la Calculadora de Precios de Venta por Unidad (General)
+            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice');    
+            const [totalCostPrice, setTotalCostPrice] = useState('');    
+            const [purchaseQuantity, setPurchaseQuantity] = useState('');    
+            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades');    
+            const [profitPercentage, setProfitPercentage] = useState('');    
             
-            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState(''); 
-            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD'); 
+            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState('');    
+            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD');    
             
-            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null); 
-            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null); 
-            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null); 
+            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null);    
+            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null);    
+            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null);    
 
             // Estado para la calculadora de Queso
             const [cheeseWeightGrams, setCheeseWeightGrams] = useState('');
@@ -425,13 +425,13 @@
 
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
-            const [messageType, setMessageType] = useState(''); 
-            const [showMessageBox, setShowMessageBox] = useState(false); 
+            const [messageType, setMessageType] = useState('');    
+            const [showMessageBox, setShowMessageBox] = useState(false);    
 
             // Nuevos estados para el modal de confirmación
             const [showConfirmModal, setShowConfirmModal] = useState(false);
             const [modalMessage, setModalMessage] = useState('');
-            const [onConfirmAction, setOnConfirmAction] = useState(null); 
+            const [onConfirmAction, setOnConfirmAction] = useState(null);    
 
             // Estados de ordenación para ventas
             const [salesSortColumn, setSalesSortColumn] = useState('date');
@@ -456,12 +456,12 @@
             const showMessage = (msg, type) => {
                 setMessage(msg);
                 setMessageType(type);
-                setShowMessageBox(true); 
+                setShowMessageBox(true);    
                 setTimeout(() => {
-                    setShowMessageBox(false); 
-                    setMessage(''); 
+                    setShowMessageBox(false);    
+                    setMessage('');    
                     setMessageType('');
-                }, 5000); 
+                }, 5000);    
             };
 
             // Función para cerrar el mensaje manualmente
@@ -474,23 +474,23 @@
             // Función para abrir el modal de confirmación
             const openConfirmModal = (message, callback) => {
                 setModalMessage(message);
-                setOnConfirmAction(() => callback); 
+                setOnConfirmAction(() => callback);    
                 setShowConfirmModal(true);
             };
 
             // Manejador para confirmar la acción en el modal
             const handleConfirm = () => {
                 if (onConfirmAction) {
-                    onConfirmAction(); 
+                    onConfirmAction();    
                 }
-                setShowConfirmModal(false); 
-                setOnConfirmAction(null); 
+                setShowConfirmModal(false);    
+                setOnConfirmAction(null);    
             };
 
             // Manejador para cancelar la acción en el modal
             const handleCancel = () => {
-                setShowConfirmModal(false); 
-                setOnConfirmAction(null); 
+                setShowConfirmModal(false);    
+                setOnConfirmAction(null);    
             };
 
             // Guarda la tasa de cambio en localStorage cada vez que cambia
@@ -516,7 +516,7 @@
 
             // Manejador para añadir una nueva venta
             const handleAddSale = (e) => {
-                e.preventDefault(); 
+                e.preventDefault();    
 
                 // Common validation
                 if (!saleDate) {
@@ -590,18 +590,18 @@
                 }
 
                 const newSale = {
-                    id: Date.now(), 
+                    id: Date.now(),    
                     date: saleDate,
                     product: storedProductLabel,
                     quantity: finalQuantity, // Cantidad en unidades O en gramos
                     amount: finalAmount, // Monto unitario O precio por kilo USD
                     currency: saleTypeForSale === 'unidades' ? saleCurrency : 'USD', // La moneda del monto original
                     unitType: finalUnitType, // 'unidades' o 'peso_g'
-                    paymentMethod: salePaymentMethod, 
-                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '', 
+                    paymentMethod: salePaymentMethod,    
+                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '',    
                 };
                 
-                setSales(prevSales => [...prevSales, newSale]); 
+                setSales(prevSales => [...prevSales, newSale]);    
                 showMessage('Venta agregada exitosamente.', 'success');
                 setCurrentSalesPage(1); // Reset to first page after adding new sale
 
@@ -611,14 +611,14 @@
                 setSaleQuantity('');
                 setSaleAmount('');
                 setSaleCurrency('USD');
-                setSalePaymentMethod(''); 
-                setSaleOperationNumber(''); 
+                setSalePaymentMethod('');    
+                setSaleOperationNumber('');    
                 setSaleTypeForSale('unidades'); // Reset to default
             };
 
             // Manejador para añadir un nuevo gasto
             const handleAddExpense = (e) => {
-                e.preventDefault(); 
+                e.preventDefault();    
 
                 const expenseAmountVal = expenseAmount.trim();
 
@@ -641,23 +641,23 @@
                 }
                 
                 const newExpense = {
-                    id: Date.now(), 
+                    id: Date.now(),    
                     date: expenseDate,
                     category: expenseCategory.trim(),
                     amount: parsedExpenseAmount,
                     currency: expenseCurrency,
-                    paymentMethod: '', 
-                    operationNumber: '', 
+                    paymentMethod: '',    
+                    operationNumber: '',    
                 };
                 
-                setExpenses(prevExpenses => [...prevExpenses, newExpense]); 
+                setExpenses(prevExpenses => [...prevExpenses, newExpense]);    
                 showMessage('Gasto agregado exitosamente.', 'success');
                 setCurrentExpensesPage(1); // Reset to first page after adding new expense
 
                 setExpenseDate('');
                 setExpenseCategory('');
                 setExpenseAmount('');
-                setExpenseCurrency('USD'); 
+                setExpenseCurrency('USD');    
             };
             
             // Manejador para añadir una nueva venta de queso a crédito
@@ -739,8 +739,8 @@
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de ventas? Esta acción no se puede deshacer.',
                     () => {
-                        setSales([]); 
-                        localStorage.removeItem('sales'); 
+                        setSales([]);    
+                        localStorage.removeItem('sales');    
                         showMessage('Historial de ventas borrado.', 'success');
                         setCurrentSalesPage(1); // Reset page after clearing
                     }
@@ -752,8 +752,8 @@
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de gastos? Esta acción no se puede deshacer.',
                     () => {
-                        setExpenses([]); 
-                        localStorage.removeItem('expenses'); 
+                        setExpenses([]);    
+                        localStorage.removeItem('expenses');    
                         showMessage('Historial de gastos borrado.', 'success');
                         setCurrentExpensesPage(1); // Reset page after clearing
                     }
@@ -785,21 +785,21 @@
                     showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null); 
+                    setCalculatedProfitPercentageResult(null);    
                     return;
                 }
                 if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
                     showMessage(`Por favor, ingresa una cantidad válida de ${purchaseMeasurementUnit} (número mayor que cero).`, 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null); 
+                    setCalculatedProfitPercentageResult(null);    
                     return;
                 }
-                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) { 
+                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) {    
                     showMessage('Por favor, ingresa un porcentaje de ganancia válido (número mayor o igual a cero).', 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null); 
+                    setCalculatedProfitPercentageResult(null);    
                     return;
                 }
 
@@ -808,8 +808,14 @@
                 
                 setCalculatedCostPerUnit(costPerUnit);
                 setCalculatedSellingPricePerUnit(sellingPricePerUnit);
-                setCalculatedProfitPercentageResult(null); 
+                setCalculatedProfitPercentageResult(null);    
                 showMessage('Precio de venta por unidad calculado.', 'success');
+
+                // Clear form fields after calculation
+                setTotalCostPrice('');
+                setPurchaseQuantity('');
+                setProfitPercentage('');
+                setPurchaseMeasurementUnit('unidades');
             };
 
             // Manejador para calcular el porcentaje de ganancia (general)
@@ -878,6 +884,13 @@
                 setCalculatedSellingPricePerUnit(parsedDesiredSellingPrice); // Mostrar el precio deseado en su moneda original
                 setCalculatedProfitPercentageResult(profitPercentageCalculated);
                 showMessage('Porcentaje de ganancia calculado.', 'success');
+
+                // Clear form fields after calculation
+                setTotalCostPrice('');
+                setPurchaseQuantity('');
+                setDesiredSellingPriceInput('');
+                setPurchaseMeasurementUnit('unidades');
+                setDesiredSellingPriceCurrency('USD');
             };
 
             // Manejador para la calculadora de queso (manteniendo la que estaba)
@@ -926,7 +939,7 @@
             const totalSalesUSD = sales.reduce((acc, sale) => acc + (convertToUSD(sale.amount * (sale.unitType === 'peso_g' ? sale.quantity / 1000 : sale.quantity), sale.currency)), 0);
             const totalSalesVES = totalSalesUSD * exchangeRate; // Calcular VES a partir de USD total
 
-            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0); 
+            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0);    
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
             
             const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
@@ -1376,7 +1389,7 @@
                                         onChange={(e) => {
                                             setSalePaymentMethod(e.target.value);
                                             if (e.target.value !== 'Pago Móvil') {
-                                                setSaleOperationNumber(''); 
+                                                setSaleOperationNumber('');    
                                             }
                                         }}
                                         className="w-full"
@@ -1462,8 +1475,8 @@
                                                             {sale.quantity} {sale.unitType === 'peso_g' ? 'g' : ''}
                                                         </td>
                                                         <td className="px-6 py-5 whitespace-nowrap text-base text-gray-800">
-                                                            {sale.unitType === 'peso_g' ? 
-                                                                `$${(sale.quantity / 1000 * sale.amount).toFixed(2)} USD` : 
+                                                            {sale.unitType === 'peso_g' ?    
+                                                                `$${(sale.quantity / 1000 * sale.amount).toFixed(2)} USD` :    
                                                                 `${sale.amount.toFixed(2)} ${sale.currency}`
                                                             }
                                                             <span className="text-sm text-gray-500 block">
@@ -1556,7 +1569,7 @@
                                             type="number"
                                             id="expenseAmount"
                                             value={expenseAmount}
-                                            onChange={(e) => setExpenseAmount(e.target.value)} 
+                                            onChange={(e) => setExpenseAmount(e.target.value)}    
                                             className="w-full"
                                             placeholder="Monto del gasto"
                                             min="0.01"
@@ -1675,6 +1688,246 @@
                                 </>
                             )}
                         </div>
+
+                        {/* Calculadora de Venta de Productos (General) */}
+                        <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
+                            <h2 className="section-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator text-purple-600">
+                                    <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                    <path d="M17 17v-2H7v2"></path>
+                                    <path d="M17 10h-2V7H7v3"></path>
+                                    <path d="M14 17h-4V14h4v3Z"></path>
+                                    <rect x="3" y="6" width="18" height="16" rx="2"></rect>
+                                </svg>
+                                Calculadora de Precios de Productos
+                            </h2>
+                            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                                <button
+                                    onClick={() => {
+                                        setCalculatorMode('calculateSellingPrice');
+                                        // Clear inputs related to the other mode
+                                        setDesiredSellingPriceInput('');
+                                        setDesiredSellingPriceCurrency('USD');
+                                        setCalculatedProfitPercentageResult(null);
+                                    }}
+                                    className={`flex-grow calculator-mode-button ${calculatorMode === 'calculateSellingPrice' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-dollar-sign">
+                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                    </svg>
+                                    Calcular Precio de Venta
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setCalculatorMode('calculateProfitPercentage');
+                                        // Clear inputs related to the other mode
+                                        setProfitPercentage('');
+                                        setCalculatedSellingPricePerUnit(null);
+                                    }}
+                                    className={`flex-grow calculator-mode-button ${calculatorMode === 'calculateProfitPercentage' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-percent">
+                                        <line x1="19" y1="5" x2="5" y2="19"></line>
+                                        <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                                        <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                                    </svg>
+                                    Calcular % Ganancia
+                                </button>
+                            </div>
+
+                            {calculatorMode === 'calculateSellingPrice' && (
+                                <form onSubmit={handleCalculateSellingPrice} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <label htmlFor="totalCostPrice" className="block text-gray-700 text-base font-bold mb-2">Costo Total de Compra (USD):</label>
+                                        <input
+                                            type="number"
+                                            id="totalCostPrice"
+                                            value={totalCostPrice}
+                                            onChange={(e) => setTotalCostPrice(e.target.value)}
+                                            placeholder="Ej: 150.00"
+                                            min="0.01"
+                                            step="0.01"
+                                            className="w-full"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex items-end space-x-4">
+                                        <div className="flex-grow">
+                                            <label htmlFor="purchaseQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad Comprada:</label>
+                                            <input
+                                                type="number"
+                                                id="purchaseQuantity"
+                                                value={purchaseQuantity}
+                                                onChange={(e) => setPurchaseQuantity(e.target.value)}
+                                                placeholder="Ej: 10"
+                                                min="0.01"
+                                                step="0.01"
+                                                className="w-full"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                            <label htmlFor="purchaseMeasurementUnit" className="sr-only">Unidad de Medida</label>
+                                            <select
+                                                id="purchaseMeasurementUnit"
+                                                value={purchaseMeasurementUnit}
+                                                onChange={(e) => setPurchaseMeasurementUnit(e.target.value)}
+                                                className="w-full py-3.5"
+                                            >
+                                                <option value="unidades">Unidades</option>
+                                                <option value="gramos">Gramos</option>
+                                                <option value="kilos">Kilos</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="profitPercentage" className="block text-gray-700 text-base font-bold mb-2">Porcentaje de Ganancia Deseado (%):</label>
+                                        <input
+                                            type="number"
+                                            id="profitPercentage"
+                                            value={profitPercentage}
+                                            onChange={(e) => setProfitPercentage(e.target.value)}
+                                            placeholder="Ej: 30 (para 30%)"
+                                            min="0"
+                                            step="0.01"
+                                            className="w-full"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2 mt-5">
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-purple-500 text-white py-4.5 px-8 rounded-xl hover:bg-purple-600 focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
+                                                <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                                <path d="M17 17v-2H7v2"></path>
+                                                <path d="M17 10h-2V7H7v3"></path>
+                                                <path d="M14 17h-4V14h4v3Z"></path>
+                                                <rect x="3" y="6" width="18" height="16" rx="2"></rect>
+                                            </svg>
+                                            Calcular Precios
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {calculatorMode === 'calculateProfitPercentage' && (
+                                <form onSubmit={handleCalculateProfitPercentage} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <label htmlFor="totalCostPriceProfit" className="block text-gray-700 text-base font-bold mb-2">Costo Total de Compra (USD):</label>
+                                        <input
+                                            type="number"
+                                            id="totalCostPriceProfit"
+                                            value={totalCostPrice}
+                                            onChange={(e) => setTotalCostPrice(e.target.value)}
+                                            placeholder="Ej: 150.00"
+                                            min="0.01"
+                                            step="0.01"
+                                            className="w-full"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex items-end space-x-4">
+                                        <div className="flex-grow">
+                                            <label htmlFor="purchaseQuantityProfit" className="block text-gray-700 text-base font-bold mb-2">Cantidad Comprada:</label>
+                                            <input
+                                                type="number"
+                                                id="purchaseQuantityProfit"
+                                                value={purchaseQuantity}
+                                                onChange={(e) => setPurchaseQuantity(e.target.value)}
+                                                placeholder="Ej: 10"
+                                                min="0.01"
+                                                step="0.01"
+                                                className="w-full"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                            <label htmlFor="purchaseMeasurementUnitProfit" className="sr-only">Unidad de Medida</label>
+                                            <select
+                                                id="purchaseMeasurementUnitProfit"
+                                                value={purchaseMeasurementUnit}
+                                                onChange={(e) => setPurchaseMeasurementUnit(e.target.value)}
+                                                className="w-full py-3.5"
+                                            >
+                                                <option value="unidades">Unidades</option>
+                                                <option value="gramos">Gramos</option>
+                                                <option value="kilos">Kilos</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-end space-x-4">
+                                        <div className="flex-grow">
+                                            <label htmlFor="desiredSellingPriceInput" className="block text-gray-700 text-base font-bold mb-2">Precio de Venta Deseado por Unidad:</label>
+                                            <input
+                                                type="number"
+                                                id="desiredSellingPriceInput"
+                                                value={desiredSellingPriceInput}
+                                                onChange={(e) => setDesiredSellingPriceInput(e.target.value)}
+                                                placeholder="Ej: 18.00"
+                                                min="0.01"
+                                                step="0.01"
+                                                className="w-full"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                            <label htmlFor="desiredSellingPriceCurrency" className="sr-only">Moneda</label>
+                                            <select
+                                                id="desiredSellingPriceCurrency"
+                                                value={desiredSellingPriceCurrency}
+                                                onChange={(e) => setDesiredSellingPriceCurrency(e.target.value)}
+                                                className="w-full py-3.5"
+                                            >
+                                                <option value="USD">USD</option>
+                                                <option value="VES">VES</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2 mt-5">
+                                        <button
+                                            type="submit"
+                                            className="w-full bg-purple-500 text-white py-4.5 px-8 rounded-xl hover:bg-purple-600 focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
+                                                <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                                <path d="M17 17v-2H7v2"></path>
+                                                <path d="M17 10h-2V7H7v3"></path>
+                                                <path d="M14 17h-4V14h4v3Z"></path>
+                                                <rect x="3" y="6" width="18" height="16" rx="2"></rect>
+                                            </svg>
+                                            Calcular Porcentaje
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            {(calculatedCostPerUnit !== null || calculatedSellingPricePerUnit !== null || calculatedProfitPercentageResult !== null) && (
+                                <div className="mt-9 p-7 bg-purple-50 border border-purple-200 rounded-2xl shadow-inner text-center">
+                                    <h3 className="text-xl font-semibold text-purple-800 mb-5">Resultados:</h3>
+                                    {calculatedCostPerUnit !== null && (
+                                        <p className="text-gray-700 text-lg">
+                                            Costo por {purchaseMeasurementUnit === 'unidades' ? 'unidad' : purchaseMeasurementUnit === 'gramos' ? 'gramo' : 'kilo'}: <span className="font-bold text-purple-700">${calculatedCostPerUnit.toFixed(2)} USD</span>
+                                        </p>
+                                    )}
+                                    {calculatorMode === 'calculateSellingPrice' && calculatedSellingPricePerUnit !== null && (
+                                        <p className="text-gray-700 text-lg mt-3">
+                                            Precio de Venta Sugerido por {purchaseMeasurementUnit === 'unidades' ? 'unidad' : purchaseMeasurementUnit === 'gramos' ? 'gramo' : 'kilo'}: <span className="font-bold text-xl text-purple-900">${calculatedSellingPricePerUnit.toFixed(2)} USD</span>
+                                            <br />
+                                            <span className="text-sm text-gray-500 block">≈ Bs. {(calculatedSellingPricePerUnit * exchangeRate).toFixed(2)} VES</span>
+                                        </p>
+                                    )}
+                                    {calculatorMode === 'calculateProfitPercentage' && calculatedProfitPercentageResult !== null && (
+                                        <p className="text-gray-700 text-lg mt-3">
+                                            Porcentaje de Ganancia: <span className="font-bold text-xl text-purple-900">{calculatedProfitPercentageResult.toFixed(2)}%</span>
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
 
                         {/* Calculadora de Venta de Queso */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
