@@ -226,7 +226,7 @@
             padding: 0.5rem; /* Espaciado interno para la tabla */
         }
 
-        /* Estilos específicos para los botones de modo de calculadora */
+        /* Estilos para los botones de modo de calculadora */
         .calculator-mode-button {
             border-radius: 0.75rem; /* Más redondeado para las pestañas */
             padding: 0.8rem 1.8rem; /* Relleno cómodo */
@@ -404,10 +404,9 @@
                 return savedExpenses ? JSON.parse(savedExpenses) : [];
             });
             
-            // Estado para ventas de queso a crédito, cargados desde localStorage
-            const [cheeseCreditSales, setCheeseCreditSales] = useState(() => {
-                const savedCreditSales = localStorage.getItem('cheeseCreditSales');
-                // Add new fields for existing data if they don't exist
+            // Estado para ventas a crédito (generalizado)
+            const [creditSales, setCreditSales] = useState(() => {
+                const savedCreditSales = localStorage.getItem('creditSales'); // Changed from cheeseCreditSales
                 if (savedCreditSales) {
                     const parsedSales = JSON.parse(savedCreditSales);
                     return parsedSales.map(sale => ({
@@ -455,9 +454,14 @@
             const [calculatedCheesePriceUSD, setCalculatedCheesePriceUSD] = useState(null);
             const [calculatedCheesePriceVES, setCalculatedCheesePriceVES] = useState(null);
             
-            // Nuevos estados para el formulario de venta de queso a crédito
+            // Nuevos estados para el formulario de venta a crédito (generalizado)
             const [creditCustomerName, setCreditCustomerName] = useState('');
-            const [creditCheeseWeightGrams, setCreditCheeseWeightGrams] = useState('');
+            const [creditProductName, setCreditProductName] = useState(''); // Nuevo: para seleccionar el producto
+            const [creditQuantity, setCreditQuantity] = useState(''); // Nueva: cantidad del producto
+            const [creditAmountPerUnit, setCreditAmountPerUnit] = useState(''); // Nuevo: monto por unidad/gramo
+            const [creditCurrencyPerUnit, setCreditCurrencyPerUnit] = useState('USD'); // Nuevo: moneda del monto por unidad/gramo
+            const [creditUnitType, setCreditUnitType] = useState('unidades'); // Nuevo: tipo de unidad del producto (derivado del inventario)
+
             const [payingCreditSaleId, setPayingCreditSaleId] = useState(null); // ID de la venta a crédito que se está pagando
             const [paymentAmount, setPaymentAmount] = useState('');
 
@@ -491,14 +495,14 @@
             const [expensesStartDate, setExpensesStartDate] = useState('');
             const [expensesEndDate, setExpensesEndDate] = useState('');
 
-            // Estados de ordenación para ventas de queso a crédito
-            const [cheeseCreditSortColumn, setCheeseCreditSortColumn] = useState('date');
-            const [cheeseCreditSortDirection, setCheeseCreditSortDirection] = useState('desc');
-            // Estados de paginación para ventas de queso a crédito
-            const [currentCheeseCreditPage, setCurrentCheeseCreditPage] = useState(1);
-            // Estados de búsqueda y filtro para ventas a crédito
-            const [cheeseCreditSearchTerm, setCheeseCreditSearchTerm] = useState('');
-            const [cheeseCreditStatusFilter, setCheeseCreditStatusFilter] = useState('Todos'); // 'Todos', 'Pendiente', 'Pagado Parcial', 'Pagado'
+            // Estados de ordenación para ventas a crédito (generalizado)
+            const [creditSalesSortColumn, setCreditSalesSortColumn] = useState('date'); // Changed from cheeseCreditSortColumn
+            const [creditSalesSortDirection, setCreditSalesSortDirection] = useState('desc');
+            // Estados de paginación para ventas a crédito (generalizado)
+            const [currentCreditSalesPage, setCurrentCreditSalesPage] = useState(1); // Changed from currentCheeseCreditPage
+            // Estados de búsqueda y filtro para ventas a crédito (generalizado)
+            const [creditSalesSearchTerm, setCreditSalesSearchTerm] = useState(''); // Changed from cheeseCreditSearchTerm
+            const [creditSalesStatusFilter, setCreditSalesStatusFilter] = useState('Todos'); // Changed from cheeseCreditStatusFilter
 
             // NUEVOS ESTADOS PARA INVENTARIO
             const [inventory, setInventory] = useState(() => {
@@ -599,10 +603,10 @@
                 localStorage.setItem('expenses', JSON.stringify(expenses));
             }, [expenses]);
 
-            // Guarda las ventas de queso a crédito en localStorage cada vez que cambian
+            // Guarda las ventas a crédito en localStorage cada vez que cambian
             useEffect(() => {
-                localStorage.setItem('cheeseCreditSales', JSON.stringify(cheeseCreditSales));
-            }, [cheeseCreditSales]);
+                localStorage.setItem('creditSales', JSON.stringify(creditSales)); // Changed from cheeseCreditSales
+            }, [creditSales]);
 
             // Guarda el inventario en localStorage cada vez que cambia
             useEffect(() => {
@@ -801,72 +805,93 @@
                 setExpenseCurrency('USD');        
             };
             
-            // Manejador para añadir una nueva venta de queso a crédito
-            const handleAddCheeseCreditSale = (e) => {
+            // Manejador para añadir una nueva venta a crédito (generalizado)
+            const handleAddCreditSale = (e) => {
                 e.preventDefault();
-                const parsedCreditCheeseWeightGrams = parseFloat(creditCheeseWeightGrams);
-                const parsedCheesePricePerKiloUSD = parseFloat(cheesePricePerKiloUSD); // Usar el precio del kilo de queso de la calculadora
+                const parsedCreditQuantity = parseFloat(creditQuantity);
+                const parsedCreditAmountPerUnit = parseFloat(creditAmountPerUnit);
 
                 if (!creditCustomerName.trim()) {
                     showMessage('El nombre del cliente no puede estar vacío.', 'error');
                     return;
                 }
-                if (isNaN(parsedCreditCheeseWeightGrams) || parsedCreditCheeseWeightGrams <= 0) {
-                    showMessage('Por favor, ingresa un peso válido en gramos (número mayor que cero).', 'error');
+                if (!creditProductName) {
+                    showMessage('Por favor, selecciona un producto para la venta a crédito.', 'error');
                     return;
                 }
-                if (isNaN(parsedCheesePricePerKiloUSD) || parsedCheesePricePerKiloUSD <= 0) {
-                    showMessage('Por favor, configura un precio válido por kilo en la "Calculadora de Venta de Queso por Peso" antes de registrar el crédito.', 'error');
+                if (isNaN(parsedCreditQuantity) || parsedCreditQuantity <= 0) {
+                    showMessage('Por favor, ingresa una cantidad válida (número mayor que cero).', 'error');
                     return;
                 }
-                if (exchangeRate <= 0) {
-                    showMessage('La tasa de cambio debe ser mayor que cero para calcular en VES.', 'error');
+                if (isNaN(parsedCreditAmountPerUnit) || parsedCreditAmountPerUnit <= 0) {
+                    showMessage('Por favor, ingresa un monto válido por unidad/gramo (número mayor que cero).', 'error');
                     return;
                 }
 
-                // Check inventory for cheese (assuming 'Queso' is the product name for cheese in inventory, and unitType is 'gramos')
-                const cheeseInventoryIndex = inventory.findIndex(
-                    invItem => invItem.name.toLowerCase() === 'queso' && invItem.stockUnitType === 'gramos'
+                const selectedProduct = inventory.find(item => item.name === creditProductName);
+                if (!selectedProduct) {
+                    showMessage('Producto no encontrado en el inventario.', 'error');
+                    return;
+                }
+
+                // Check inventory stock
+                const inventoryIndex = inventory.findIndex(
+                    invItem => invItem.name === selectedProduct.name && invItem.stockUnitType === selectedProduct.stockUnitType
                 );
 
-                if (cheeseInventoryIndex === -1) {
-                    showMessage('El producto "Queso" no se encontró en el inventario con la unidad de medida "gramos". Por favor, agrégalo al inventario primero.', 'error');
+                if (inventoryIndex === -1) {
+                    showMessage(`El producto "${selectedProduct.name}" no se encontró en el inventario con la unidad de medida correcta.`, 'error');
                     return;
                 }
 
-                const currentCheeseStock = inventory[cheeseInventoryIndex].stockQuantity;
-                if (currentCheeseStock < parsedCreditCheeseWeightGrams) {
-                    showMessage(`Stock insuficiente para Queso. Disponible: ${currentCheeseStock.toFixed(2)} gramos.`, 'error');
+                const currentStock = inventory[inventoryIndex].stockQuantity;
+                if (currentStock < parsedCreditQuantity) {
+                    showMessage(`Stock insuficiente para "${selectedProduct.name}". Disponible: ${currentStock.toFixed(2)} ${selectedProduct.stockUnitType}.`, 'error');
                     return;
                 }
 
-                const totalUSD = (parsedCreditCheeseWeightGrams / 1000) * parsedCheesePricePerKiloUSD;
-
+                let totalUSD;
+                if (selectedProduct.stockUnitType === 'gramos' && creditUnitType === 'peso_g') {
+                    // If product is in grams and sale is by weight, amount is per kilo USD
+                    totalUSD = (parsedCreditQuantity / 1000) * parsedCreditAmountPerUnit;
+                } else {
+                    // For units or if grams product is sold by gram price
+                    totalUSD = parsedCreditQuantity * convertToUSD(parsedCreditAmountPerUnit, creditCurrencyPerUnit);
+                }
+                
                 const newCreditSale = {
                     id: Date.now(),
                     date: new Date().toISOString().slice(0, 10), // Fecha actual
                     customerName: creditCustomerName.trim(),
-                    weightGrams: parsedCreditCheeseWeightGrams,
-                    pricePerKiloUSD: parsedCheesePricePerKiloUSD, // Guardar el precio por kilo usado en ese momento
+                    productName: selectedProduct.name, // Store product name
+                    quantity: parsedCreditQuantity,
+                    unitType: selectedProduct.stockUnitType, // Store unit type from inventory
+                    amountPerUnit: parsedCreditAmountPerUnit, // Store the amount entered
+                    currencyPerUnit: creditCurrencyPerUnit, // Store the currency entered
                     totalUSD: totalUSD,
-                    paidAmount: 0, // Nuevo campo: monto pagado inicialmente 0
-                    status: 'Pendiente', // Nuevo campo: estado inicial 'Pendiente'
+                    paidAmount: 0,
+                    status: 'Pendiente',
                 };
 
-                // Deduct cheese from inventory
+                // Deduct stock from inventory
                 const updatedInventory = [...inventory];
-                updatedInventory[cheeseInventoryIndex].stockQuantity -= parsedCreditCheeseWeightGrams;
+                updatedInventory[inventoryIndex].stockQuantity -= parsedCreditQuantity;
                 setInventory(updatedInventory);
 
-                setCheeseCreditSales(prevSales => [...prevSales, newCreditSale]);
-                showMessage('Venta de queso a crédito registrada y stock actualizado.', 'success');
-                setCurrentCheeseCreditPage(1); // Reset to first page after adding
+                setCreditSales(prevSales => [...prevSales, newCreditSale]); // Changed from setCheeseCreditSales
+                showMessage('Venta a crédito registrada y stock actualizado.', 'success');
+                setCurrentCreditSalesPage(1); // Reset to first page after adding
 
+                // Clear form fields
                 setCreditCustomerName('');
-                setCreditCheeseWeightGrams('');
+                setCreditProductName('');
+                setCreditQuantity('');
+                setCreditAmountPerUnit('');
+                setCreditCurrencyPerUnit('USD');
+                setCreditUnitType('unidades');
             };
 
-            // Manejador para registrar un pago a una venta de queso a crédito
+            // Manejador para registrar un pago a una venta a crédito
             const handleRegisterCreditPayment = (e) => {
                 e.preventDefault();
                 const parsedPaymentAmount = parseFloat(paymentAmount);
@@ -876,7 +901,7 @@
                     return;
                 }
 
-                setCheeseCreditSales(prevSales => prevSales.map(sale => {
+                setCreditSales(prevSales => prevSales.map(sale => { // Changed from setCheeseCreditSales
                     if (sale.id === payingCreditSaleId) {
                         const newPaidAmount = sale.paidAmount + parsedPaymentAmount;
                         const remaining = sale.totalUSD - newPaidAmount;
@@ -927,15 +952,15 @@
                 }
             };
             
-            // Manejador para eliminar una venta de queso a crédito individual
-            const handleDeleteCheeseCreditSale = (id) => {
+            // Manejador para eliminar una venta a crédito individual (generalizado)
+            const handleDeleteCreditSale = (id) => {
                 openConfirmModal(
-                    '¿Estás seguro de que quieres eliminar este registro de fiado? Esto no repondrá el inventario.',
+                    '¿Estás seguro de que quieres eliminar este registro de crédito? Esto no repondrá el inventario.',
                     () => {
-                        setCheeseCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
-                        showMessage('Venta a crédito de queso eliminada.', 'success');
-                        if (paginatedCheeseCreditSales.length === 1 && currentCheeseCreditPage > 1) {
-                            setCurrentCheeseCreditPage(currentCheeseCreditPage - 1);
+                        setCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
+                        showMessage('Venta a crédito eliminada.', 'success');
+                        if (paginatedCreditSales.length === 1 && currentCreditSalesPage > 1) {
+                            setCurrentCreditSalesPage(currentCreditSalesPage - 1);
                         }
                     }
                 );
@@ -968,15 +993,15 @@
                 );
             };
             
-            // Manejador para borrar TODO el historial de ventas de queso a crédito
-            const handleClearCheeseCreditSales = () => {
+            // Manejador para borrar TODO el historial de ventas a crédito (generalizado)
+            const handleClearCreditSales = () => {
                 openConfirmModal(
-                    '¿Estás seguro de que quieres borrar TODO el historial de ventas de queso a crédito? Esta acción no se puede deshacer.',
+                    '¿Estás seguro de que quieres borrar TODO el historial de ventas a crédito? Esta acción no se puede deshacer.',
                     () => {
-                        setCheeseCreditSales([]);
-                        localStorage.removeItem('cheeseCreditSales');
-                        showMessage('Historial de ventas a crédito de queso borrado.', 'success');
-                        setCurrentCheeseCreditPage(1); // Reset page after clearing
+                        setCreditSales([]);
+                        localStorage.removeItem('creditSales');
+                        showMessage('Historial de ventas a crédito borrado.', 'success');
+                        setCurrentCreditSalesPage(1); // Reset page after clearing
                     }
                 );
             };
@@ -1305,8 +1330,8 @@
             const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0);        
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
             
-            const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
-            const totalCheeseCreditSalesVES = totalCheeseCreditSalesUSD * exchangeRate; // Calcular VES a partir de USD total del fiado
+            const totalCreditSalesUSD = creditSales.reduce((acc, sale) => acc + sale.totalUSD, 0); // Changed from totalCheeseCreditSalesUSD
+            const totalCreditSalesVES = totalCreditSalesUSD * exchangeRate; // Calcular VES a partir de USD total del fiado
 
             // Calculate total inventory value based on costPerUnit (which is always in USD)
             const totalInventoryValueUSD = inventory.reduce((acc, item) => acc + (item.stockQuantity * item.costPerUnit), 0);
@@ -1338,15 +1363,15 @@
                 setCurrentExpensesPage(1); // Reset to first page on sort change
             };
             
-            // Lógica de ordenación para ventas de queso a crédito
-            const handleCheeseCreditSort = (column) => {
-                if (cheeseCreditSortColumn === column) {
-                    setCheeseCreditSortDirection(cheeseCreditSortDirection === 'asc' ? 'desc' : 'asc');
+            // Lógica de ordenación para ventas a crédito (generalizado)
+            const handleCreditSalesSort = (column) => {
+                if (creditSalesSortColumn === column) {
+                    setCreditSalesSortDirection(creditSalesSortDirection === 'asc' ? 'desc' : 'asc');
                 } else {
-                    setCheeseCreditSortColumn(column);
-                    setCheeseCreditSortDirection('asc');
+                    setCreditSalesSortColumn(column);
+                    setCreditSalesSortDirection('asc');
                 }
-                setCurrentCheeseCreditPage(1); // Reset to first page on sort change
+                setCurrentCreditSalesPage(1);
             };
 
             // Lógica de ordenación para inventario
@@ -1482,27 +1507,28 @@
                 return filteredAndSortedExpenses.slice(startIndex, endIndex);
             }, [filteredAndSortedExpenses, currentExpensesPage]);
             
-            // Memoized filtered and sorted cheese credit sales data
-            const filteredAndSortedCheeseCreditSales = useMemo(() => {
-                let tempCreditSales = [...cheeseCreditSales];
+            // Memoized filtered and sorted credit sales data (generalizado)
+            const filteredAndSortedCreditSales = useMemo(() => {
+                let tempCreditSales = [...creditSales];
 
-                // Filter by search term (customer name)
-                if (cheeseCreditSearchTerm) {
+                // Filter by search term (customer name or product name)
+                if (creditSalesSearchTerm) {
                     tempCreditSales = tempCreditSales.filter(sale =>
-                        sale.customerName.toLowerCase().includes(cheeseCreditSearchTerm.toLowerCase())
+                        sale.customerName.toLowerCase().includes(creditSalesSearchTerm.toLowerCase()) ||
+                        sale.productName.toLowerCase().includes(creditSalesSearchTerm.toLowerCase())
                     );
                 }
 
                 // Filter by status
-                if (cheeseCreditStatusFilter !== 'Todos') {
-                    tempCreditSales = tempCreditSales.filter(sale => sale.status === cheeseCreditStatusFilter);
+                if (creditSalesStatusFilter !== 'Todos') {
+                    tempCreditSales = tempCreditSales.filter(sale => sale.status === creditSalesStatusFilter);
                 }
 
                 // Sort
                 tempCreditSales.sort((a, b) => {
                     let aValue, bValue;
 
-                    switch (cheeseCreditSortColumn) {
+                    switch (creditSalesSortColumn) {
                         case 'date':
                             aValue = new Date(a.date);
                             bValue = new Date(b.date);
@@ -1515,24 +1541,28 @@
                             aValue = a.totalUSD;
                             bValue = b.totalUSD;
                             break;
+                        case 'productName': // Added sort by product name
+                            aValue = a.productName.toLowerCase();
+                            bValue = b.productName.toLowerCase();
+                            break;
                         default:
                             return 0;
                     }
 
-                    if (aValue < bValue) return cheeseCreditSortDirection === 'asc' ? -1 : 1;
-                    if (aValue > bValue) return cheeseCreditSortDirection === 'asc' ? 1 : -1;
+                    if (aValue < bValue) return creditSalesSortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return creditSalesSortDirection === 'asc' ? 1 : -1;
                     return 0;
                 });
                 return tempCreditSales;
-            }, [cheeseCreditSales, cheeseCreditSearchTerm, cheeseCreditStatusFilter, cheeseCreditSortColumn, cheeseCreditSortDirection]);
+            }, [creditSales, creditSalesSearchTerm, creditSalesStatusFilter, creditSalesSortColumn, creditSalesSortDirection]);
 
-            // Paginación de ventas de queso a crédito
-            const totalCheeseCreditPages = Math.ceil(filteredAndSortedCheeseCreditSales.length / ITEMS_PER_PAGE);
-            const paginatedCheeseCreditSales = useMemo(() => {
-                const startIndex = (currentCheeseCreditPage - 1) * ITEMS_PER_PAGE;
+            // Paginación de ventas a crédito (generalizado)
+            const totalCreditSalesPages = Math.ceil(filteredAndSortedCreditSales.length / ITEMS_PER_PAGE);
+            const paginatedCreditSales = useMemo(() => {
+                const startIndex = (currentCreditSalesPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
-                return filteredAndSortedCheeseCreditSales.slice(startIndex, endIndex);
-            }, [filteredAndSortedCheeseCreditSales, currentCheeseCreditPage]);
+                return filteredAndSortedCreditSales.slice(startIndex, endIndex);
+            }, [filteredAndSortedCreditSales, currentCreditSalesPage]);
 
             // Memoized filtered and sorted inventory data
             const filteredAndSortedInventory = useMemo(() => {
@@ -1642,6 +1672,13 @@
                         // Specific handling for profitability report
                         if (header === 'profitUSD' || header === 'profitPercentage') {
                             return String(row[header]).replace(/"/g, '""');
+                        }
+                        // Handle credit sales specific fields
+                        if (header === 'quantity' && row.unitType) {
+                            return `${row.quantity} ${row.unitType === 'gramos' ? 'g' : row.unitType}`;
+                        }
+                        if (header === 'amountPerUnit' && row.currencyPerUnit) {
+                            return `${row.amountPerUnit} ${row.currencyPerUnit}`;
                         }
                         return `"${String(row[header]).replace(/"/g, '""')}"`;
                     }).join(',') : Object.values(row).map(value => `"${String(value).replace(/"/g, '""')}"`).join(',');
@@ -1767,6 +1804,23 @@
 
                 return profitability.sort((a, b) => b.profitUSD - a.profitUSD); // Sort by profit descending
             }, [filteredSalesForReports, inventory, convertToUSD]);
+
+            // Effect to update creditAmountPerUnit and creditUnitType when creditProductName changes
+            useEffect(() => {
+                if (creditProductName) {
+                    const selectedProduct = inventory.find(item => item.name === creditProductName);
+                    if (selectedProduct) {
+                        setCreditUnitType(selectedProduct.stockUnitType);
+                        // Optionally pre-fill amountPerUnit with suggested selling price
+                        setCreditAmountPerUnit(selectedProduct.suggestedSellingPrice || '');
+                        setCreditCurrencyPerUnit(selectedProduct.suggestedSellingPriceCurrency || 'USD');
+                    }
+                } else {
+                    setCreditUnitType('unidades'); // Reset to default if no product selected
+                    setCreditAmountPerUnit('');
+                    setCreditCurrencyPerUnit('USD');
+                }
+            }, [creditProductName, inventory]);
 
 
             return (
@@ -2862,7 +2916,7 @@
                             )}
                         </div>
                         
-                        {/* Sección: Venta de Queso a Crédito */}
+                        {/* Sección: Gestión de Ventas a Crédito (Generalizado) */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
                                 <span className="section-heading-title">
@@ -2870,13 +2924,13 @@
                                     <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h12a2 2 0 0 1 0 4H5a2 2 0 0 0 0 4h12a2 2 0 0 0 2-2v-3"></path>
                                     <path d="M2 20v-3h.01"></path>
                                 </svg>
-                                Venta de Queso a Crédito 🧀
+                                Gestión de Ventas a Crédito
                                 </span>
                             </h2>
                             <p className="text-gray-700 text-base mb-6">
-                                * Se utilizará el "Precio por Kilo (USD)" de la calculadora de queso para el cálculo.
+                                Registra ventas que tus clientes te pagarán después. El stock se deducirá del inventario.
                             </p>
-                            <form onSubmit={handleAddCheeseCreditSale} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <form onSubmit={handleAddCreditSale} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
                                     <label htmlFor="creditCustomerName" className="block text-gray-700 text-base font-bold mb-2">Nombre del Cliente:</label>
                                     <input
@@ -2890,18 +2944,68 @@
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="creditCheeseWeightGrams" className="block text-gray-700 text-base font-bold mb-2">Peso (Gramos):</label>
+                                    <label htmlFor="creditProductName" className="block text-gray-700 text-base font-bold mb-2">Producto:</label>
+                                    <select
+                                        id="creditProductName"
+                                        value={creditProductName}
+                                        onChange={(e) => setCreditProductName(e.target.value)}
+                                        className="w-full"
+                                        required
+                                    >
+                                        <option value="">Seleccione un producto</option>
+                                        {inventory.map(item => (
+                                            <option key={item.id} value={item.name}>
+                                                {item.name} ({item.stockUnitType === 'unidades' ? 'unidades' : 'gramos'})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="creditQuantity" className="block text-gray-700 text-base font-bold mb-2">
+                                        Cantidad {creditUnitType === 'gramos' ? '(Gramos)' : ''}:
+                                    </label>
                                     <input
                                         type="number"
-                                        id="creditCheeseWeightGrams"
-                                        value={creditCheeseWeightGrams}
-                                        onChange={(e) => setCreditCheeseWeightGrams(e.target.value)}
-                                        placeholder="Ej: 655"
+                                        id="creditQuantity"
+                                        value={creditQuantity}
+                                        onChange={(e) => setCreditQuantity(e.target.value)}
+                                        placeholder={creditUnitType === 'gramos' ? "Peso en gramos" : "Cantidad"}
                                         min="0.01"
                                         step="0.01"
                                         className="w-full"
                                         required
                                     />
+                                </div>
+                                <div className="flex items-end space-x-4">
+                                    <div className="flex-grow">
+                                        <label htmlFor="creditAmountPerUnit" className="block text-gray-700 text-base font-bold mb-2">
+                                            Monto por {creditUnitType === 'gramos' ? 'Kilo' : 'Unidad'}:
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="creditAmountPerUnit"
+                                            value={creditAmountPerUnit}
+                                            onChange={(e) => setCreditAmountPerUnit(e.target.value)}
+                                            placeholder={creditUnitType === 'gramos' ? "Precio/kilo" : "Precio/unidad"}
+                                            min="0.01"
+                                            step="0.01"
+                                            className="w-full"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                        <label htmlFor="creditCurrencyPerUnit" className="sr-only">Moneda</label>
+                                        <select
+                                            id="creditCurrencyPerUnit"
+                                            value={creditCurrencyPerUnit}
+                                            onChange={(e) => setCreditCurrencyPerUnit(e.target.value)}
+                                            className="w-full py-3.5"
+                                            disabled={creditUnitType === 'gramos'} // Force USD if selling by grams (price per kilo is usually USD)
+                                        >
+                                            <option value="USD">USD</option>
+                                            <option value="VES">VES</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="md:col-span-2 mt-5">
                                     <button
@@ -2912,13 +3016,13 @@
                                             <line x1="12" y1="5" x2="12" y2="19"></line>
                                             <line x1="5" y1="12" x2="19" y2="12"></line>
                                         </svg>
-                                        Registrar Crédito
+                                        Registrar Venta a Crédito
                                     </button>
                                 </div>
                             </form>
                         </div>
                         
-                        {/* Historial de Venta de Queso a Crédito */}
+                        {/* Historial de Ventas a Crédito (Generalizado) */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                            <h2 className="section-heading">
                                 <span className="section-heading-title">
@@ -2929,33 +3033,33 @@
                                     <path d="M8 12H5"></path>
                                     <path d="M12 17H5"></path>
                                 </svg>
-                                Historial de Venta de Queso a Crédito
+                                Historial de Ventas a Crédito
                                 </span>
-                                {cheeseCreditSales.length > 0 && (
-                                    <button onClick={handleClearCheeseCreditSales} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                {creditSales.length > 0 && (
+                                    <button onClick={handleClearCreditSales} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
                                         Borrar Historial
                                     </button>
                                 )}
                             </h2>
-                            {/* Cheese Credit Sales Filters */}
+                            {/* Credit Sales Filters */}
                             <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="cheeseCreditSearch" className="block text-gray-700 text-sm font-bold mb-1">Buscar Cliente:</label>
+                                    <label htmlFor="creditSalesSearch" className="block text-gray-700 text-sm font-bold mb-1">Buscar Cliente/Producto:</label>
                                     <input
                                         type="text"
-                                        id="cheeseCreditSearch"
-                                        value={cheeseCreditSearchTerm}
-                                        onChange={(e) => setCheeseCreditSearchTerm(e.target.value)}
-                                        placeholder="Nombre del cliente"
+                                        id="creditSalesSearch"
+                                        value={creditSalesSearchTerm}
+                                        onChange={(e) => setCreditSalesSearchTerm(e.target.value)}
+                                        placeholder="Nombre del cliente o producto"
                                         className="w-full text-base"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="cheeseCreditStatusFilter" className="block text-gray-700 text-sm font-bold mb-1">Filtrar por Estado:</label>
+                                    <label htmlFor="creditSalesStatusFilter" className="block text-gray-700 text-sm font-bold mb-1">Filtrar por Estado:</label>
                                     <select
-                                        id="cheeseCreditStatusFilter"
-                                        value={cheeseCreditStatusFilter}
-                                        onChange={(e) => setCheeseCreditStatusFilter(e.target.value)}
+                                        id="creditSalesStatusFilter"
+                                        value={creditSalesStatusFilter}
+                                        onChange={(e) => setCreditSalesStatusFilter(e.target.value)}
                                         className="w-full text-base"
                                     >
                                         <option value="Todos">Todos</option>
@@ -2965,23 +3069,27 @@
                                     </select>
                                 </div>
                             </div>
-                            {paginatedCheeseCreditSales.length === 0 ? (
-                                <p className="text-gray-600 text-center py-7 text-lg">No hay registros de crédito de queso que coincidan con los filtros.</p>
+                            {paginatedCreditSales.length === 0 ? (
+                                <p className="text-gray-600 text-center py-7 text-lg">No hay registros de ventas a crédito que coincidan con los filtros.</p>
                             ) : (
                                 <>
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full">
                                             <thead>
                                                 <tr>
-                                                    <th onClick={() => handleCheeseCreditSort('date')}>
-                                                        Fecha {cheeseCreditSortColumn === 'date' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                    <th onClick={() => handleCreditSalesSort('date')}>
+                                                        Fecha {creditSalesSortColumn === 'date' && (creditSalesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th onClick={() => handleCheeseCreditSort('customerName')}>
-                                                        Cliente {cheeseCreditSortColumn === 'customerName' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                    <th onClick={() => handleCreditSalesSort('customerName')}>
+                                                        Cliente {creditSalesSortColumn === 'customerName' && (creditSalesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
-                                                    <th>Peso (g)</th>
-                                                    <th onClick={() => handleCheeseCreditSort('totalUSD')}>
-                                                        Monto Total (USD) {cheeseCreditSortColumn === 'totalUSD' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                    <th onClick={() => handleCreditSalesSort('productName')}>
+                                                        Producto {creditSalesSortColumn === 'productName' && (creditSalesSortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th>Cantidad</th>
+                                                    <th>Monto/Unidad</th>
+                                                    <th onClick={() => handleCreditSalesSort('totalUSD')}>
+                                                        Monto Total (USD) {creditSalesSortColumn === 'totalUSD' && (creditSalesSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
                                                     <th>Pagado (USD)</th>
                                                     <th>Adeudado (USD)</th>
@@ -2990,11 +3098,13 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {paginatedCheeseCreditSales.map((sale) => (
+                                                {paginatedCreditSales.map((sale) => (
                                                     <tr key={sale.id}>
                                                         <td>{sale.date}</td>
                                                         <td>{sale.customerName}</td>
-                                                        <td>{sale.weightGrams} g</td>
+                                                        <td>{sale.productName}</td>
+                                                        <td>{sale.quantity} {sale.unitType === 'gramos' ? 'g' : sale.unitType}</td>
+                                                        <td>{sale.amountPerUnit.toFixed(2)} {sale.currencyPerUnit}</td>
                                                         <td>
                                                             ${sale.totalUSD.toFixed(2)} USD
                                                             <span className="text-xs text-gray-500 block font-normal">
@@ -3024,7 +3134,7 @@
                                                                 </button>
                                                             )}
                                                             <button
-                                                                onClick={() => handleDeleteCheeseCreditSale(sale.id)}
+                                                                onClick={() => handleDeleteCreditSale(sale.id)}
                                                                 className="text-rose-600 hover:text-rose-800 p-2 text-xs"
                                                             >
                                                                 Eliminar
@@ -3036,35 +3146,35 @@
                                         </table>
                                     </div>
                                     <div className="flex justify-between items-center mt-6">
-                                        {filteredAndSortedCheeseCreditSales.length > 0 && (
+                                        {filteredAndSortedCreditSales.length > 0 && (
                                             <button
-                                                onClick={() => exportToCSV(filteredAndSortedCheeseCreditSales, 'ventas_credito_queso.csv', ['id', 'date', 'customerName', 'weightGrams', 'pricePerKiloUSD', 'totalUSD', 'paidAmount', 'status'])}
+                                                onClick={() => exportToCSV(filteredAndSortedCreditSales, 'ventas_credito.csv', ['id', 'date', 'customerName', 'productName', 'quantity', 'unitType', 'amountPerUnit', 'currencyPerUnit', 'totalUSD', 'paidAmount', 'status'])}
                                                 className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm"
                                             >
                                                 Exportar a CSV
                                             </button>
                                         )}
-                                        {filteredAndSortedCheeseCreditSales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                        {filteredAndSortedCreditSales.length > ITEMS_PER_PAGE && (
                                             <div className="pagination-container">
                                                 <button
-                                                    onClick={() => setCurrentCheeseCreditPage(prev => Math.max(prev - 1, 1))}
-                                                    disabled={currentCheeseCreditPage === 1}
+                                                    onClick={() => setCurrentCreditSalesPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentCreditSalesPage === 1}
                                                     className="pagination-button"
                                                 >
                                                     Anterior
                                                 </button>
-                                                {Array.from({ length: totalCheeseCreditPages }, (_, i) => i + 1).map(page => (
+                                                {Array.from({ length: totalCreditSalesPages }, (_, i) => i + 1).map(page => (
                                                     <button
                                                         key={page}
-                                                        onClick={() => setCurrentCheeseCreditPage(page)}
-                                                        className={`pagination-button ${currentCheeseCreditPage === page ? 'active' : ''}`}
+                                                        onClick={() => setCurrentCreditSalesPage(page)}
+                                                        className={`pagination-button ${currentCreditSalesPage === page ? 'active' : ''}`}
                                                     >
                                                         {page}
                                                     </button>
                                                 ))}
                                                 <button
-                                                    onClick={() => setCurrentCheeseCreditPage(prev => Math.min(prev + 1, totalCheeseCreditPages))}
-                                                    disabled={currentCheeseCreditPage === totalCheeseCreditPages}
+                                                    onClick={() => setCurrentCreditSalesPage(prev => Math.min(prev + 1, totalCreditSalesPages))}
+                                                    disabled={currentCreditSalesPage === totalCreditSalesPages}
                                                     className="pagination-button"
                                                 >
                                                     Siguiente
@@ -3476,7 +3586,7 @@
                                                 ))}
                                             </ul>
                                             <button
-                                                onClick={() => exportToCSV(expensesSummaryByCategory.map(([category, total]) => ({ category, totalUSD: total })), 'gastos_por_categoria.csv', ['category', 'totalUSD'])}
+                                                onClick={() => exportToCSV(expensesSummaryByCategory.map(([category, total]) => ({ category, totalUSD: total }), 'gastos_por_categoria.csv', ['category', 'totalUSD']))}
                                                 className="mt-4 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm w-full"
                                             >
                                                 Exportar a CSV
