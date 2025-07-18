@@ -503,9 +503,6 @@
             // Estados de búsqueda y filtro para ventas a crédito (generalizado)
             const [creditSalesSearchTerm, setCreditSalesSearchTerm] = useState(''); // Changed from cheeseCreditSearchTerm
             const [creditSalesStatusFilter, setCreditSalesStatusFilter] = useState('Todos'); // Changed from cheeseCreditStatusFilter
-            // Estado para la edición de ventas a crédito
-            const [editingCreditSaleId, setEditingCreditSaleId] = useState(null);
-
 
             // NUEVOS ESTADOS PARA INVENTARIO
             const [inventory, setInventory] = useState(() => {
@@ -808,8 +805,8 @@
                 setExpenseCurrency('USD');        
             };
             
-            // Manejador para añadir o actualizar una venta a crédito (generalizado)
-            const handleAddOrUpdateCreditSale = (e) => {
+            // Manejador para añadir una nueva venta a crédito (generalizado)
+            const handleAddCreditSale = (e) => {
                 e.preventDefault();
                 const parsedCreditQuantity = parseFloat(creditQuantity);
                 const parsedCreditAmountPerUnit = parseFloat(creditAmountPerUnit);
@@ -831,121 +828,59 @@
                     return;
                 }
 
-                const newSelectedProduct = inventory.find(item => item.name === creditProductName);
-                if (!newSelectedProduct) {
-                    showMessage('Producto seleccionado no encontrado en el inventario.', 'error');
+                const selectedProduct = inventory.find(item => item.name === creditProductName);
+                if (!selectedProduct) {
+                    showMessage('Producto no encontrado en el inventario.', 'error');
                     return;
                 }
 
-                let newTotalUSD;
-                if (newSelectedProduct.stockUnitType === 'gramos' && creditUnitType === 'peso_g') {
-                    newTotalUSD = (parsedCreditQuantity / 1000) * parsedCreditAmountPerUnit;
-                } else {
-                    newTotalUSD = parsedCreditQuantity * convertToUSD(parsedCreditAmountPerUnit, creditCurrencyPerUnit);
+                // Check inventory stock
+                const inventoryIndex = inventory.findIndex(
+                    invItem => invItem.name === selectedProduct.name && invItem.stockUnitType === selectedProduct.stockUnitType
+                );
+
+                if (inventoryIndex === -1) {
+                    showMessage(`El producto "${selectedProduct.name}" no se encontró en el inventario con la unidad de medida correcta.`, 'error');
+                    return;
                 }
 
-                let updatedInventory = [...inventory]; // Create a mutable copy
-
-                if (editingCreditSaleId) {
-                    // --- EDIT MODE ---
-                    const originalSale = creditSales.find(sale => sale.id === editingCreditSaleId);
-                    if (!originalSale) {
-                        showMessage('Venta a crédito original no encontrada para edición.', 'error');
-                        return;
-                    }
-
-                    const originalProduct = inventory.find(item => item.name === originalSale.productName);
-                    if (!originalProduct) {
-                        // This case should ideally not happen if inventory is well-managed
-                        showMessage('Producto original de la venta a crédito no encontrado en inventario. No se puede ajustar stock.', 'error');
-                        return;
-                    }
-
-                    // 1. Replenish stock for the ORIGINAL sale's product and quantity
-                    const originalProductIndex = updatedInventory.findIndex(item => item.id === originalProduct.id);
-                    if (originalProductIndex !== -1) {
-                        updatedInventory[originalProductIndex].stockQuantity += originalSale.quantity;
-                    } else {
-                        console.warn(`Original product ${originalProduct.name} not found in current inventory for replenishment. Skipping replenishment.`);
-                    }
-
-                    // 2. Deduct stock for the NEW sale's product and quantity
-                    const newProductIndex = updatedInventory.findIndex(item => item.id === newSelectedProduct.id);
-                    if (newProductIndex === -1) {
-                        showMessage(`El producto "${newSelectedProduct.name}" no se encontró en el inventario para la nueva deducción.`, 'error');
-                        // Revert original replenishment if new product not found
-                        if (originalProductIndex !== -1) {
-                            updatedInventory[originalProductIndex].stockQuantity -= originalSale.quantity;
-                        }
-                        return;
-                    }
-
-                    if (updatedInventory[newProductIndex].stockQuantity < parsedCreditQuantity) {
-                        showMessage(`Stock insuficiente para "${newSelectedProduct.name}". Disponible: ${updatedInventory[newProductIndex].stockQuantity.toFixed(2)} ${newSelectedProduct.stockUnitType}.`, 'error');
-                        // Revert original replenishment if new stock is insufficient
-                        if (originalProductIndex !== -1) {
-                            updatedInventory[originalProductIndex].stockQuantity -= originalSale.quantity;
-                        }
-                        return;
-                    }
-                    updatedInventory[newProductIndex].stockQuantity -= parsedCreditQuantity;
-
-                    // Update the credit sale record
-                    setCreditSales(prevSales => prevSales.map(sale =>
-                        sale.id === editingCreditSaleId
-                            ? {
-                                ...sale,
-                                // Keep original date, don't update to today's date on edit
-                                customerName: creditCustomerName.trim(),
-                                productName: newSelectedProduct.name,
-                                quantity: parsedCreditQuantity,
-                                unitType: newSelectedProduct.stockUnitType,
-                                amountPerUnit: parsedCreditAmountPerUnit,
-                                currencyPerUnit: creditCurrencyPerUnit,
-                                totalUSD: newTotalUSD,
-                                // Keep paidAmount and status as they are, unless explicit change is requested
-                            }
-                            : sale
-                    ));
-                    showMessage('Venta a crédito actualizada y stock ajustado.', 'success');
-                    setEditingCreditSaleId(null); // Exit edit mode
-
-                } else {
-                    // --- ADD MODE (existing logic) ---
-                    const inventoryIndex = updatedInventory.findIndex(
-                        invItem => invItem.name === newSelectedProduct.name && invItem.stockUnitType === newSelectedProduct.stockUnitType
-                    );
-
-                    if (inventoryIndex === -1) {
-                        showMessage(`El producto "${newSelectedProduct.name}" no se encontró en el inventario con la unidad de medida correcta.`, 'error');
-                        return;
-                    }
-                    const currentStock = updatedInventory[inventoryIndex].stockQuantity;
-                    if (currentStock < parsedCreditQuantity) {
-                        showMessage(`Stock insuficiente para "${newSelectedProduct.name}". Disponible: ${currentStock.toFixed(2)} ${newSelectedProduct.stockUnitType}.`, 'error');
-                        return;
-                    }
-                    updatedInventory[inventoryIndex].stockQuantity -= parsedCreditQuantity;
-
-                    const newCreditSale = {
-                        id: Date.now(),
-                        date: new Date().toISOString().slice(0, 10),
-                        customerName: creditCustomerName.trim(),
-                        productName: newSelectedProduct.name,
-                        quantity: parsedCreditQuantity,
-                        unitType: newSelectedProduct.stockUnitType,
-                        amountPerUnit: parsedCreditAmountPerUnit,
-                        currencyPerUnit: creditCurrencyPerUnit,
-                        totalUSD: newTotalUSD,
-                        paidAmount: 0,
-                        status: 'Pendiente',
-                    };
-                    setCreditSales(prevSales => [...prevSales, newCreditSale]);
-                    showMessage('Venta a crédito registrada y stock actualizado.', 'success');
+                const currentStock = inventory[inventoryIndex].stockQuantity;
+                if (currentStock < parsedCreditQuantity) {
+                    showMessage(`Stock insuficiente para "${selectedProduct.name}". Disponible: ${currentStock.toFixed(2)} ${selectedProduct.stockUnitType}.`, 'error');
+                    return;
                 }
 
-                setInventory(updatedInventory); // Update inventory state
-                setCurrentCreditSalesPage(1); // Reset to first page
+                let totalUSD;
+                if (selectedProduct.stockUnitType === 'gramos' && creditUnitType === 'peso_g') {
+                    // If product is in grams and sale is by weight, amount is per kilo USD
+                    totalUSD = (parsedCreditQuantity / 1000) * parsedCreditAmountPerUnit;
+                } else {
+                    // For units or if grams product is sold by gram price
+                    totalUSD = parsedCreditQuantity * convertToUSD(parsedCreditAmountPerUnit, creditCurrencyPerUnit);
+                }
+                
+                const newCreditSale = {
+                    id: Date.now(),
+                    date: new Date().toISOString().slice(0, 10), // Fecha actual
+                    customerName: creditCustomerName.trim(),
+                    productName: selectedProduct.name, // Store product name
+                    quantity: parsedCreditQuantity,
+                    unitType: selectedProduct.stockUnitType, // Store unit type from inventory
+                    amountPerUnit: parsedCreditAmountPerUnit, // Store the amount entered
+                    currencyPerUnit: creditCurrencyPerUnit, // Store the currency entered
+                    totalUSD: totalUSD,
+                    paidAmount: 0,
+                    status: 'Pendiente',
+                };
+
+                // Deduct stock from inventory
+                const updatedInventory = [...inventory];
+                updatedInventory[inventoryIndex].stockQuantity -= parsedCreditQuantity;
+                setInventory(updatedInventory);
+
+                setCreditSales(prevSales => [...prevSales, newCreditSale]); // Changed from setCheeseCreditSales
+                showMessage('Venta a crédito registrada y stock actualizado.', 'success');
+                setCurrentCreditSalesPage(1); // Reset to first page after adding
 
                 // Clear form fields
                 setCreditCustomerName('');
@@ -956,28 +891,44 @@
                 setCreditUnitType('unidades');
             };
 
-            // Manejador para cargar una venta a crédito para edición
-            const handleEditCreditSale = (sale) => {
-                setEditingCreditSaleId(sale.id);
-                setCreditCustomerName(sale.customerName);
-                setCreditProductName(sale.productName);
-                setCreditQuantity(sale.quantity);
-                setCreditAmountPerUnit(sale.amountPerUnit);
-                setCreditCurrencyPerUnit(sale.currencyPerUnit);
-                setCreditUnitType(sale.unitType); // Pre-fill unit type
-                showMessage('Editando venta a crédito. Modifica los campos y haz clic en "Actualizar".', 'info');
-            };
+            // Manejador para registrar un pago a una venta a crédito
+            const handleRegisterCreditPayment = (e) => {
+                e.preventDefault();
+                const parsedPaymentAmount = parseFloat(paymentAmount);
 
-            // Manejador para cancelar la edición de una venta a crédito
-            const handleCancelCreditSaleEdit = () => {
-                setEditingCreditSaleId(null);
-                setCreditCustomerName('');
-                setCreditProductName('');
-                setCreditQuantity('');
-                setCreditAmountPerUnit('');
-                setCreditCurrencyPerUnit('USD');
-                setCreditUnitType('unidades');
-                showMessage('Edición de venta a crédito cancelada.', 'info');
+                if (isNaN(parsedPaymentAmount) || parsedPaymentAmount <= 0) {
+                    showMessage('Por favor, ingresa un monto de pago válido (número mayor que cero).', 'error');
+                    return;
+                }
+
+                setCreditSales(prevSales => prevSales.map(sale => { // Changed from setCheeseCreditSales
+                    if (sale.id === payingCreditSaleId) {
+                        const newPaidAmount = sale.paidAmount + parsedPaymentAmount;
+                        const remaining = sale.totalUSD - newPaidAmount;
+                        let newStatus = 'Pendiente';
+                        if (remaining <= 0.01) { // Allow for small floating point inaccuracies
+                            newStatus = 'Pagado';
+                        } else if (newPaidAmount > 0) {
+                            newStatus = 'Pagado Parcial';
+                        }
+
+                        if (newPaidAmount > sale.totalUSD + 0.01) { // Check for overpayment
+                            showMessage(`El monto de pago excede el total adeudado. Monto adeudado: $${(sale.totalUSD - sale.paidAmount).toFixed(2)} USD.`, 'error');
+                            return sale; // Do not update if overpayment
+                        }
+
+                        return {
+                            ...sale,
+                            paidAmount: newPaidAmount,
+                            status: newStatus,
+                        };
+                    }
+                    return sale;
+                }));
+
+                showMessage('Pago registrado exitosamente.', 'success');
+                setPayingCreditSaleId(null);
+                setPaymentAmount('');
             };
 
 
@@ -1856,7 +1807,7 @@
 
             // Effect to update creditAmountPerUnit and creditUnitType when creditProductName changes
             useEffect(() => {
-                if (!editingCreditSaleId && creditProductName) { // Only auto-fill if not in edit mode
+                if (creditProductName) {
                     const selectedProduct = inventory.find(item => item.name === creditProductName);
                     if (selectedProduct) {
                         setCreditUnitType(selectedProduct.stockUnitType);
@@ -1864,12 +1815,12 @@
                         setCreditAmountPerUnit(selectedProduct.suggestedSellingPrice || '');
                         setCreditCurrencyPerUnit(selectedProduct.suggestedSellingPriceCurrency || 'USD');
                     }
-                } else if (!creditProductName && !editingCreditSaleId) {
-                    setCreditUnitType('unidades'); // Reset to default if no product selected and not editing
+                } else {
+                    setCreditUnitType('unidades'); // Reset to default if no product selected
                     setCreditAmountPerUnit('');
                     setCreditCurrencyPerUnit('USD');
                 }
-            }, [creditProductName, inventory, editingCreditSaleId]);
+            }, [creditProductName, inventory]);
 
 
             return (
@@ -2979,7 +2930,7 @@
                             <p className="text-gray-700 text-base mb-6">
                                 Registra ventas que tus clientes te pagarán después. El stock se deducirá del inventario.
                             </p>
-                            <form onSubmit={handleAddOrUpdateCreditSale} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <form onSubmit={handleAddCreditSale} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
                                     <label htmlFor="creditCustomerName" className="block text-gray-700 text-base font-bold mb-2">Nombre del Cliente:</label>
                                     <input
@@ -3065,17 +3016,8 @@
                                             <line x1="12" y1="5" x2="12" y2="19"></line>
                                             <line x1="5" y1="12" x2="19" y2="12"></line>
                                         </svg>
-                                        {editingCreditSaleId ? 'Actualizar Venta a Crédito' : 'Registrar Venta a Crédito'}
+                                        Registrar Venta a Crédito
                                     </button>
-                                    {editingCreditSaleId && (
-                                        <button
-                                            type="button"
-                                            onClick={handleCancelCreditSaleEdit}
-                                            className="mt-4 w-full bg-gray-400 text-white py-3.5 px-8 rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 text-lg flex items-center justify-center"
-                                        >
-                                            Cancelar Edición
-                                        </button>
-                                    )}
                                 </div>
                             </form>
                         </div>
@@ -3191,12 +3133,6 @@
                                                                     Registrar Pago
                                                                 </button>
                                                             )}
-                                                            <button
-                                                                onClick={() => handleEditCreditSale(sale)}
-                                                                className="text-indigo-600 hover:text-indigo-800 p-2 text-xs mr-2"
-                                                            >
-                                                                Editar
-                                                            </button>
                                                             <button
                                                                 onClick={() => handleDeleteCreditSale(sale.id)}
                                                                 className="text-rose-600 hover:text-rose-800 p-2 text-xs"
