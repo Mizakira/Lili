@@ -209,7 +209,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06); /* Sombra sutil para un efecto "flotante" */
             transition: all 0.25s ease-in-out;
         }
-         tbody td {
+        tbody td {
             font-size: 0.9rem; /* REDUCIDO: Tamaño de fuente en celdas del cuerpo */
         }
         tbody tr:hover {
@@ -407,14 +407,23 @@
             // Estado para ventas de queso a crédito, cargados desde localStorage
             const [cheeseCreditSales, setCheeseCreditSales] = useState(() => {
                 const savedCreditSales = localStorage.getItem('cheeseCreditSales');
-                return savedCreditSales ? JSON.parse(savedCreditSales) : [];
+                // Add new fields for existing data if they don't exist
+                if (savedCreditSales) {
+                    const parsedSales = JSON.parse(savedCreditSales);
+                    return parsedSales.map(sale => ({
+                        ...sale,
+                        paidAmount: sale.paidAmount !== undefined ? sale.paidAmount : 0,
+                        status: sale.status || 'Pendiente'
+                    }));
+                }
+                return [];
             });
 
             // Estados del formulario de ventas para múltiples productos
             const [saleDate, setSaleDate] = useState('');
             const [saleItems, setSaleItems] = useState([{ product: '', quantity: '', amount: '', currency: 'USD', unitType: 'unidades' }]);
-            const [salePaymentMethod, setSalePaymentMethod] = useState('');     
-            const [saleOperationNumber, setSaleOperationNumber] = useState('');     
+            const [salePaymentMethod, setSalePaymentMethod] = useState('');        
+            const [saleOperationNumber, setSaleOperationNumber] = useState('');        
             // Nuevo estado para el tipo de venta (unidades o peso) - this now applies per item
             // Retaining saleTypeForSale to control the default type for new items
             const [saleTypeForSale, setSaleTypeForSale] = useState('unidades');
@@ -422,23 +431,23 @@
             // Estados del formulario de gastos
             const [expenseDate, setExpenseDate] = useState('');
             const [expenseCategory, setExpenseCategory] = useState('');
-            const [expenseAmount, setExpenseAmount] = useState('');     
-            const [expenseCurrency, setExpenseCurrency] = useState('USD');     
+            const [expenseAmount, setExpenseAmount] = useState('');        
+            const [expenseCurrency, setExpenseCurrency] = useState('USD');        
             // Removed expensePaymentMethod and expenseOperationNumber from state as they are not used in expense form
 
             // ESTADOS para la Calculadora de Precios de Venta por Unidad (General)
-            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice');     
-            const [totalCostPrice, setTotalCostPrice] = useState('');     
-            const [purchaseQuantity, setPurchaseQuantity] = useState('');     
-            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades');     
-            const [profitPercentage, setProfitPercentage] = useState('');     
+            const [calculatorMode, setCalculatorMode] = useState('calculateSellingPrice');        
+            const [totalCostPrice, setTotalCostPrice] = useState('');        
+            const [purchaseQuantity, setPurchaseQuantity] = useState('');        
+            const [purchaseMeasurementUnit, setPurchaseMeasurementUnit] = useState('unidades');        
+            const [profitPercentage, setProfitPercentage] = useState('');        
             
-            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState('');     
-            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD');     
+            const [desiredSellingPriceInput, setDesiredSellingPriceInput] = useState('');        
+            const [desiredSellingPriceCurrency, setDesiredSellingPriceCurrency] = useState('USD');        
             
-            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null);     
-            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null);     
-            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null);     
+            const [calculatedCostPerUnit, setCalculatedCostPerUnit] = useState(null);        
+            const [calculatedSellingPricePerUnit, setCalculatedSellingPricePerUnit] = useState(null);        
+            const [calculatedProfitPercentageResult, setCalculatedProfitPercentageResult] = useState(null);        
 
             // Estado para la calculadora de Queso
             const [cheeseWeightGrams, setCheeseWeightGrams] = useState('');
@@ -449,46 +458,97 @@
             // Nuevos estados para el formulario de venta de queso a crédito
             const [creditCustomerName, setCreditCustomerName] = useState('');
             const [creditCheeseWeightGrams, setCreditCheeseWeightGrams] = useState('');
+            const [payingCreditSaleId, setPayingCreditSaleId] = useState(null); // ID de la venta a crédito que se está pagando
+            const [paymentAmount, setPaymentAmount] = useState('');
 
             // Estado para mensajes de usuario
             const [message, setMessage] = useState('');
-            const [messageType, setMessageType] = useState('');     
-            const [showMessageBox, setShowMessageBox] = useState(false);     
+            const [messageType, setMessageType] = useState('');        
+            const [showMessageBox, setShowMessageBox] = useState(false);        
 
             // Nuevos estados para el modal de confirmación
             const [showConfirmModal, setShowConfirmModal] = useState(false);
             const [modalMessage, setModalMessage] = useState('');
-            const [onConfirmAction, setOnConfirmAction] = useState(null);     
+            const [onConfirmAction, setOnConfirmAction] = useState(null);        
 
             // Estados de ordenación para ventas
             const [salesSortColumn, setSalesSortColumn] = useState('date');
             const [salesSortDirection, setSalesSortDirection] = useState('desc'); // 'asc' o 'desc'
             // Estados de paginación para ventas
             const [currentSalesPage, setCurrentSalesPage] = useState(1);
+            // Estados de búsqueda y filtro para ventas
+            const [salesSearchTerm, setSalesSearchTerm] = useState('');
+            const [salesStartDate, setSalesStartDate] = useState('');
+            const [salesEndDate, setSalesEndDate] = useState('');
 
             // Estados de ordenación para gastos
             const [expensesSortColumn, setExpensesSortColumn] = useState('date');
             const [expensesSortDirection, setExpensesSortDirection] = useState('desc'); // 'asc' o 'desc'
             // Estados de paginación para gastos
             const [currentExpensesPage, setCurrentExpensesPage] = useState(1);
+            // Estados de búsqueda y filtro para gastos
+            const [expensesSearchTerm, setExpensesSearchTerm] = useState('');
+            const [expensesStartDate, setExpensesStartDate] = useState('');
+            const [expensesEndDate, setExpensesEndDate] = useState('');
 
             // Estados de ordenación para ventas de queso a crédito
             const [cheeseCreditSortColumn, setCheeseCreditSortColumn] = useState('date');
             const [cheeseCreditSortDirection, setCheeseCreditSortDirection] = useState('desc');
             // Estados de paginación para ventas de queso a crédito
             const [currentCheeseCreditPage, setCurrentCheeseCreditPage] = useState(1);
+            // Estados de búsqueda y filtro para ventas a crédito
+            const [cheeseCreditSearchTerm, setCheeseCreditSearchTerm] = useState('');
+            const [cheeseCreditStatusFilter, setCheeseCreditStatusFilter] = useState('Todos'); // 'Todos', 'Pendiente', 'Pagado Parcial', 'Pagado'
+
+            // NUEVOS ESTADOS PARA INVENTARIO
+            const [inventory, setInventory] = useState(() => {
+                const savedInventory = localStorage.getItem('inventory');
+                // Add new fields for existing data if they don't exist
+                if (savedInventory) {
+                    const parsedInventory = JSON.parse(savedInventory);
+                    return parsedInventory.map(item => ({
+                        ...item,
+                        minStockAlert: item.minStockAlert !== undefined ? item.minStockAlert : 0, // Default to 0 for no alert
+                        category: item.category || 'General', // Default category
+                        totalCostPurchaseCurrency: item.totalCostPurchaseCurrency || 'USD',
+                        suggestedSellingPriceCurrency: item.suggestedSellingPriceCurrency || 'USD',
+                    }));
+                }
+                return [];
+            });
+            const [newInventoryItem, setNewInventoryItem] = useState({
+                name: '',
+                stockQuantity: '',
+                stockUnitType: 'unidades', // 'unidades' o 'gramos'
+                totalCostPurchase: '', // Nuevo campo para el costo total de compra
+                totalCostPurchaseCurrency: 'USD', // Nueva moneda para el costo total de compra
+                suggestedSellingPrice: '', // Nuevo campo para el precio de venta sugerido
+                suggestedSellingPriceCurrency: 'USD', // Nueva moneda para el precio de venta sugerido
+                minStockAlert: '', // Nuevo campo para alerta de stock mínimo
+                category: 'General', // Nueva categoría
+            });
+            const [editingInventoryItem, setEditingInventoryItem] = useState(null); // null o el ID del item a editar
+
+            // Estados de ordenación para inventario
+            const [inventorySortColumn, setInventorySortColumn] = useState('name');
+            const [inventorySortDirection, setInventorySortDirection] = useState('asc');
+            // Estados de paginación para inventario
+            const [currentInventoryPage, setCurrentInventoryPage] = useState(1);
+            // Estados de búsqueda y filtro para inventario
+            const [inventorySearchTerm, setInventorySearchTerm] = useState('');
+            const [inventoryCategoryFilter, setInventoryCategoryFilter] = useState('Todas');
 
 
             // Muestra mensajes temporales al usuario
             const showMessage = (msg, type) => {
                 setMessage(msg);
                 setMessageType(type);
-                setShowMessageBox(true);     
+                setShowMessageBox(true);        
                 setTimeout(() => {
-                    setShowMessageBox(false);     
-                    setMessage('');     
+                    setShowMessageBox(false);        
+                    setMessage('');        
                     setMessageType('');
-                }, 5000);     
+                }, 5000);        
             };
 
             // Función para cerrar el mensaje manualmente
@@ -501,23 +561,23 @@
             // Función para abrir el modal de confirmación
             const openConfirmModal = (message, callback) => {
                 setModalMessage(message);
-                setOnConfirmAction(() => callback);     
+                setOnConfirmAction(() => callback);        
                 setShowConfirmModal(true);
             };
 
             // Manejador para confirmar la acción en el modal
             const handleConfirm = () => {
                 if (onConfirmAction) {
-                    onConfirmAction();     
+                    onConfirmAction();        
                 }
-                setShowConfirmModal(false);     
-                setOnConfirmAction(null);     
+                setShowConfirmModal(false);        
+                setOnConfirmAction(null);        
             };
 
             // Manejador para cancelar la acción en el modal
             const handleCancel = () => {
-                setShowConfirmModal(false);     
-                setOnConfirmAction(null);     
+                setShowConfirmModal(false);        
+                setOnConfirmAction(null);        
             };
 
             // Guarda la tasa de cambio en localStorage cada vez que cambia
@@ -540,6 +600,11 @@
                 localStorage.setItem('cheeseCreditSales', JSON.stringify(cheeseCreditSales));
             }, [cheeseCreditSales]);
 
+            // Guarda el inventario en localStorage cada vez que cambia
+            useEffect(() => {
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+            }, [inventory]);
+
 
             // Manejador para añadir un nuevo producto a la lista de venta actual
             const handleAddSaleItem = () => {
@@ -555,6 +620,19 @@
             const handleSaleItemChange = (index, field, value) => {
                 const updatedItems = saleItems.map((item, idx) => {
                     if (index === idx) {
+                        if (field === 'product') {
+                            const selectedInventoryItem = inventory.find(invItem => invItem.name === value);
+                            if (selectedInventoryItem) {
+                                return {
+                                    ...item,
+                                    product: value,
+                                    unitType: selectedInventoryItem.stockUnitType,
+                                    // Optionally pre-fill amount with suggested selling price
+                                    amount: selectedInventoryItem.suggestedSellingPrice || '',
+                                    currency: selectedInventoryItem.suggestedSellingPriceCurrency || 'USD' // Use the currency from inventory
+                                };
+                            }
+                        }
                         // If changing unitType for a peso_g item, currency must be USD
                         if (field === 'unitType' && value === 'peso_g') {
                             return { ...item, [field]: value, currency: 'USD' };
@@ -568,7 +646,7 @@
 
             // Manejador para añadir una nueva venta
             const handleAddSale = (e) => {
-                e.preventDefault();     
+                e.preventDefault();        
 
                 // Validate overall sale properties first
                 if (!saleDate) {
@@ -589,8 +667,10 @@
                     return;
                 }
 
-                // Validate each item in saleItems
+                // Validate each item in saleItems and check inventory
                 const validatedItems = [];
+                const updatedInventory = [...inventory]; // Create a mutable copy
+
                 for (const item of saleItems) {
                     if (!item.product.trim()) {
                         showMessage('El nombre de un producto no puede estar vacío.', 'error');
@@ -616,6 +696,26 @@
                         return;
                     }
 
+                    // Inventory deduction logic
+                    const inventoryIndex = updatedInventory.findIndex(
+                        invItem => invItem.name.toLowerCase() === item.product.trim().toLowerCase() &&
+                                   (invItem.stockUnitType === item.unitType || (invItem.stockUnitType === 'gramos' && item.unitType === 'peso_g'))
+                    );
+
+                    if (inventoryIndex === -1) {
+                        showMessage(`El producto "${item.product.trim()}" no se encontró en el inventario con la unidad de medida correcta.`, 'error');
+                        return;
+                    }
+
+                    const currentStock = updatedInventory[inventoryIndex].stockQuantity;
+                    if (currentStock < parsedQuantity) {
+                        showMessage(`Stock insuficiente para "${item.product.trim()}". Disponible: ${currentStock.toFixed(2)} ${updatedInventory[inventoryIndex].stockUnitType}.`, 'error');
+                        return;
+                    }
+
+                    // Deduct from stock
+                    updatedInventory[inventoryIndex].stockQuantity -= parsedQuantity;
+
                     // Adjust product label if it's a 'peso' sale type
                     let storedProductLabel = item.product.trim();
                     let itemCurrency = item.currency;
@@ -635,28 +735,29 @@
                 }
 
                 const newSale = {
-                    id: Date.now(),     
+                    id: Date.now(),        
                     date: saleDate,
-                    paymentMethod: salePaymentMethod,     
-                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '',     
+                    paymentMethod: salePaymentMethod,        
+                    operationNumber: salePaymentMethod === 'Pago Móvil' ? saleOperationNumber.trim() : '',        
                     items: validatedItems, // Store the array of validated items
                 };
                 
-                setSales(prevSales => [...prevSales, newSale]);     
-                showMessage('Venta agregada exitosamente.', 'success');
+                setSales(prevSales => [...prevSales, newSale]);        
+                setInventory(updatedInventory); // Update inventory after successful sale
+                showMessage('Venta agregada exitosamente y stock actualizado.', 'success');
                 setCurrentSalesPage(1); // Reset to first page after adding new sale
 
                 // Clear form fields
                 setSaleDate('');
-                setSalePaymentMethod('');     
-                setSaleOperationNumber('');     
+                setSalePaymentMethod('');        
+                setSaleOperationNumber('');        
                 setSaleItems([{ product: '', quantity: '', amount: '', currency: 'USD', unitType: 'unidades' }]); // Reset to one empty item
                 setSaleTypeForSale('unidades'); // Reset sale type radio to default
             };
 
             // Manejador para añadir un nuevo gasto
             const handleAddExpense = (e) => {
-                e.preventDefault();     
+                e.preventDefault();        
 
                 const expenseAmountVal = expenseAmount.trim();
 
@@ -679,21 +780,21 @@
                 }
                 
                 const newExpense = {
-                    id: Date.now(),     
+                    id: Date.now(),        
                     date: expenseDate,
                     category: expenseCategory.trim(),
                     amount: parsedExpenseAmount,
-                    currency: expenseCurrency, 
+                    currency: expenseCurrency,    
                 };
                 
-                setExpenses(prevExpenses => [...prevExpenses, newExpense]);     
+                setExpenses(prevExpenses => [...prevExpenses, newExpense]);        
                 showMessage('Gasto agregado exitosamente.', 'success');
                 setCurrentExpensesPage(1); // Reset to first page after adding new expense
 
                 setExpenseDate('');
                 setExpenseCategory('');
                 setExpenseAmount('');
-                setExpenseCurrency('USD');     
+                setExpenseCurrency('USD');        
             };
             
             // Manejador para añadir una nueva venta de queso a crédito
@@ -719,6 +820,22 @@
                     return;
                 }
 
+                // Check inventory for cheese (assuming 'Queso' is the product name for cheese in inventory, and unitType is 'gramos')
+                const cheeseInventoryIndex = inventory.findIndex(
+                    invItem => invItem.name.toLowerCase() === 'queso' && invItem.stockUnitType === 'gramos'
+                );
+
+                if (cheeseInventoryIndex === -1) {
+                    showMessage('El producto "Queso" no se encontró en el inventario con la unidad de medida "gramos". Por favor, agrégalo al inventario primero.', 'error');
+                    return;
+                }
+
+                const currentCheeseStock = inventory[cheeseInventoryIndex].stockQuantity;
+                if (currentCheeseStock < parsedCreditCheeseWeightGrams) {
+                    showMessage(`Stock insuficiente para Queso. Disponible: ${currentCheeseStock.toFixed(2)} gramos.`, 'error');
+                    return;
+                }
+
                 const totalUSD = (parsedCreditCheeseWeightGrams / 1000) * parsedCheesePricePerKiloUSD;
 
                 const newCreditSale = {
@@ -728,14 +845,61 @@
                     weightGrams: parsedCreditCheeseWeightGrams,
                     pricePerKiloUSD: parsedCheesePricePerKiloUSD, // Guardar el precio por kilo usado en ese momento
                     totalUSD: totalUSD,
+                    paidAmount: 0, // Nuevo campo: monto pagado inicialmente 0
+                    status: 'Pendiente', // Nuevo campo: estado inicial 'Pendiente'
                 };
 
+                // Deduct cheese from inventory
+                const updatedInventory = [...inventory];
+                updatedInventory[cheeseInventoryIndex].stockQuantity -= parsedCreditCheeseWeightGrams;
+                setInventory(updatedInventory);
+
                 setCheeseCreditSales(prevSales => [...prevSales, newCreditSale]);
-                showMessage('Venta de queso a crédito registrada.', 'success');
+                showMessage('Venta de queso a crédito registrada y stock actualizado.', 'success');
                 setCurrentCheeseCreditPage(1); // Reset to first page after adding
 
                 setCreditCustomerName('');
                 setCreditCheeseWeightGrams('');
+            };
+
+            // Manejador para registrar un pago a una venta de queso a crédito
+            const handleRegisterCreditPayment = (e) => {
+                e.preventDefault();
+                const parsedPaymentAmount = parseFloat(paymentAmount);
+
+                if (isNaN(parsedPaymentAmount) || parsedPaymentAmount <= 0) {
+                    showMessage('Por favor, ingresa un monto de pago válido (número mayor que cero).', 'error');
+                    return;
+                }
+
+                setCheeseCreditSales(prevSales => prevSales.map(sale => {
+                    if (sale.id === payingCreditSaleId) {
+                        const newPaidAmount = sale.paidAmount + parsedPaymentAmount;
+                        const remaining = sale.totalUSD - newPaidAmount;
+                        let newStatus = 'Pendiente';
+                        if (remaining <= 0.01) { // Allow for small floating point inaccuracies
+                            newStatus = 'Pagado';
+                        } else if (newPaidAmount > 0) {
+                            newStatus = 'Pagado Parcial';
+                        }
+
+                        if (newPaidAmount > sale.totalUSD + 0.01) { // Check for overpayment
+                            showMessage(`El monto de pago excede el total adeudado. Monto adeudado: $${(sale.totalUSD - sale.paidAmount).toFixed(2)} USD.`, 'error');
+                            return sale; // Do not update if overpayment
+                        }
+
+                        return {
+                            ...sale,
+                            paidAmount: newPaidAmount,
+                            status: newStatus,
+                        };
+                    }
+                    return sale;
+                }));
+
+                showMessage('Pago registrado exitosamente.', 'success');
+                setPayingCreditSaleId(null);
+                setPaymentAmount('');
             };
 
 
@@ -753,7 +917,7 @@
             const handleDeleteExpense = (id) => {
                 setExpenses(prevExpenses => prevExpenses.filter(expense => expense.id !== id));
                 showMessage('Gasto eliminado.', 'success');
-                 // Adjust current page if the last item on it was deleted
+                    // Adjust current page if the last item on it was deleted
                 if (paginatedExpenses.length === 1 && currentExpensesPage > 1) {
                     setCurrentExpensesPage(currentExpensesPage - 1);
                 }
@@ -761,11 +925,16 @@
             
             // Manejador para eliminar una venta de queso a crédito individual
             const handleDeleteCheeseCreditSale = (id) => {
-                setCheeseCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
-                showMessage('Venta a crédito de queso eliminada.', 'success');
-                if (paginatedCheeseCreditSales.length === 1 && currentCheeseCreditPage > 1) {
-                    setCurrentCheeseCreditPage(currentCheeseCreditPage - 1);
-                }
+                openConfirmModal(
+                    '¿Estás seguro de que quieres eliminar este registro de fiado? Esto no repondrá el inventario.',
+                    () => {
+                        setCheeseCreditSales(prevSales => prevSales.filter(sale => sale.id !== id));
+                        showMessage('Venta a crédito de queso eliminada.', 'success');
+                        if (paginatedCheeseCreditSales.length === 1 && currentCheeseCreditPage > 1) {
+                            setCurrentCheeseCreditPage(currentCheeseCreditPage - 1);
+                        }
+                    }
+                );
             };
 
 
@@ -774,8 +943,8 @@
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de ventas? Esta acción no se puede deshacer.',
                     () => {
-                        setSales([]);     
-                        localStorage.removeItem('sales');     
+                        setSales([]);        
+                        localStorage.removeItem('sales');        
                         showMessage('Historial de ventas borrado.', 'success');
                         setCurrentSalesPage(1); // Reset page after clearing
                     }
@@ -787,8 +956,8 @@
                 openConfirmModal(
                     '¿Estás seguro de que quieres borrar TODO el historial de gastos? Esta acción no se puede deshacer.',
                     () => {
-                        setExpenses([]);     
-                        localStorage.removeItem('expenses');     
+                        setExpenses([]);        
+                        localStorage.removeItem('expenses');        
                         showMessage('Historial de gastos borrado.', 'success');
                         setCurrentExpensesPage(1); // Reset page after clearing
                     }
@@ -820,21 +989,21 @@
                     showMessage('Por favor, ingresa un costo TOTAL válido (número mayor que cero).', 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null);     
+                    setCalculatedProfitPercentageResult(null);        
                     return;
                 }
                 if (isNaN(parsedPurchaseQuantity) || parsedPurchaseQuantity <= 0) {
                     showMessage(`Por favor, ingresa una cantidad válida de ${purchaseMeasurementUnit} (número mayor que cero).`, 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null);     
+                    setCalculatedProfitPercentageResult(null);        
                     return;
                 }
-                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) {     
+                if (isNaN(parsedProfitPercentage) || parsedProfitPercentage < 0) {        
                     showMessage('Por favor, ingresa un porcentaje de ganancia válido (número mayor o igual a cero).', 'error');
                     setCalculatedCostPerUnit(null);
                     setCalculatedSellingPricePerUnit(null);
-                    setCalculatedProfitPercentageResult(null);     
+                    setCalculatedProfitPercentageResult(null);        
                     return;
                 }
 
@@ -843,7 +1012,7 @@
                 
                 setCalculatedCostPerUnit(costPerUnit);
                 setCalculatedSellingPricePerUnit(sellingPricePerUnit);
-                setCalculatedProfitPercentageResult(null);     
+                setCalculatedProfitPercentageResult(null);        
                 showMessage('Precio de venta por unidad calculado.', 'success');
 
                 // Clear form fields after calculation
@@ -961,6 +1130,155 @@
                 showMessage('Precio del queso calculado.', 'success');
             };
 
+            // Función de ayuda para convertir a USD desde cualquier moneda
+            const convertToUSDFromAny = useCallback((amount, currency) => {
+                if (currency === 'VES') {
+                    return exchangeRate > 0 ? amount / exchangeRate : 0;
+                }
+                return amount;
+            }, [exchangeRate]);
+
+            // Función de ayuda para convertir a VES desde USD
+            const convertToVESFromUSD = useCallback((amountUSD) => {
+                return amountUSD * exchangeRate;
+            }, [exchangeRate]);
+
+
+            // Manejador para añadir o actualizar un item en el inventario
+            const handleAddOrUpdateInventoryItem = (e) => {
+                e.preventDefault();
+                const { name, stockQuantity, stockUnitType, totalCostPurchase, totalCostPurchaseCurrency, suggestedSellingPrice, suggestedSellingPriceCurrency, minStockAlert, category } = newInventoryItem;
+
+                if (!name.trim()) {
+                    showMessage('El nombre del producto no puede estar vacío.', 'error');
+                    return;
+                }
+                const parsedStockQuantity = parseFloat(stockQuantity);
+                if (isNaN(parsedStockQuantity) || parsedStockQuantity < 0) {
+                    showMessage('La cantidad en stock debe ser un número válido mayor o igual a cero.', 'error');
+                    return;
+                }
+                const parsedTotalCostPurchase = parseFloat(totalCostPurchase);
+                if (isNaN(parsedTotalCostPurchase) || parsedTotalCostPurchase < 0) {
+                    showMessage('El costo total de compra debe ser un número válido mayor o igual a cero.', 'error');
+                    return;
+                }
+                const parsedSuggestedSellingPrice = parseFloat(suggestedSellingPrice);
+                if (isNaN(parsedSuggestedSellingPrice) || parsedSuggestedSellingPrice < 0) {
+                    showMessage('El precio de venta sugerido debe ser un número válido mayor o igual a cero.', 'error');
+                    return;
+                }
+                const parsedMinStockAlert = parseFloat(minStockAlert);
+                if (minStockAlert !== '' && (isNaN(parsedMinStockAlert) || parsedMinStockAlert < 0)) {
+                    showMessage('La alerta de stock mínimo debe ser un número válido mayor o igual a cero.', 'error');
+                    return;
+                }
+
+                // Convert totalCostPurchase to USD for internal calculation
+                const totalCostPurchaseInUSD = convertToUSDFromAny(parsedTotalCostPurchase, totalCostPurchaseCurrency);
+
+                // Calculate costPerUnit (always stored in USD)
+                const calculatedCostPerUnit = parsedStockQuantity > 0 ? totalCostPurchaseInUSD / parsedStockQuantity : 0;
+
+                if (editingInventoryItem) {
+                    // Update existing item
+                    setInventory(prevInventory => prevInventory.map(item =>
+                        item.id === editingInventoryItem
+                            ? {
+                                ...item,
+                                name: name.trim(),
+                                stockQuantity: parsedStockQuantity,
+                                stockUnitType,
+                                totalCostPurchase: parsedTotalCostPurchase,
+                                totalCostPurchaseCurrency,
+                                costPerUnit: calculatedCostPerUnit, // Always USD
+                                suggestedSellingPrice: parsedSuggestedSellingPrice,
+                                suggestedSellingPriceCurrency,
+                                minStockAlert: parsedMinStockAlert,
+                                category,
+                                lastUpdated: new Date().toISOString().slice(0, 10)
+                            }
+                            : item
+                    ));
+                    showMessage('Producto de inventario actualizado exitosamente.', 'success');
+                    setEditingInventoryItem(null);
+                } else {
+                    // Add new item
+                    // Check for duplicate product name + unit type combination
+                    const isDuplicate = inventory.some(item =>
+                        item.name.toLowerCase() === name.trim().toLowerCase() && item.stockUnitType === stockUnitType
+                    );
+                    if (isDuplicate) {
+                        showMessage('Ya existe un producto con este nombre y tipo de unidad en el inventario.', 'error');
+                        return;
+                    }
+
+                    const newItem = {
+                        id: Date.now(),
+                        name: name.trim(),
+                        stockQuantity: parsedStockQuantity,
+                        stockUnitType,
+                        totalCostPurchase: parsedTotalCostPurchase,
+                        totalCostPurchaseCurrency,
+                        costPerUnit: calculatedCostPerUnit, // Always USD
+                        suggestedSellingPrice: parsedSuggestedSellingPrice,
+                        suggestedSellingPriceCurrency,
+                        minStockAlert: parsedMinStockAlert,
+                        category,
+                        lastUpdated: new Date().toISOString().slice(0, 10),
+                    };
+                    setInventory(prevInventory => [...prevInventory, newItem]);
+                    showMessage('Producto agregado al inventario exitosamente.', 'success');
+                }
+
+                // Clear form
+                setNewInventoryItem({ name: '', stockQuantity: '', stockUnitType: 'unidades', totalCostPurchase: '', totalCostPurchaseCurrency: 'USD', suggestedSellingPrice: '', suggestedSellingPriceCurrency: 'USD', minStockAlert: '', category: 'General' });
+                setCurrentInventoryPage(1); // Reset to first page after adding/updating
+            };
+
+            // Manejador para cargar un item de inventario para edición
+            const handleEditInventoryItem = (item) => {
+                setNewInventoryItem({
+                    name: item.name,
+                    stockQuantity: item.stockQuantity,
+                    stockUnitType: item.stockUnitType,
+                    totalCostPurchase: item.totalCostPurchase,
+                    totalCostPurchaseCurrency: item.totalCostPurchaseCurrency || 'USD', // Default to USD for old data
+                    suggestedSellingPrice: item.suggestedSellingPrice,
+                    suggestedSellingPriceCurrency: item.suggestedSellingPriceCurrency || 'USD', // Default to USD for old data
+                    minStockAlert: item.minStockAlert !== undefined ? item.minStockAlert : '',
+                    category: item.category || 'General',
+                });
+                setEditingInventoryItem(item.id);
+            };
+
+            // Manejador para eliminar un item del inventario
+            const handleDeleteInventoryItem = (id) => {
+                openConfirmModal(
+                    '¿Estás seguro de que quieres eliminar este producto del inventario?',
+                    () => {
+                        setInventory(prevInventory => prevInventory.filter(item => item.id !== id));
+                        showMessage('Producto de inventario eliminado.', 'success');
+                        if (paginatedInventory.length === 1 && currentInventoryPage > 1) {
+                            setCurrentInventoryPage(currentInventoryPage - 1);
+                        }
+                    }
+                );
+            };
+
+            // Manejador para borrar todo el inventario
+            const handleClearInventory = () => {
+                openConfirmModal(
+                    '¿Estás seguro de que quieres borrar TODO el inventario? Esta acción no se puede deshacer.',
+                    () => {
+                        setInventory([]);
+                        localStorage.removeItem('inventory');
+                        showMessage('Inventario borrado.', 'success');
+                        setCurrentInventoryPage(1);
+                    }
+                );
+            };
+
 
             // Función de ayuda para convertir a USD
             const convertToUSD = useCallback((amount, currency) => {
@@ -980,11 +1298,15 @@
             }, 0);
             const totalSalesVES = totalSalesUSD * exchangeRate; // Calcular VES a partir de USD total
 
-            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0);     
+            const totalExpensesUSD = expenses.reduce((acc, expense) => acc + convertToUSD(expense.amount, expense.currency), 0);        
             const totalExpensesVES = totalExpensesUSD * exchangeRate; // Calcular VES a partir de USD total
             
             const totalCheeseCreditSalesUSD = cheeseCreditSales.reduce((acc, sale) => acc + sale.totalUSD, 0);
             const totalCheeseCreditSalesVES = totalCheeseCreditSalesUSD * exchangeRate; // Calcular VES a partir de USD total del fiado
+
+            // Calculate total inventory value based on costPerUnit (which is always in USD)
+            const totalInventoryValueUSD = inventory.reduce((acc, item) => acc + (item.stockQuantity * item.costPerUnit), 0);
+            const totalInventoryValueVES = totalInventoryValueUSD * exchangeRate;
 
 
             const netProfitUSD = totalSalesUSD - totalExpensesUSD;
@@ -1023,12 +1345,41 @@
                 setCurrentCheeseCreditPage(1); // Reset to first page on sort change
             };
 
-            // Memoized sorted sales data (before pagination)
-            const sortedSales = useMemo(() => {
-                if (!sales || sales.length === 0) return [];
-                const sortableSales = [...sales]; // Crear una copia para ordenar
+            // Lógica de ordenación para inventario
+            const handleInventorySort = (column) => {
+                if (inventorySortColumn === column) {
+                    setInventorySortDirection(inventorySortDirection === 'asc' ? 'desc' : 'asc');
+                } else {
+                    setInventorySortColumn(column);
+                    setInventorySortDirection('asc');
+                }
+                setCurrentInventoryPage(1); // Reset to first page on sort change
+            };
 
-                sortableSales.sort((a, b) => {
+
+            // Memoized filtered and sorted sales data
+            const filteredAndSortedSales = useMemo(() => {
+                let tempSales = [...sales];
+
+                // Filter by search term
+                if (salesSearchTerm) {
+                    tempSales = tempSales.filter(sale =>
+                        sale.paymentMethod.toLowerCase().includes(salesSearchTerm.toLowerCase()) ||
+                        sale.operationNumber.toLowerCase().includes(salesSearchTerm.toLowerCase()) ||
+                        (sale.items || []).some(item => item.product.toLowerCase().includes(salesSearchTerm.toLowerCase()))
+                    );
+                }
+
+                // Filter by date range
+                if (salesStartDate) {
+                    tempSales = tempSales.filter(sale => sale.date >= salesStartDate);
+                }
+                if (salesEndDate) {
+                    tempSales = tempSales.filter(sale => sale.date <= salesEndDate);
+                }
+
+                // Sort
+                tempSales.sort((a, b) => {
                     let aValue, bValue;
 
                     switch (salesSortColumn) {
@@ -1036,25 +1387,19 @@
                             aValue = new Date(a.date);
                             bValue = new Date(b.date);
                             break;
-                        case 'product': // Corrected logic for sorting by product name
-                            // Safely access the first item's product name, default to empty string if no items or product name
+                        case 'product':
                             aValue = (a.items && (a.items || []).length > 0 && (a.items || [])[0].product) ? (a.items || [])[0].product.toLowerCase() : '';
                             bValue = (b.items && (b.items || []).length > 0 && (b.items || [])[0].product) ? (b.items || [])[0].product.toLowerCase() : '';
                             break;
                         case 'totalAmount':
-                            // Calculate total amount for sale a
                             let aTotal = (a.items || []).reduce((acc, item) => {
                                 const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
                                 return acc + convertToUSD(effectiveAmount, item.currency);
                             }, 0);
-
-                            // Calculate total amount for sale b
                             let bTotal = (b.items || []).reduce((acc, item) => {
-                                // BUG FIX: Was using b.quantity, should be item.quantity
                                 const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
                                 return acc + convertToUSD(effectiveAmount, item.currency);
                             }, 0);
-
                             aValue = aTotal;
                             bValue = bTotal;
                             break;
@@ -1066,24 +1411,39 @@
                     if (aValue > bValue) return salesSortDirection === 'asc' ? 1 : -1;
                     return 0;
                 });
-                return sortableSales;
-            }, [sales, salesSortColumn, salesSortDirection, convertToUSD]); // Dependencias
+                return tempSales;
+            }, [sales, salesSearchTerm, salesStartDate, salesEndDate, salesSortColumn, salesSortDirection, convertToUSD]);
 
             // Paginación de ventas
-            const totalSalesPages = Math.ceil(sortedSales.length / ITEMS_PER_PAGE);
+            const totalSalesPages = Math.ceil(filteredAndSortedSales.length / ITEMS_PER_PAGE);
             const paginatedSales = useMemo(() => {
                 const startIndex = (currentSalesPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
-                return sortedSales.slice(startIndex, endIndex);
-            }, [sortedSales, currentSalesPage]);
+                return filteredAndSortedSales.slice(startIndex, endIndex);
+            }, [filteredAndSortedSales, currentSalesPage]);
 
 
-            // Memoized sorted expenses data (before pagination)
-            const sortedExpenses = useMemo(() => {
-                if (!expenses || expenses.length === 0) return [];
-                const sortableExpenses = [...expenses]; // Crear una copia para ordenar
+            // Memoized filtered and sorted expenses data
+            const filteredAndSortedExpenses = useMemo(() => {
+                let tempExpenses = [...expenses];
 
-                sortableExpenses.sort((a, b) => {
+                // Filter by search term
+                if (expensesSearchTerm) {
+                    tempExpenses = tempExpenses.filter(expense =>
+                        expense.category.toLowerCase().includes(expensesSearchTerm.toLowerCase())
+                    );
+                }
+
+                // Filter by date range
+                if (expensesStartDate) {
+                    tempExpenses = tempExpenses.filter(expense => expense.date >= expensesStartDate);
+                }
+                if (expensesEndDate) {
+                    tempExpenses = tempExpenses.filter(expense => expense.date <= expensesEndDate);
+                }
+
+                // Sort
+                tempExpenses.sort((a, b) => {
                     let aValue, bValue;
 
                     switch (expensesSortColumn) {
@@ -1107,23 +1467,35 @@
                     if (aValue > bValue) return expensesSortDirection === 'asc' ? 1 : -1;
                     return 0;
                 });
-                return sortableExpenses;
-            }, [expenses, expensesSortColumn, expensesSortDirection, convertToUSD]); // Dependencias
+                return tempExpenses;
+            }, [expenses, expensesSearchTerm, expensesStartDate, expensesEndDate, expensesSortColumn, expensesSortDirection, convertToUSD]);
 
             // Paginación de gastos
-            const totalExpensesPages = Math.ceil(sortedExpenses.length / ITEMS_PER_PAGE);
+            const totalExpensesPages = Math.ceil(filteredAndSortedExpenses.length / ITEMS_PER_PAGE);
             const paginatedExpenses = useMemo(() => {
                 const startIndex = (currentExpensesPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
-                return sortedExpenses.slice(startIndex, endIndex);
-            }, [sortedExpenses, currentExpensesPage]);
+                return filteredAndSortedExpenses.slice(startIndex, endIndex);
+            }, [filteredAndSortedExpenses, currentExpensesPage]);
             
-            // Memoized sorted cheese credit sales data
-            const sortedCheeseCreditSales = useMemo(() => {
-                if (!cheeseCreditSales || cheeseCreditSales.length === 0) return [];
-                const sortableCreditSales = [...cheeseCreditSales];
+            // Memoized filtered and sorted cheese credit sales data
+            const filteredAndSortedCheeseCreditSales = useMemo(() => {
+                let tempCreditSales = [...cheeseCreditSales];
 
-                sortableCreditSales.sort((a, b) => {
+                // Filter by search term (customer name)
+                if (cheeseCreditSearchTerm) {
+                    tempCreditSales = tempCreditSales.filter(sale =>
+                        sale.customerName.toLowerCase().includes(cheeseCreditSearchTerm.toLowerCase())
+                    );
+                }
+
+                // Filter by status
+                if (cheeseCreditStatusFilter !== 'Todos') {
+                    tempCreditSales = tempCreditSales.filter(sale => sale.status === cheeseCreditStatusFilter);
+                }
+
+                // Sort
+                tempCreditSales.sort((a, b) => {
                     let aValue, bValue;
 
                     switch (cheeseCreditSortColumn) {
@@ -1147,16 +1519,165 @@
                     if (aValue > bValue) return cheeseCreditSortDirection === 'asc' ? 1 : -1;
                     return 0;
                 });
-                return sortableCreditSales;
-            }, [cheeseCreditSales, cheeseCreditSortColumn, cheeseCreditSortDirection]);
+                return tempCreditSales;
+            }, [cheeseCreditSales, cheeseCreditSearchTerm, cheeseCreditStatusFilter, cheeseCreditSortColumn, cheeseCreditSortDirection]);
 
             // Paginación de ventas de queso a crédito
-            const totalCheeseCreditPages = Math.ceil(sortedCheeseCreditSales.length / ITEMS_PER_PAGE);
+            const totalCheeseCreditPages = Math.ceil(filteredAndSortedCheeseCreditSales.length / ITEMS_PER_PAGE);
             const paginatedCheeseCreditSales = useMemo(() => {
                 const startIndex = (currentCheeseCreditPage - 1) * ITEMS_PER_PAGE;
                 const endIndex = startIndex + ITEMS_PER_PAGE;
-                return sortedCheeseCreditSales.slice(startIndex, endIndex);
-            }, [sortedCheeseCreditSales, currentCheeseCreditPage]);
+                return filteredAndSortedCheeseCreditSales.slice(startIndex, endIndex);
+            }, [filteredAndSortedCheeseCreditSales, currentCheeseCreditPage]);
+
+            // Memoized filtered and sorted inventory data
+            const filteredAndSortedInventory = useMemo(() => {
+                let tempInventory = [...inventory];
+
+                // Filter by search term (product name)
+                if (inventorySearchTerm) {
+                    tempInventory = tempInventory.filter(item =>
+                        item.name.toLowerCase().includes(inventorySearchTerm.toLowerCase())
+                    );
+                }
+
+                // Filter by category
+                if (inventoryCategoryFilter !== 'Todas') {
+                    tempInventory = tempInventory.filter(item => item.category === inventoryCategoryFilter);
+                }
+
+                // Sort
+                tempInventory.sort((a, b) => {
+                    let aValue, bValue;
+
+                    switch (inventorySortColumn) {
+                        case 'name':
+                            aValue = a.name.toLowerCase();
+                            bValue = b.name.toLowerCase();
+                            break;
+                        case 'stockQuantity':
+                            aValue = a.stockQuantity;
+                            bValue = b.stockQuantity;
+                            break;
+                        case 'costPerUnit':
+                            aValue = a.costPerUnit; // Already in USD
+                            bValue = b.costPerUnit; // Already in USD
+                            break;
+                        case 'lastUpdated':
+                            aValue = new Date(a.lastUpdated);
+                            bValue = new Date(b.lastUpdated);
+                            break;
+                        case 'suggestedSellingPrice':
+                            // Sort by suggested selling price converted to USD
+                            aValue = convertToUSDFromAny(a.suggestedSellingPrice, a.suggestedSellingPriceCurrency);
+                            bValue = convertToUSDFromAny(b.suggestedSellingPrice, b.suggestedSellingPriceCurrency);
+                            break;
+                        default:
+                            return 0;
+                    }
+
+                    if (aValue < bValue) return inventorySortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return inventorySortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                return tempInventory;
+            }, [inventory, inventorySearchTerm, inventoryCategoryFilter, inventorySortColumn, inventorySortDirection, convertToUSDFromAny]);
+
+            // Paginación de inventario
+            const totalInventoryPages = Math.ceil(filteredAndSortedInventory.length / ITEMS_PER_PAGE);
+            const paginatedInventory = useMemo(() => {
+                const startIndex = (currentInventoryPage - 1) * ITEMS_PER_PAGE;
+                const endIndex = startIndex + ITEMS_PER_PAGE;
+                return filteredAndSortedInventory.slice(startIndex, endIndex);
+            }, [filteredAndSortedInventory, currentInventoryPage]);
+
+            // Get unique inventory categories for filter dropdown
+            const uniqueInventoryCategories = useMemo(() => {
+                const categories = new Set(inventory.map(item => item.category));
+                return ['Todas', ...Array.from(categories).sort()];
+            }, [inventory]);
+
+
+            // Helper function to export data to CSV
+            const exportToCSV = (data, filename, headers) => {
+                if (!data || data.length === 0) {
+                    showMessage('No hay datos para exportar.', 'info');
+                    return;
+                }
+
+                let csvContent = '';
+
+                // Add headers
+                if (headers) {
+                    csvContent += headers.join(',') + '\n';
+                } else {
+                    // If no specific headers, use keys from the first object
+                    csvContent += Object.keys(data[0]).join(',') + '\n';
+                }
+
+                // Add data rows
+                data.forEach(row => {
+                    const values = headers ? headers.map(header => {
+                        // Handle nested objects for sales items
+                        if (header === 'items' && Array.isArray(row[header])) {
+                            return `"${row[header].map(item => `${item.product} (${item.quantity} ${item.unitType})`).join('; ')}"`
+                        }
+                        // Handle currency conversion for amounts in expenses and inventory
+                        if (header === 'amount' && row.currency) {
+                            return `${row.amount} ${row.currency}`;
+                        }
+                        if (header === 'totalCostPurchase' && row.totalCostPurchaseCurrency) {
+                            return `${row.totalCostPurchase} ${row.totalCostPurchaseCurrency}`;
+                        }
+                        if (header === 'suggestedSellingPrice' && row.suggestedSellingPriceCurrency) {
+                            return `${row.suggestedSellingPrice} ${row.suggestedSellingPriceCurrency}`;
+                        }
+                        if (header === 'costPerUnit') {
+                            return `${row.costPerUnit.toFixed(3)} USD`;
+                        }
+                        return `"${String(row[header]).replace(/"/g, '""')}"`;
+                    }).join(',') : Object.values(row).map(value => `"${String(value).replace(/"/g, '""')}"`).join(',');
+                    csvContent += values + '\n';
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                if (link.download !== undefined) { // Feature detection for download attribute
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showMessage(`Datos exportados a ${filename}`, 'success');
+                } else {
+                    showMessage('Tu navegador no soporta la descarga de archivos CSV directamente. Copia el texto.', 'warning');
+                    console.log(csvContent); // Log to console for manual copy
+                }
+            };
+
+
+            // Summaries for reports
+            const salesSummaryByProduct = useMemo(() => {
+                const summary = {};
+                sales.forEach(sale => {
+                    (sale.items || []).forEach(item => {
+                        const totalAmountUSD = convertToUSD(item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount, item.currency);
+                        summary[item.product] = (summary[item.product] || 0) + totalAmountUSD;
+                    });
+                });
+                return Object.entries(summary).sort(([,a],[,b]) => b - a); // Sort descending by amount
+            }, [sales, convertToUSD]);
+
+            const expensesSummaryByCategory = useMemo(() => {
+                const summary = {};
+                expenses.forEach(expense => {
+                    const amountUSD = convertToUSD(expense.amount, expense.currency);
+                    summary[expense.category] = (summary[expense.category] || 0) + amountUSD;
+                });
+                return Object.entries(summary).sort(([,a],[,b]) => b - a); // Sort descending by amount
+            }, [expenses, convertToUSD]);
 
 
             return (
@@ -1174,6 +1695,47 @@
                             onCancel={handleCancel}
                         />
                     )}
+
+                    {/* Modal para Registrar Pago de Crédito */}
+                    {payingCreditSaleId && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-6">Registrar Pago de Crédito</h3>
+                                <form onSubmit={handleRegisterCreditPayment}>
+                                    <div className="mb-6">
+                                        <label htmlFor="paymentAmount" className="block text-gray-700 text-base font-bold mb-2">Monto a Pagar (USD):</label>
+                                        <input
+                                            type="number"
+                                            id="paymentAmount"
+                                            value={paymentAmount}
+                                            onChange={(e) => setPaymentAmount(e.target.value)}
+                                            className="w-full"
+                                            placeholder="Ej: 5.00"
+                                            min="0.01"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex justify-center space-x-8">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setPayingCreditSaleId(null); setPaymentAmount(''); }}
+                                            className="px-9 py-4 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 text-xl font-medium"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-9 py-4 bg-blue-400 text-white rounded-xl hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 text-xl font-medium"
+                                        >
+                                            Registrar Pago
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
 
                     <div className="w-full max-w-6xl bg-white main-container mb-8">
                         <h1 className="main-heading text-center mb-14">
@@ -1213,7 +1775,7 @@
                                 Actualiza este valor diariamente con la tasa de cambio actual (ej. BCV).
                             </p>
                             <p className="text-base text-blue-800 mt-3 text-center font-semibold">
-                                ✨ Tus datos (ventas, gastos y tasa) se guardan automáticamente en tu navegador.
+                                ✨ Tus datos (ventas, gastos, tasa e inventario) se guardan automáticamente en tu navegador.
                             </p>
                         </div>
 
@@ -1284,6 +1846,30 @@
                                         ≈ Bs. {(netProfitUSD * exchangeRate).toFixed(2)} VES
                                     </p>
                                 </div>
+                                {/* Valor Total en Inventario */}
+                                <div className="bg-gradient-to-br from-orange-300 to-orange-500 text-white p-9 rounded-3xl shadow-2xl flex flex-col items-center justify-center transform hover:scale-105 transition duration-300">
+                                    <h3 className="sub-heading mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-boxes">
+                                            <path d="M2.97 12.93a2 2 0 0 0 0 3.14l1.97 2.63c.41.55 1.05.82 1.69.82h10.72c.64 0 1.28-.27 1.69-.82l1.97-2.63a2 2 0 0 0 0-3.14l-1.97-2.63c-.41-.55-1.05-.82-1.69-.82H6.66c-.64 0-1.28.27-1.69.82Z"></path>
+                                            <path d="M7.5 14.5h9"></path>
+                                            <path d="M12 2v2"></path>
+                                            <path d="M12 22v-2"></path>
+                                            <path d="M16 4h2"></path>
+                                            <path d="M6 4H8"></path>
+                                            <path d="M16 20h2"></path>
+                                            <path d="M6 20H8"></path>
+                                            <path d="M2 12h2"></path>
+                                            <path d="M20 12h2"></path>
+                                        </svg>
+                                        Valor Total en Inventario (USD)
+                                    </h3>
+                                    <p className="card-value">
+                                        <span className="card-currency">$</span>{totalInventoryValueUSD.toFixed(2)}
+                                    </p>
+                                    <p className="card-secondary-value mt-4">
+                                        ≈ Bs. {(totalInventoryValueVES).toFixed(2)} VES
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
@@ -1301,7 +1887,7 @@
                             </h2>
                             <form onSubmit={handleAddSale} className="grid grid-cols-1 gap-8">
                                 <div className="md:col-span-2">
-                                    <label className="block text-gray-700 text-base font-bold mb-2">Tipo de Venta para nuevos productos:</label>
+                                    <label className="block text-gray-700 text-base font-bold mb-2">Tipo de Venta para nuevos productos (si no seleccionas del inventario):</label>
                                     <div className="flex space-x-4">
                                         <label className="inline-flex items-center">
                                             <input
@@ -1326,7 +1912,7 @@
                                             <span className="ml-2 text-gray-700 text-lg">Por Peso (Gramos/Kilo)</span>
                                         </label>
                                     </div>
-                                    <p className="text-sm text-gray-500 mt-2">Esta opción establece el tipo predeterminado para las nuevas líneas de productos.</p>
+                                    <p className="text-sm text-gray-500 mt-2">Esta opción establece el tipo predeterminado para las nuevas líneas de productos que no vienen del inventario.</p>
                                 </div>
 
                                 <div>
@@ -1348,7 +1934,7 @@
                                         onChange={(e) => {
                                             setSalePaymentMethod(e.target.value);
                                             if (e.target.value !== 'Pago Móvil') {
-                                                setSaleOperationNumber('');     
+                                                setSaleOperationNumber('');        
                                             }
                                         }}
                                         className="w-full"
@@ -1383,15 +1969,20 @@
                                         <div key={index} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 items-end p-3 border-b border-gray-200 last:mb-0 last:border-b-0">
                                             <div className="sm:col-span-2 lg:col-span-1">
                                                 <label htmlFor={`product-${index}`} className="block text-gray-700 text-sm font-bold mb-1">Producto</label>
-                                                <input
-                                                    type="text"
+                                                <select
                                                     id={`product-${index}`}
                                                     value={item.product}
                                                     onChange={(e) => handleSaleItemChange(index, 'product', e.target.value)}
                                                     className="w-full"
-                                                    placeholder="Nombre del producto"
                                                     required
-                                                />
+                                                >
+                                                    <option value="">Seleccione un producto</option>
+                                                    {inventory.map(invItem => (
+                                                        <option key={invItem.id} value={invItem.name}>
+                                                            {invItem.name} ({invItem.stockUnitType === 'unidades' ? 'unidades' : 'gramos'})
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
                                             <div>
                                                 <label htmlFor={`quantity-${index}`} className="block text-gray-700 text-sm font-bold mb-1">
@@ -1448,6 +2039,7 @@
                                                     value={item.unitType}
                                                     onChange={(e) => handleSaleItemChange(index, 'unitType', e.target.value)}
                                                     className="w-full py-3.5"
+                                                    disabled // Disable as it's now controlled by inventory selection
                                                 >
                                                     <option value="unidades">Unidades</option>
                                                     <option value="peso_g">Gramos</option>
@@ -1511,8 +2103,42 @@
                                     </button>
                                 )}
                             </h2>
+                            {/* Sales Filters */}
+                            <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label htmlFor="salesSearch" className="block text-gray-700 text-sm font-bold mb-1">Buscar:</label>
+                                    <input
+                                        type="text"
+                                        id="salesSearch"
+                                        value={salesSearchTerm}
+                                        onChange={(e) => setSalesSearchTerm(e.target.value)}
+                                        placeholder="Producto, método de pago, N° operación"
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="salesStartDate" className="block text-gray-700 text-sm font-bold mb-1">Fecha Inicio:</label>
+                                    <input
+                                        type="date"
+                                        id="salesStartDate"
+                                        value={salesStartDate}
+                                        onChange={(e) => setSalesStartDate(e.target.value)}
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="salesEndDate" className="block text-gray-700 text-sm font-bold mb-1">Fecha Fin:</label>
+                                    <input
+                                        type="date"
+                                        id="salesEndDate"
+                                        value={salesEndDate}
+                                        onChange={(e) => setSalesEndDate(e.target.value)}
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                            </div>
                             {paginatedSales.length === 0 ? (
-                                <p className="text-gray-600 text-center py-7 text-lg">No hay ventas registradas aún.</p>
+                                <p className="text-gray-600 text-center py-7 text-lg">No hay ventas registradas que coincidan con los filtros.</p>
                             ) : (
                                 <>
                                     <div className="overflow-x-auto">
@@ -1545,7 +2171,7 @@
                                                         <td>
                                                             {(() => {
                                                                 let currentSaleTotalUSD = 0;
-                                                                (sale.items || []).forEach(item => { 
+                                                                (sale.items || []).forEach(item => {    
                                                                     const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
                                                                     currentSaleTotalUSD += convertToUSD(effectiveAmount, item.currency);
                                                                 });
@@ -1578,33 +2204,43 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    {sortedSales.length > ITEMS_PER_PAGE && (
-                                        <div className="pagination-container">
+                                    <div className="flex justify-between items-center mt-6">
+                                        {filteredAndSortedSales.length > 0 && (
                                             <button
-                                                onClick={() => setCurrentSalesPage(prev => Math.max(prev - 1, 1))}
-                                                disabled={currentSalesPage === 1}
-                                                className="pagination-button"
+                                                onClick={() => exportToCSV(filteredAndSortedSales, 'ventas.csv', ['id', 'date', 'items', 'paymentMethod', 'operationNumber'])}
+                                                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm"
                                             >
-                                                Anterior
+                                                Exportar a CSV
                                             </button>
-                                            {Array.from({ length: totalSalesPages }, (_, i) => i + 1).map(page => (
+                                        )}
+                                        {filteredAndSortedSales.length > ITEMS_PER_PAGE && (
+                                            <div className="pagination-container">
                                                 <button
-                                                    key={page}
-                                                    onClick={() => setCurrentSalesPage(page)}
-                                                    className={`pagination-button ${currentSalesPage === page ? 'active' : ''}`}
+                                                    onClick={() => setCurrentSalesPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentSalesPage === 1}
+                                                    className="pagination-button"
                                                 >
-                                                    {page}
+                                                    Anterior
                                                 </button>
-                                            ))}
-                                            <button
-                                                onClick={() => setCurrentSalesPage(prev => Math.min(prev + 1, totalSalesPages))}
-                                                disabled={currentSalesPage === totalSalesPages}
-                                                className="pagination-button"
-                                            >
-                                                Siguiente
-                                            </button>
-                                        </div>
-                                    )}
+                                                {Array.from({ length: totalSalesPages }, (_, i) => i + 1).map(page => (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setCurrentSalesPage(page)}
+                                                        className={`pagination-button ${currentSalesPage === page ? 'active' : ''}`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    onClick={() => setCurrentSalesPage(prev => Math.min(prev + 1, totalSalesPages))}
+                                                    disabled={currentSalesPage === totalSalesPages}
+                                                    className="pagination-button"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -1651,7 +2287,7 @@
                                             type="number"
                                             id="expenseAmount"
                                             value={expenseAmount}
-                                            onChange={(e) => setExpenseAmount(e.target.value)}     
+                                            onChange={(e) => setExpenseAmount(e.target.value)}    
                                             className="w-full"
                                             placeholder="Monto del gasto"
                                             min="0.01"
@@ -1690,21 +2326,55 @@
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
                             <h2 className="section-heading">
                                 <span className="section-heading-title">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-archive text-gray-600">
-                                    <rect width="20" height="5" x="2" y="3" rx="1"></rect>
-                                    <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
-                                    <path d="M10 12h4"></path>
-                                </svg>
-                                Historial de Gastos
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-archive text-gray-600">
+                                        <rect width="20" height="5" x="2" y="3" rx="1"></rect>
+                                        <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
+                                        <path d="M10 12h4"></path>
+                                    </svg>
+                                    Historial de Gastos
                                 </span>
                                 {expenses.length > 0 && (
-                                     <button onClick={handleClearExpenses} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                    <button onClick={handleClearExpenses} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
                                         Borrar Historial
                                     </button>
                                 )}
                             </h2>
+                            {/* Expenses Filters */}
+                            <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label htmlFor="expensesSearch" className="block text-gray-700 text-sm font-bold mb-1">Buscar:</label>
+                                    <input
+                                        type="text"
+                                        id="expensesSearch"
+                                        value={expensesSearchTerm}
+                                        onChange={(e) => setExpensesSearchTerm(e.target.value)}
+                                        placeholder="Categoría"
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="expensesStartDate" className="block text-gray-700 text-sm font-bold mb-1">Fecha Inicio:</label>
+                                    <input
+                                        type="date"
+                                        id="expensesStartDate"
+                                        value={expensesStartDate}
+                                        onChange={(e) => setExpensesStartDate(e.target.value)}
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="expensesEndDate" className="block text-gray-700 text-sm font-bold mb-1">Fecha Fin:</label>
+                                    <input
+                                        type="date"
+                                        id="expensesEndDate"
+                                        value={expensesEndDate}
+                                        onChange={(e) => setExpensesEndDate(e.target.value)}
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                            </div>
                             {paginatedExpenses.length === 0 ? (
-                                <p className="text-gray-600 text-center py-7 text-lg">No hay gastos registrados aún.</p>
+                                <p className="text-gray-600 text-center py-7 text-lg">No hay gastos registrados que coincidan con los filtros.</p>
                             ) : (
                                 <>
                                     <div className="overflow-x-auto">
@@ -1747,33 +2417,43 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    {sortedExpenses.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
-                                        <div className="pagination-container">
+                                    <div className="flex justify-between items-center mt-6">
+                                        {filteredAndSortedExpenses.length > 0 && (
                                             <button
-                                                onClick={() => setCurrentExpensesPage(prev => Math.max(prev - 1, 1))}
-                                                disabled={currentExpensesPage === 1}
-                                                className="pagination-button"
+                                                onClick={() => exportToCSV(filteredAndSortedExpenses, 'gastos.csv', ['id', 'date', 'category', 'amount', 'currency'])}
+                                                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm"
                                             >
-                                                Anterior
+                                                Exportar a CSV
                                             </button>
-                                            {Array.from({ length: totalExpensesPages }, (_, i) => i + 1).map(page => (
+                                        )}
+                                        {filteredAndSortedExpenses.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                            <div className="pagination-container">
                                                 <button
-                                                    key={page}
-                                                    onClick={() => setCurrentExpensesPage(page)}
-                                                    className={`pagination-button ${currentExpensesPage === page ? 'active' : ''}`}
+                                                    onClick={() => setCurrentExpensesPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentExpensesPage === 1}
+                                                    className="pagination-button"
                                                 >
-                                                    {page}
+                                                    Anterior
                                                 </button>
-                                            ))}
-                                            <button
-                                                onClick={() => setCurrentExpensesPage(prev => Math.min(prev + 1, totalExpensesPages))}
-                                                disabled={currentExpensesPage === totalExpensesPages}
-                                                className="pagination-button"
-                                            >
-                                                Siguiente
-                                            </button>
-                                        </div>
-                                    )}
+                                                {Array.from({ length: totalExpensesPages }, (_, i) => i + 1).map(page => (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setCurrentExpensesPage(page)}
+                                                        className={`pagination-button ${currentExpensesPage === page ? 'active' : ''}`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    onClick={() => setCurrentExpensesPage(prev => Math.min(prev + 1, totalExpensesPages))}
+                                                    disabled={currentExpensesPage === totalExpensesPages}
+                                                    className="pagination-button"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -2022,7 +2702,7 @@
 
                         {/* Calculadora de Venta de Queso */}
                         <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
-                             <h2 className="section-heading">
+                               <h2 className="section-heading">
                                 <span className="section-heading-title">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cheese text-gray-600">
                                     <path d="M12 21s-3-2-6-2-6 2-6 2V3s3 2 6 2 6-2 6-2v18Z"></path>
@@ -2035,7 +2715,7 @@
                                 Calculadora de Venta de Queso por Peso
                                 </span>
                             </h2>
-                            <form onSubmit={handleCalculateCheesePrice} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           <form onSubmit={handleCalculateCheesePrice} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
                                     <label htmlFor="cheeseWeightGrams" className="block text-gray-700 text-base font-bold mb-2">Peso del Queso (Gramos):</label>
                                     <input
@@ -2069,7 +2749,7 @@
                                         type="submit"
                                         className="w-full bg-green-400 text-white py-4.5 px-8 rounded-xl hover:bg-green-500 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calculator mr-3">
                                             <rect x="8" y="2" width="8" height="4" rx="1"></rect>
                                             <path d="M17 17v-2H7v2"></path>
                                             <path d="M17 10h-2V7H7v3"></path>
@@ -2168,8 +2848,36 @@
                                     </button>
                                 )}
                             </h2>
+                            {/* Cheese Credit Sales Filters */}
+                            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="cheeseCreditSearch" className="block text-gray-700 text-sm font-bold mb-1">Buscar Cliente:</label>
+                                    <input
+                                        type="text"
+                                        id="cheeseCreditSearch"
+                                        value={cheeseCreditSearchTerm}
+                                        onChange={(e) => setCheeseCreditSearchTerm(e.target.value)}
+                                        placeholder="Nombre del cliente"
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="cheeseCreditStatusFilter" className="block text-gray-700 text-sm font-bold mb-1">Filtrar por Estado:</label>
+                                    <select
+                                        id="cheeseCreditStatusFilter"
+                                        value={cheeseCreditStatusFilter}
+                                        onChange={(e) => setCheeseCreditStatusFilter(e.target.value)}
+                                        className="w-full text-base"
+                                    >
+                                        <option value="Todos">Todos</option>
+                                        <option value="Pendiente">Pendiente</option>
+                                        <option value="Pagado Parcial">Pagado Parcial</option>
+                                        <option value="Pagado">Pagado</option>
+                                    </select>
+                                </div>
+                            </div>
                             {paginatedCheeseCreditSales.length === 0 ? (
-                                <p className="text-gray-600 text-center py-7 text-lg">No hay registros de crédito de queso aún.</p>
+                                <p className="text-gray-600 text-center py-7 text-lg">No hay registros de crédito de queso que coincidan con los filtros.</p>
                             ) : (
                                 <>
                                     <div className="overflow-x-auto">
@@ -2184,8 +2892,11 @@
                                                     </th>
                                                     <th>Peso (g)</th>
                                                     <th onClick={() => handleCheeseCreditSort('totalUSD')}>
-                                                        Monto Adeudado {cheeseCreditSortColumn === 'totalUSD' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
+                                                        Monto Total (USD) {cheeseCreditSortColumn === 'totalUSD' && (cheeseCreditSortDirection === 'asc' ? '↑' : '↓')}
                                                     </th>
+                                                    <th>Pagado (USD)</th>
+                                                    <th>Adeudado (USD)</th>
+                                                    <th>Estado</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -2201,9 +2912,30 @@
                                                                 ≈ Bs. {(sale.totalUSD * exchangeRate).toFixed(2)} VES
                                                             </span>
                                                         </td>
+                                                        <td>${sale.paidAmount.toFixed(2)} USD</td>
+                                                        <td className={sale.totalUSD - sale.paidAmount > 0.01 ? 'font-bold text-rose-600' : 'text-emerald-600'}>
+                                                            ${(sale.totalUSD - sale.paidAmount).toFixed(2)} USD
+                                                        </td>
+                                                        <td>
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                                                                ${sale.status === 'Pagado' ? 'bg-emerald-100 text-emerald-800' :
+                                                                  sale.status === 'Pagado Parcial' ? 'bg-amber-100 text-amber-800' :
+                                                                  'bg-rose-100 text-rose-800'}`
+                                                            }>
+                                                                {sale.status}
+                                                            </span>
+                                                        </td>
                                                         <td className="text-right">
+                                                            {sale.status !== 'Pagado' && (
+                                                                <button
+                                                                    onClick={() => { setPayingCreditSaleId(sale.id); setPaymentAmount(''); }}
+                                                                    className="text-blue-600 hover:text-blue-800 p-2 text-xs mr-2"
+                                                                >
+                                                                    Registrar Pago
+                                                                </button>
+                                                            )}
                                                             <button
-                                                                onClick={() => openConfirmModal('¿Estás seguro de que quieres eliminar este registro de fiado?', () => handleDeleteCheeseCreditSale(sale.id))}
+                                                                onClick={() => handleDeleteCheeseCreditSale(sale.id)}
                                                                 className="text-rose-600 hover:text-rose-800 p-2 text-xs"
                                                             >
                                                                 Eliminar
@@ -2214,36 +2946,419 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    {sortedCheeseCreditSales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
-                                        <div className="pagination-container">
+                                    <div className="flex justify-between items-center mt-6">
+                                        {filteredAndSortedCheeseCreditSales.length > 0 && (
                                             <button
-                                                onClick={() => setCurrentCheeseCreditPage(prev => Math.max(prev - 1, 1))}
-                                                disabled={currentCheeseCreditPage === 1}
-                                                className="pagination-button"
+                                                onClick={() => exportToCSV(filteredAndSortedCheeseCreditSales, 'ventas_credito_queso.csv', ['id', 'date', 'customerName', 'weightGrams', 'pricePerKiloUSD', 'totalUSD', 'paidAmount', 'status'])}
+                                                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm"
                                             >
-                                                Anterior
+                                                Exportar a CSV
                                             </button>
-                                            {Array.from({ length: totalCheeseCreditPages }, (_, i) => i + 1).map(page => (
+                                        )}
+                                        {filteredAndSortedCheeseCreditSales.length > ITEMS_PER_PAGE && ( // Solo muestra la paginación si hay más de una página
+                                            <div className="pagination-container">
                                                 <button
-                                                    key={page}
-                                                    onClick={() => setCurrentCheeseCreditPage(page)}
-                                                    className={`pagination-button ${currentCheeseCreditPage === page ? 'active' : ''}`}
+                                                    onClick={() => setCurrentCheeseCreditPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentCheeseCreditPage === 1}
+                                                    className="pagination-button"
                                                 >
-                                                    {page}
+                                                    Anterior
                                                 </button>
-                                            ))}
+                                                {Array.from({ length: totalCheeseCreditPages }, (_, i) => i + 1).map(page => (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setCurrentCheeseCreditPage(page)}
+                                                        className={`pagination-button ${currentCheeseCreditPage === page ? 'active' : ''}`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    onClick={() => setCurrentCheeseCreditPage(prev => Math.min(prev + 1, totalCheeseCreditPages))}
+                                                    disabled={currentCheeseCreditPage === totalCheeseCreditPages}
+                                                    className="pagination-button"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Sección de Gestión de Inventario */}
+                        <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
+                            <h2 className="section-heading">
+                                <span className="section-heading-title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-boxes text-orange-600">
+                                        <path d="M2.97 12.93a2 2 0 0 0 0 3.14l1.97 2.63c.41.55 1.05.82 1.69.82h10.72c.64 0 1.28-.27 1.69-.82l1.97-2.63a2 2 0 0 0 0-3.14l-1.97-2.63c-.41-.55-1.05-.82-1.69-.82H6.66c-.64 0-1.28.27-1.69.82Z"></path>
+                                        <path d="M7.5 14.5h9"></path>
+                                        <path d="M12 2v2"></path>
+                                        <path d="M12 22v-2"></path>
+                                        <path d="M16 4h2"></path>
+                                        <path d="M6 4H8"></path>
+                                        <path d="M16 20h2"></path>
+                                        <path d="M6 20H8"></path>
+                                        <path d="M2 12h2"></path>
+                                        <path d="M20 12h2"></path>
+                                    </svg>
+                                    Gestión de Inventario
+                                </span>
+                            </h2>
+                            <form onSubmit={handleAddOrUpdateInventoryItem} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label htmlFor="inventoryProductName" className="block text-gray-700 text-base font-bold mb-2">Nombre del Producto:</label>
+                                    <input
+                                        type="text"
+                                        id="inventoryProductName"
+                                        value={newInventoryItem.name}
+                                        onChange={(e) => setNewInventoryItem({ ...newInventoryItem, name: e.target.value })}
+                                        className="w-full"
+                                        placeholder="Ej: Leche, Huevos, Queso"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="inventoryStockQuantity" className="block text-gray-700 text-base font-bold mb-2">Cantidad en Stock:</label>
+                                    <input
+                                        type="number"
+                                        id="inventoryStockQuantity"
+                                        value={newInventoryItem.stockQuantity}
+                                        onChange={(e) => setNewInventoryItem({ ...newInventoryItem, stockQuantity: e.target.value })}
+                                        className="w-full"
+                                        placeholder="Ej: 100 (unidades) o 5000 (gramos)"
+                                        min="0"
+                                        step="0.01"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="inventoryStockUnitType" className="block text-gray-700 text-base font-bold mb-2">Tipo de Unidad:</label>
+                                    <select
+                                        id="inventoryStockUnitType"
+                                        value={newInventoryItem.stockUnitType}
+                                        onChange={(e) => setNewInventoryItem({ ...newInventoryItem, stockUnitType: e.target.value })}
+                                        className="w-full"
+                                    >
+                                        <option value="unidades">Unidades</option>
+                                        <option value="gramos">Gramos</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-end space-x-4">
+                                    <div className="flex-grow">
+                                        <label htmlFor="inventoryTotalCostPurchase" className="block text-gray-700 text-base font-bold mb-2">Costo Total de Compra:</label>
+                                        <input
+                                            type="number"
+                                            id="inventoryTotalCostPurchase"
+                                            value={newInventoryItem.totalCostPurchase}
+                                            onChange={(e) => setNewInventoryItem({ ...newInventoryItem, totalCostPurchase: e.target.value })}
+                                            className="w-full"
+                                            placeholder="Ej: 150.00"
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                        <label htmlFor="inventoryTotalCostPurchaseCurrency" className="sr-only">Moneda</label>
+                                        <select
+                                            id="inventoryTotalCostPurchaseCurrency"
+                                            value={newInventoryItem.totalCostPurchaseCurrency}
+                                            onChange={(e) => setNewInventoryItem({ ...newInventoryItem, totalCostPurchaseCurrency: e.target.value })}
+                                            className="w-full py-3.5"
+                                        >
+                                            <option value="USD">USD</option>
+                                            <option value="VES">VES</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex items-end space-x-4">
+                                    <div className="flex-grow">
+                                        <label htmlFor="inventorySuggestedSellingPrice" className="block text-gray-700 text-base font-bold mb-2">Precio de Venta Sugerido:</label>
+                                        <input
+                                            type="number"
+                                            id="inventorySuggestedSellingPrice"
+                                            value={newInventoryItem.suggestedSellingPrice}
+                                            onChange={(e) => setNewInventoryItem({ ...newInventoryItem, suggestedSellingPrice: e.target.value })}
+                                            className="w-full"
+                                            placeholder="Ej: 1.80 (por unidad) o 0.005 (por gramo)"
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                        <label htmlFor="inventorySuggestedSellingPriceCurrency" className="sr-only">Moneda</label>
+                                        <select
+                                            id="inventorySuggestedSellingPriceCurrency"
+                                            value={newInventoryItem.suggestedSellingPriceCurrency}
+                                            onChange={(e) => setNewInventoryItem({ ...newInventoryItem, suggestedSellingPriceCurrency: e.target.value })}
+                                            className="w-full py-3.5"
+                                        >
+                                            <option value="USD">USD</option>
+                                            <option value="VES">VES</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="inventoryMinStockAlert" className="block text-gray-700 text-base font-bold mb-2">Alerta de Stock Mínimo:</label>
+                                    <input
+                                        type="number"
+                                        id="inventoryMinStockAlert"
+                                        value={newInventoryItem.minStockAlert}
+                                        onChange={(e) => setNewInventoryItem({ ...newInventoryItem, minStockAlert: e.target.value })}
+                                        className="w-full"
+                                        placeholder="Ej: 10 (unidades) o 1000 (gramos)"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="inventoryCategory" className="block text-gray-700 text-base font-bold mb-2">Categoría:</label>
+                                    <input
+                                        type="text"
+                                        id="inventoryCategory"
+                                        value={newInventoryItem.category}
+                                        onChange={(e) => setNewInventoryItem({ ...newInventoryItem, category: e.target.value })}
+                                        className="w-full"
+                                        placeholder="Ej: Lácteos, Granos, Bebidas"
+                                        required
+                                    />
+                                </div>
+                                <div className="md:col-span-2 mt-5">
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-orange-500 text-white py-4.5 px-8 rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 focus:ring-opacity-50 text-xl flex items-center justify-center"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-package-plus mr-3">
+                                            <path d="M16 16h2l2-2V6l-2-2H6l-2 2v7"></path>
+                                            <path d="M2 12h10"></path>
+                                            <path d="M12 2L8 6"></path>
+                                            <path d="M12 2l4 4"></path>
+                                            <path d="M12 22v-8"></path>
+                                            <path d="M9 15h6"></path>
+                                        </svg>
+                                        {editingInventoryItem ? 'Actualizar Producto' : 'Añadir Producto al Inventario'}
+                                    </button>
+                                    {editingInventoryItem && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingInventoryItem(null);
+                                                setNewInventoryItem({ name: '', stockQuantity: '', stockUnitType: 'unidades', totalCostPurchase: '', totalCostPurchaseCurrency: 'USD', suggestedSellingPrice: '', suggestedSellingPriceCurrency: 'USD', minStockAlert: '', category: 'General' });
+                                            }}
+                                            className="mt-4 w-full bg-gray-400 text-white py-3.5 px-8 rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 text-lg flex items-center justify-center"
+                                        >
+                                            Cancelar Edición
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+
+                            <h3 className="text-xl font-bold text-gray-800 mt-12 mb-6">Inventario Actual:</h3>
+                            {/* Inventory Filters */}
+                            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="inventorySearch" className="block text-gray-700 text-sm font-bold mb-1">Buscar Producto:</label>
+                                    <input
+                                        type="text"
+                                        id="inventorySearch"
+                                        value={inventorySearchTerm}
+                                        onChange={(e) => setInventorySearchTerm(e.target.value)}
+                                        placeholder="Nombre del producto"
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="inventoryCategoryFilter" className="block text-gray-700 text-sm font-bold mb-1">Filtrar por Categoría:</label>
+                                    <select
+                                        id="inventoryCategoryFilter"
+                                        value={inventoryCategoryFilter}
+                                        onChange={(e) => setInventoryCategoryFilter(e.target.value)}
+                                        className="w-full text-base"
+                                    >
+                                        {uniqueInventoryCategories.map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            {paginatedInventory.length === 0 ? (
+                                <p className="text-gray-600 text-center py-7 text-lg">No hay productos en el inventario que coincidan con los filtros.</p>
+                            ) : (
+                                <>
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full">
+                                            <thead>
+                                                <tr>
+                                                    <th onClick={() => handleInventorySort('name')}>
+                                                        Producto {inventorySortColumn === 'name' && (inventorySortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleInventorySort('stockQuantity')}>
+                                                        Stock {inventorySortColumn === 'stockQuantity' && (inventorySortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th>Unidad</th>
+                                                    <th onClick={() => handleInventorySort('category')}>Categoría</th>
+                                                    <th onClick={() => handleInventorySort('costPerUnit')}>
+                                                        Costo/Unidad (USD) {inventorySortColumn === 'costPerUnit' && (inventorySortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleInventorySort('suggestedSellingPrice')}>
+                                                        Venta Sugerida (USD/VES) {inventorySortColumn === 'suggestedSellingPrice' && (inventorySortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th onClick={() => handleInventorySort('lastUpdated')}>
+                                                        Última Actualización {inventorySortColumn === 'lastUpdated' && (inventorySortDirection === 'asc' ? '↑' : '↓')}
+                                                    </th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginatedInventory.map((item) => (
+                                                    <tr key={item.id} className={item.stockQuantity <= item.minStockAlert && item.minStockAlert > 0 ? 'bg-amber-50' : ''}>
+                                                        <td>{item.name}</td>
+                                                        <td>
+                                                            {item.stockQuantity.toFixed(2)}
+                                                            {item.stockQuantity <= item.minStockAlert && item.minStockAlert > 0 && (
+                                                                <span className="ml-2 text-rose-600 font-semibold text-sm">
+                                                                    (Bajo Stock!)
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td>{item.stockUnitType}</td>
+                                                        <td>{item.category}</td>
+                                                        <td>
+                                                            ${item.costPerUnit.toFixed(3)} USD
+                                                            <span className="text-xs text-gray-500 block font-normal">
+                                                                (≈ Bs. {(convertToVESFromUSD(item.costPerUnit)).toFixed(2)} VES)
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            {item.suggestedSellingPriceCurrency === 'USD' ? '$' : 'Bs. '}
+                                                            {item.suggestedSellingPrice.toFixed(2)} {item.suggestedSellingPriceCurrency}
+                                                            <span className="text-xs text-gray-500 block font-normal">
+                                                                {item.suggestedSellingPriceCurrency === 'USD' ?
+                                                                    `(≈ Bs. ${(convertToVESFromUSD(item.suggestedSellingPrice)).toFixed(2)} VES)` :
+                                                                    `(≈ $${(convertToUSDFromAny(item.suggestedSellingPrice, item.suggestedSellingPriceCurrency)).toFixed(2)} USD)`
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td>{item.lastUpdated}</td>
+                                                        <td className="text-right">
+                                                            <button
+                                                                onClick={() => handleEditInventoryItem(item)}
+                                                                className="text-blue-600 hover:text-blue-800 p-2 text-xs mr-2"
+                                                            >
+                                                                Editar
+                                                            </button>
+                                                            <button
+                                                                onClick={() => openConfirmModal('¿Estás seguro de que quieres eliminar este producto del inventario?', () => handleDeleteInventoryItem(item.id))}
+                                                                className="text-rose-600 hover:text-rose-800 p-2 text-xs"
+                                                            >
+                                                                Eliminar
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="flex justify-between items-center mt-6">
+                                        {filteredAndSortedInventory.length > 0 && (
                                             <button
-                                                onClick={() => setCurrentCheeseCreditPage(prev => Math.min(prev + 1, totalCheeseCreditPages))}
-                                                disabled={currentCheeseCreditPage === totalCheeseCreditPages}
-                                                className="pagination-button"
+                                                onClick={() => exportToCSV(filteredAndSortedInventory, 'inventario.csv', ['id', 'name', 'stockQuantity', 'stockUnitType', 'totalCostPurchase', 'totalCostPurchaseCurrency', 'costPerUnit', 'suggestedSellingPrice', 'suggestedSellingPriceCurrency', 'minStockAlert', 'category', 'lastUpdated'])}
+                                                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm"
                                             >
-                                                Siguiente
+                                                Exportar a CSV
+                                            </button>
+                                        )}
+                                        {filteredAndSortedInventory.length > ITEMS_PER_PAGE && (
+                                            <div className="pagination-container">
+                                                <button
+                                                    onClick={() => setCurrentInventoryPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={currentInventoryPage === 1}
+                                                    className="pagination-button"
+                                                >
+                                                    Anterior
+                                                </button>
+                                                {Array.from({ length: totalInventoryPages }, (_, i) => i + 1).map(page => (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() => setCurrentInventoryPage(page)}
+                                                        className={`pagination-button ${currentInventoryPage === page ? 'active' : ''}`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    onClick={() => setCurrentInventoryPage(prev => Math.min(prev + 1, totalInventoryPages))}
+                                                    disabled={currentInventoryPage === totalInventoryPages}
+                                                    className="pagination-button"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {inventory.length > 0 && (
+                                        <div className="text-center mt-8">
+                                            <button onClick={handleClearInventory} className="text-sm bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                                Borrar Inventario Completo
                                             </button>
                                         </div>
                                     )}
                                 </>
                             )}
                         </div>
+
+                        {/* Sección de Reportes */}
+                        <div className="mb-16 p-9 bg-white rounded-3xl shadow-2xl border border-gray-100">
+                            <h2 className="section-heading">
+                                <span className="section-heading-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bar-chart-2 text-teal-600">
+                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                </svg>
+                                Reportes Rápidos
+                                </span>
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Resumen de Ventas por Producto */}
+                                <div className="p-6 bg-teal-50 border border-teal-100 rounded-2xl shadow-inner">
+                                    <h3 className="text-xl font-semibold text-teal-800 mb-4">Ventas por Producto (USD)</h3>
+                                    {salesSummaryByProduct.length === 0 ? (
+                                        <p className="text-gray-600">No hay datos de ventas por producto.</p>
+                                    ) : (
+                                        <ul>
+                                            {salesSummaryByProduct.map(([product, total], index) => (
+                                                <li key={index} className="flex justify-between items-center py-2 border-b border-teal-200 last:border-b-0">
+                                                    <span className="text-gray-700 font-medium">{product}:</span>
+                                                    <span className="font-bold text-teal-700">${total.toFixed(2)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+
+                                {/* Resumen de Gastos por Categoría */}
+                                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl shadow-inner">
+                                    <h3 className="text-xl font-semibold text-rose-800 mb-4">Gastos por Categoría (USD)</h3>
+                                    {expensesSummaryByCategory.length === 0 ? (
+                                        <p className="text-gray-600">No hay datos de gastos por categoría.</p>
+                                    ) : (
+                                        <ul>
+                                            {expensesSummaryByCategory.map(([category, total], index) => (
+                                                <li key={index} className="flex justify-between items-center py-2 border-b border-rose-200 last:border-b-0">
+                                                    <span className="text-gray-700 font-medium">{category}:</span>
+                                                    <span className="font-bold text-rose-700">${total.toFixed(2)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             );
