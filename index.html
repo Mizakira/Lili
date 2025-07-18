@@ -538,6 +538,10 @@
             const [inventorySearchTerm, setInventorySearchTerm] = useState('');
             const [inventoryCategoryFilter, setInventoryCategoryFilter] = useState('Todas');
 
+            // NUEVOS ESTADOS PARA FILTROS DE REPORTES
+            const [reportStartDate, setReportStartDate] = useState('');
+            const [reportEndDate, setReportEndDate] = useState('');
+
 
             // Muestra mensajes temporales al usuario
             const showMessage = (msg, type) => {
@@ -1635,6 +1639,10 @@
                         if (header === 'costPerUnit') {
                             return `${row.costPerUnit.toFixed(3)} USD`;
                         }
+                        // Specific handling for profitability report
+                        if (header === 'profitUSD' || header === 'profitPercentage') {
+                            return String(row[header]).replace(/"/g, '""');
+                        }
                         return `"${String(row[header]).replace(/"/g, '""')}"`;
                     }).join(',') : Object.values(row).map(value => `"${String(value).replace(/"/g, '""')}"`).join(',');
                     csvContent += values + '\n';
@@ -1659,25 +1667,106 @@
 
 
             // Summaries for reports
+            const filteredSalesForReports = useMemo(() => {
+                let tempSales = [...sales];
+                if (reportStartDate) {
+                    tempSales = tempSales.filter(sale => sale.date >= reportStartDate);
+                }
+                if (reportEndDate) {
+                    tempSales = tempSales.filter(sale => sale.date <= reportEndDate);
+                }
+                return tempSales;
+            }, [sales, reportStartDate, reportEndDate]);
+
+            const filteredExpensesForReports = useMemo(() => {
+                let tempExpenses = [...expenses];
+                if (reportStartDate) {
+                    tempExpenses = tempExpenses.filter(expense => expense.date >= reportStartDate);
+                }
+                if (reportEndDate) {
+                    tempExpenses = tempExpenses.filter(expense => expense.date <= reportEndDate);
+                }
+                return tempExpenses;
+            }, [expenses, reportStartDate, reportEndDate]);
+
+
             const salesSummaryByProduct = useMemo(() => {
                 const summary = {};
-                sales.forEach(sale => {
+                filteredSalesForReports.forEach(sale => {
                     (sale.items || []).forEach(item => {
                         const totalAmountUSD = convertToUSD(item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount, item.currency);
                         summary[item.product] = (summary[item.product] || 0) + totalAmountUSD;
                     });
                 });
                 return Object.entries(summary).sort(([,a],[,b]) => b - a); // Sort descending by amount
-            }, [sales, convertToUSD]);
+            }, [filteredSalesForReports, convertToUSD]);
 
             const expensesSummaryByCategory = useMemo(() => {
                 const summary = {};
-                expenses.forEach(expense => {
+                filteredExpensesForReports.forEach(expense => {
                     const amountUSD = convertToUSD(expense.amount, expense.currency);
                     summary[expense.category] = (summary[expense.category] || 0) + amountUSD;
                 });
                 return Object.entries(summary).sort(([,a],[,b]) => b - a); // Sort descending by amount
-            }, [expenses, convertToUSD]);
+            }, [filteredExpensesForReports, convertToUSD]);
+
+            const salesSummaryByPaymentMethod = useMemo(() => {
+                const summary = {};
+                filteredSalesForReports.forEach(sale => {
+                    const totalSaleAmountUSD = (sale.items || []).reduce((acc, item) => {
+                        const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
+                        return acc + convertToUSD(effectiveAmount, item.currency);
+                    }, 0);
+                    summary[sale.paymentMethod] = (summary[sale.paymentMethod] || 0) + totalSaleAmountUSD;
+                });
+                return Object.entries(summary).sort(([,a],[,b]) => b - a); // Sort descending by amount
+            }, [filteredSalesForReports, convertToUSD]);
+
+            const profitabilityByProduct = useMemo(() => {
+                const productSales = {}; // { productName: { totalRevenue: X, totalQuantitySold: Y } }
+                const productCosts = {}; // { productName: costPerUnit }
+
+                // Aggregate sales revenue and quantity
+                filteredSalesForReports.forEach(sale => {
+                    (sale.items || []).forEach(item => {
+                        const effectiveAmount = item.unitType === 'peso_g' ? (item.quantity / 1000) * item.amount : item.quantity * item.amount;
+                        const revenueUSD = convertToUSD(effectiveAmount, item.currency);
+                        const productName = item.product.replace(' (Peso)', ''); // Remove '(Peso)' for matching with inventory
+
+                        if (!productSales[productName]) {
+                            productSales[productName] = { totalRevenue: 0, totalQuantitySold: 0 };
+                        }
+                        productSales[productName].totalRevenue += revenueUSD;
+                        productSales[productName].totalQuantitySold += item.quantity;
+                    });
+                });
+
+                // Get cost per unit from inventory
+                inventory.forEach(item => {
+                    productCosts[item.name] = item.costPerUnit; // costPerUnit is always in USD
+                });
+
+                const profitability = [];
+                for (const productName in productSales) {
+                    const revenue = productSales[productName].totalRevenue;
+                    const quantitySold = productSales[productName].totalQuantitySold;
+                    const costPerUnit = productCosts[productName] || 0; // Get cost from inventory
+
+                    const totalCost = costPerUnit * quantitySold;
+                    const profitUSD = revenue - totalCost;
+                    const profitPercentage = totalCost > 0 ? (profitUSD / totalCost) * 100 : 0;
+
+                    profitability.push({
+                        product: productName,
+                        totalRevenueUSD: revenue,
+                        totalCostUSD: totalCost,
+                        profitUSD: profitUSD,
+                        profitPercentage: profitPercentage,
+                    });
+                }
+
+                return profitability.sort((a, b) => b.profitUSD - a.profitUSD); // Sort by profit descending
+            }, [filteredSalesForReports, inventory, convertToUSD]);
 
 
             return (
@@ -3322,21 +3411,52 @@
                                 Reportes Rápidos
                                 </span>
                             </h2>
+                            {/* Report Filters */}
+                            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="reportStartDate" className="block text-gray-700 text-sm font-bold mb-1">Fecha Inicio Reporte:</label>
+                                    <input
+                                        type="date"
+                                        id="reportStartDate"
+                                        value={reportStartDate}
+                                        onChange={(e) => setReportStartDate(e.target.value)}
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="reportEndDate" className="block text-gray-700 text-sm font-bold mb-1">Fecha Fin Reporte:</label>
+                                    <input
+                                        type="date"
+                                        id="reportEndDate"
+                                        value={reportEndDate}
+                                        onChange={(e) => setReportEndDate(e.target.value)}
+                                        className="w-full text-base"
+                                    />
+                                </div>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {/* Resumen de Ventas por Producto */}
                                 <div className="p-6 bg-teal-50 border border-teal-100 rounded-2xl shadow-inner">
                                     <h3 className="text-xl font-semibold text-teal-800 mb-4">Ventas por Producto (USD)</h3>
                                     {salesSummaryByProduct.length === 0 ? (
-                                        <p className="text-gray-600">No hay datos de ventas por producto.</p>
+                                        <p className="text-gray-600">No hay datos de ventas por producto para el período seleccionado.</p>
                                     ) : (
-                                        <ul>
-                                            {salesSummaryByProduct.map(([product, total], index) => (
-                                                <li key={index} className="flex justify-between items-center py-2 border-b border-teal-200 last:border-b-0">
-                                                    <span className="text-gray-700 font-medium">{product}:</span>
-                                                    <span className="font-bold text-teal-700">${total.toFixed(2)}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <>
+                                            <ul>
+                                                {salesSummaryByProduct.map(([product, total], index) => (
+                                                    <li key={index} className="flex justify-between items-center py-2 border-b border-teal-200 last:border-b-0">
+                                                        <span className="text-gray-700 font-medium">{product}:</span>
+                                                        <span className="font-bold text-teal-700">${total.toFixed(2)}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <button
+                                                onClick={() => exportToCSV(salesSummaryByProduct.map(([product, total]) => ({ product, totalUSD: total })), 'ventas_por_producto.csv', ['product', 'totalUSD'])}
+                                                className="mt-4 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm w-full"
+                                            >
+                                                Exportar a CSV
+                                            </button>
+                                        </>
                                     )}
                                 </div>
 
@@ -3344,16 +3464,81 @@
                                 <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl shadow-inner">
                                     <h3 className="text-xl font-semibold text-rose-800 mb-4">Gastos por Categoría (USD)</h3>
                                     {expensesSummaryByCategory.length === 0 ? (
-                                        <p className="text-gray-600">No hay datos de gastos por categoría.</p>
+                                        <p className="text-gray-600">No hay datos de gastos por categoría para el período seleccionado.</p>
                                     ) : (
-                                        <ul>
-                                            {expensesSummaryByCategory.map(([category, total], index) => (
-                                                <li key={index} className="flex justify-between items-center py-2 border-b border-rose-200 last:border-b-0">
-                                                    <span className="text-gray-700 font-medium">{category}:</span>
-                                                    <span className="font-bold text-rose-700">${total.toFixed(2)}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <>
+                                            <ul>
+                                                {expensesSummaryByCategory.map(([category, total], index) => (
+                                                    <li key={index} className="flex justify-between items-center py-2 border-b border-rose-200 last:border-b-0">
+                                                        <span className="text-gray-700 font-medium">{category}:</span>
+                                                        <span className="font-bold text-rose-700">${total.toFixed(2)}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <button
+                                                onClick={() => exportToCSV(expensesSummaryByCategory.map(([category, total]) => ({ category, totalUSD: total })), 'gastos_por_categoria.csv', ['category', 'totalUSD'])}
+                                                className="mt-4 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm w-full"
+                                            >
+                                                Exportar a CSV
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Nuevo Reporte: Ventas por Método de Pago */}
+                                <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl shadow-inner">
+                                    <h3 className="text-xl font-semibold text-blue-800 mb-4">Ventas por Método de Pago (USD)</h3>
+                                    {salesSummaryByPaymentMethod.length === 0 ? (
+                                        <p className="text-gray-600">No hay datos de ventas por método de pago para el período seleccionado.</p>
+                                    ) : (
+                                        <>
+                                            <ul>
+                                                {salesSummaryByPaymentMethod.map(([method, total], index) => (
+                                                    <li key={index} className="flex justify-between items-center py-2 border-b border-blue-200 last:border-b-0">
+                                                        <span className="text-gray-700 font-medium">{method}:</span>
+                                                        <span className="font-bold text-blue-700">${total.toFixed(2)}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <button
+                                                onClick={() => exportToCSV(salesSummaryByPaymentMethod.map(([method, total]) => ({ paymentMethod: method, totalUSD: total })), 'ventas_por_metodo_pago.csv', ['paymentMethod', 'totalUSD'])}
+                                                className="mt-4 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm w-full"
+                                            >
+                                                Exportar a CSV
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Nuevo Reporte: Rentabilidad por Producto */}
+                                <div className="p-6 bg-purple-50 border border-purple-100 rounded-2xl shadow-inner">
+                                    <h3 className="text-xl font-semibold text-purple-800 mb-4">Rentabilidad por Producto</h3>
+                                    {profitabilityByProduct.length === 0 ? (
+                                        <p className="text-gray-600">No hay datos de rentabilidad por producto para el período seleccionado.</p>
+                                    ) : (
+                                        <>
+                                            <ul>
+                                                {profitabilityByProduct.map((data, index) => (
+                                                    <li key={index} className="py-2 border-b border-purple-200 last:border-b-0">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-700 font-medium">{data.product}:</span>
+                                                            <span className={`font-bold ${data.profitUSD >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                                                ${data.profitUSD.toFixed(2)} ({data.profitPercentage.toFixed(2)}%)
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            Ventas: ${data.totalRevenueUSD.toFixed(2)} | Costo: ${data.totalCostUSD.toFixed(2)}
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <button
+                                                onClick={() => exportToCSV(profitabilityByProduct, 'rentabilidad_por_producto.csv', ['product', 'totalRevenueUSD', 'totalCostUSD', 'profitUSD', 'profitPercentage'])}
+                                                className="mt-4 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 text-sm w-full"
+                                            >
+                                                Exportar a CSV
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
